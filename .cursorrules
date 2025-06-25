@@ -1,0 +1,87 @@
+# Cursor Rules
+
+## Instructions
+
+- Record fixes for mistakes or corrections to avoid repetition in the `Lessons` section.
+- Organize thoughts and plan steps before starting a task in the `Scratchpad` section.
+- Clear old tasks if necessary.
+- Use todo markers for progress tracking:
+  - `[X]` Completed tasks
+  - `[ ]` Pending tasks
+- Update Scratchpad after completing subtasks.
+- Reflect and plan after milestones for better task management.
+- Always refer to Scratchpad before planning the next step.
+
+## Lessons
+
+## Scratchpad
+
+[X] Project Initialization
+    - [X] Set up Next.js 15 project with TypeScript
+    - [X] Configure ESLint, Prettier, and basic folder structure
+    - [X] Initialize Git repository
+
+[X] UI & Component Library Setup
+    - [X] Install and configure Shadcn UI
+    - [X] Add Button component
+    - [X] Integrate Lucide icons
+    - [X] Set up global styles and theme
+
+[X] Dependency Installation
+    - [X] Validation: Install Zod
+    - [X] State Management: Install Zustand
+    - [X] Analytics: Install Recharts
+    - [X] Email: Install Resend
+    - [X] File Uploads: Install Uploadthing
+    - [X] ORM: Install Prisma and @prisma/client
+    - [X] Authentication: Install next-auth@beta
+    - [X] Payments: Install Stripe
+
+[ ] Database & ORM
+    - [ ] Set up PostgreSQL database
+    - [ ] Install and configure Prisma ORM
+    - [ ] Define and migrate initial Prisma schema (users, products, categories, orders, etc.)
+
+[ ] Authentication & Authorization
+    - [ ] Install and configure next-auth@beta
+    - [ ] Set up social and email/password login
+    - [ ] Implement role-based access (admin, user)
+
+[ ] State Management
+    - [ ] Set up Zustand for global state management
+
+[ ] File Uploads
+    - [ ] Integrate Uploadthing for product images and user avatars
+
+[ ] Email Service
+    - [ ] Set up Resend for transactional emails (order confirmation, password reset, etc.)
+
+[ ] Payment Integration
+    - [ ] Integrate Stripe for payments
+    - [ ] Set up webhooks for order/payment status
+
+[ ] Validation
+    - [ ] Use Zod for form and API validation
+
+[ ] Admin Dashboard
+    - [ ] Build dashboard UI (analytics, product management, order management)
+    - [ ] Integrate Recharts for analytics and sales data visualization
+    - [ ] CRUD operations for products, categories, users, orders
+
+[ ] Storefront
+    - [ ] Build product listing, search, and filtering
+    - [ ] Product detail pages
+    - [ ] Shopping cart and checkout flow
+    - [ ] User profile and order history
+
+[ ] Testing & QA
+    - [ ] Write unit and integration tests
+    - [ ] Manual QA and bug fixing
+
+[ ] Deployment
+    - [ ] Set up environment variables and production config
+    - [ ] Deploy to Vercel or preferred platform
+
+[ ] Post-Launch
+    - [ ] Monitor logs and analytics
+    - [ ] Collect user feedback and iterate

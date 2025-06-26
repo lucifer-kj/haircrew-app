@@ -38,9 +38,16 @@
     - [X] Payments: Install Stripe
 
 [ ] Database & ORM
-    - [ ] Set up PostgreSQL database
-    - [ ] Install and configure Prisma ORM
-    - [ ] Define and migrate initial Prisma schema (users, products, categories, orders, etc.)
+    - [X] Set up PostgreSQL database
+    - [X] Configure Prisma schema
+        - [X] User model
+        - [X] Product model
+        - [X] Category model
+        - [X] Order model
+        - [X] Review model
+        - [X] Cart model
+    - [X] Run Prisma migrations
+    - [X] Seed sample data (categories, products, users)
 
 [ ] Authentication & Authorization
     - [ ] Install and configure next-auth@beta

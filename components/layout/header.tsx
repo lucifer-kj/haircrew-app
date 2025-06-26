@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { Search, User, Menu, X } from "lucide-react"
+import { Search, User, Menu, X, Settings, LogOut } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useSession, signOut } from "next-auth/react"
@@ -110,6 +110,45 @@ function MobileSearchBar() {
 export function Header() {
   const { data: session } = useSession()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
+  const [isSigningOut, setIsSigningOut] = useState(false)
+  const router = useRouter()
+
+  // Close user menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Element
+      if (!target.closest('.user-menu-container')) {
+        setIsUserMenuOpen(false)
+      }
+    }
+
+    if (isUserMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside)
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [isUserMenuOpen])
+
+  const handleSignOut = async () => {
+    try {
+      setIsSigningOut(true)
+      await signOut({ callbackUrl: "/" })
+    } catch (error) {
+      console.error('Sign out error:', error)
+      // Fallback redirect
+      router.push('/')
+    } finally {
+      setIsSigningOut(false)
+    }
+  }
+
+  const handleDashboardClick = () => {
+    setIsUserMenuOpen(false)
+    router.push('/dashboard')
+  }
 
   return (
     <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
@@ -126,7 +165,7 @@ export function Header() {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-20">
           {/* Logo */}
-          <Link href="/" className="flex items-center space-x-2">
+          <Link href="/" className="flex items-center space-x-2 hover:opacity-80 transition-opacity">
             <div className="w-8 h-8 bg-[var(--primary)] rounded-full flex items-center justify-center">
               <span className="text-white font-bold text-lg">H</span>
             </div>
@@ -135,9 +174,6 @@ export function Header() {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
-            <Link href="/" className="text-[var(--charcoal)] hover:text-[var(--primary)] transition-colors">
-              Home
-            </Link>
             <Link href="/products" className="text-[var(--charcoal)] hover:text-[var(--primary)] transition-colors">
               Products
             </Link>
@@ -178,24 +214,58 @@ export function Header() {
 
             {/* User menu */}
             {session ? (
-              <div className="relative group">
+              <div className="relative user-menu-container">
                 <Button
                   variant="ghost"
                   size="sm"
                   className="flex items-center space-x-2 text-[var(--charcoal)] hover:text-[var(--primary)]"
+                  onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                 >
                   <User className="w-5 h-5" />
                   <span className="hidden sm:block">{session.user?.name || session.user?.email}</span>
                 </Button>
-                <div className="absolute right-0 mt-2 w-40 bg-white border rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity z-50">
-                  <button
-                    className="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
-                    onClick={() => signOut({ callbackUrl: "/" })}
-                  >
-                    Sign Out
-                  </button>
-                </div>
-                {/* Dropdown menu would go here */}
+                
+                {/* User Dropdown Menu */}
+                {isUserMenuOpen && (
+                  <div className="absolute right-0 mt-2 w-64 bg-white border rounded-lg shadow-lg z-50">
+                    {/* User Info Section */}
+                    <div className="p-4 border-b border-gray-100">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-10 h-10 bg-[var(--primary)] rounded-full flex items-center justify-center">
+                          <User className="w-5 h-5 text-white" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-gray-900 truncate">
+                            {session.user?.name || 'User'}
+                          </p>
+                          <p className="text-xs text-gray-500 truncate">
+                            {session.user?.email}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Menu Items */}
+                    <div className="py-2">
+                      <button
+                        onClick={handleDashboardClick}
+                        className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                      >
+                        <Settings className="w-4 h-4 mr-3" />
+                        Dashboard
+                      </button>
+                      
+                      <button
+                        onClick={handleSignOut}
+                        disabled={isSigningOut}
+                        className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors disabled:opacity-50"
+                      >
+                        <LogOut className="w-4 h-4 mr-3" />
+                        {isSigningOut ? 'Signing out...' : 'Sign Out'}
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             ) : (
               <Link href="/auth/signin">
@@ -221,9 +291,6 @@ export function Header() {
         {isMenuOpen && (
           <div className="md:hidden py-4 border-t border-gray-200">
             <nav className="flex flex-col space-y-4">
-              <Link href="/" className="text-[var(--charcoal)] hover:text-[var(--primary)] transition-colors">
-                Home
-              </Link>
               <Link href="/products" className="text-[var(--charcoal)] hover:text-[var(--primary)] transition-colors">
                 Products
               </Link>
@@ -236,6 +303,11 @@ export function Header() {
               <Link href="/contact" className="text-[var(--charcoal)] hover:text-[var(--primary)] transition-colors">
                 Contact
               </Link>
+              {session && (
+                <Link href="/dashboard" className="text-[var(--charcoal)] hover:text-[var(--primary)] transition-colors">
+                  Dashboard
+                </Link>
+              )}
             </nav>
             {/* Mobile Search */}
             <div className="mt-4">

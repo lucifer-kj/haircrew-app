@@ -1,11 +1,12 @@
 "use client"
 
 import Link from "next/link"
-import { Search, ShoppingCart, User, Menu } from "lucide-react"
+import { Search, User, Menu } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useSession } from "next-auth/react"
 import { useState } from "react"
+import CartDrawer from "@/components/cart-drawer"
 
 export function Header() {
   const { data: session } = useSession()
@@ -67,12 +68,9 @@ export function Header() {
           {/* Right side actions */}
           <div className="flex items-center space-x-4">
             {/* Cart */}
-            <Link href="/cart" className="relative p-2 text-[var(--charcoal)] hover:text-[var(--primary)] transition-colors">
-              <ShoppingCart className="w-6 h-6" />
-              <span className="absolute -top-1 -right-1 bg-[var(--primary)] text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                0
-              </span>
-            </Link>
+            <div title="View cart" aria-label="View cart">
+              <CartDrawer />
+            </div>
 
             {/* User menu */}
             {session ? (

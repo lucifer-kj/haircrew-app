@@ -95,13 +95,13 @@
   - [X] Related products section:
     - [X] Show products from same category
     - [X] Product card carousel
-- [ ] Shopping cart:
-  - [ ] Add/remove items
-  - [ ] Update quantities
-  - [ ] Cart persistence
-- [ ] Checkout process:
-  - [ ] Shipping information
-  - [ ] Payment integration (Stripe)
+- [X] Shopping cart:
+  - [X] Add/remove items
+  - [X] Update quantities
+  - [X] Cart persistence
+- [X] Checkout process:
+  - [X] Shipping information
+  - [ ] Payment integration (UPI QR)
   - [ ] Order confirmation
 - [ ] User dashboard:
   - [ ] Order history

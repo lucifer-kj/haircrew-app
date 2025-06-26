@@ -10,6 +10,7 @@ import { Star, ShoppingCart, Heart, Share2 } from "lucide-react"
 import ReviewForm from "@/components/review-form"
 import StarRating from "@/components/star-rating"
 import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from "@/components/ui/carousel"
+import { useCartStore } from "@/store/cart-store"
 
 interface Product {
   id: string
@@ -60,6 +61,7 @@ export default function ProductPage({ params }: PageProps) {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [isSubmittingReview, setIsSubmittingReview] = useState(false)
   const [reviewSortBy, setReviewSortBy] = useState<'newest' | 'oldest' | 'highest' | 'lowest'>('newest')
+  const addToCart = useCartStore((state) => state.addItem)
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -104,8 +106,15 @@ export default function ProductPage({ params }: PageProps) {
   }, [params])
 
   const handleAddToCart = () => {
-    // TODO: Implement add to cart functionality
-    console.log('Adding to cart:', product?.name, quantity)
+    if (!product) return
+    addToCart({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      image: product.images[0] || "/Images/p1.jpg",
+      slug: product.slug,
+      stock: product.stock,
+    }, quantity)
   }
 
   const handleReviewSubmit = async (reviewData: { rating: number; title: string; comment: string }) => {

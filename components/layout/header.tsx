@@ -4,7 +4,7 @@ import Link from "next/link"
 import { Search, ShoppingCart, User, Menu } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { useSession, signOut } from "next-auth/react"
+import { useSession } from "next-auth/react"
 import { useState } from "react"
 
 export function Header() {

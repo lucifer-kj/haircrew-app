@@ -88,13 +88,13 @@
     - [X] Title, price, description
     - [X] Stock status
     - [X] Add to cart button
-  - [ ] Reviews and ratings section:
-    - [ ] Display existing reviews
-    - [ ] Add review form for authenticated users
-    - [ ] Star rating component
-  - [ ] Related products section:
-    - [ ] Show products from same category
-    - [ ] Product card carousel
+  - [X] Reviews and ratings section:
+    - [X] Display existing reviews
+    - [X] Add review form for authenticated users
+    - [X] Star rating component
+  - [X] Related products section:
+    - [X] Show products from same category
+    - [X] Product card carousel
 - [ ] Shopping cart:
   - [ ] Add/remove items
   - [ ] Update quantities

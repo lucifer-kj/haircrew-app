@@ -8,6 +8,8 @@ import { Card, CardContent, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Star, ShoppingCart, Heart, Share2 } from "lucide-react"
 import ReviewForm from "@/components/review-form"
+import StarRating from "@/components/star-rating"
+import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from "@/components/ui/carousel"
 
 interface Product {
   id: string
@@ -57,6 +59,7 @@ export default function ProductPage({ params }: PageProps) {
   const [loading, setLoading] = useState(true)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [isSubmittingReview, setIsSubmittingReview] = useState(false)
+  const [reviewSortBy, setReviewSortBy] = useState<'newest' | 'oldest' | 'highest' | 'lowest'>('newest')
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -144,6 +147,28 @@ export default function ProductPage({ params }: PageProps) {
     ? reviews.reduce((acc, review) => acc + review.rating, 0) / reviews.length 
     : 0
 
+  // Calculate rating distribution
+  const ratingDistribution = reviews.reduce((acc, review) => {
+    acc[review.rating] = (acc[review.rating] || 0) + 1
+    return acc
+  }, {} as Record<number, number>)
+
+  // Sort reviews based on selected option
+  const sortedReviews = [...reviews].sort((a, b) => {
+    switch (reviewSortBy) {
+      case 'newest':
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      case 'oldest':
+        return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+      case 'highest':
+        return b.rating - a.rating
+      case 'lowest':
+        return a.rating - b.rating
+      default:
+        return 0
+    }
+  })
+
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-8">
@@ -215,21 +240,11 @@ export default function ProductPage({ params }: PageProps) {
           <div>
             <h1 className="text-3xl font-bold text-[var(--charcoal)] mb-2">{product.name}</h1>
             <div className="flex items-center gap-4 mb-4">
-              <div className="flex items-center">
-                {[...Array(5)].map((_, i) => (
-                  <Star
-                    key={i}
-                    className={`w-5 h-5 ${
-                      i < Math.floor(averageRating) 
-                        ? 'text-yellow-400 fill-current' 
-                        : 'text-gray-300'
-                    }`}
-                  />
-                ))}
-                <span className="ml-2 text-sm text-gray-600">
-                  ({reviews.length} reviews)
-                </span>
-              </div>
+              <StarRating
+                rating={averageRating}
+                size="md"
+                showValue={true}
+              />
               <Badge variant={stockInfo.color as "default" | "secondary" | "destructive"}>{stockInfo.status}</Badge>
             </div>
           </div>
@@ -303,10 +318,64 @@ export default function ProductPage({ params }: PageProps) {
 
       {/* Reviews Section */}
       <div className="mb-16">
-        <h2 className="text-2xl font-bold mb-6">Customer Reviews</h2>
-        
-        {/* Review Form for Authenticated Users */}
-        {isAuthenticated && (
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-bold">Customer Reviews</h2>
+          {reviews.length > 0 && (
+            <div className="flex items-center gap-4">
+              <div className="flex items-center">
+                <span className="text-2xl font-bold mr-2">{averageRating.toFixed(1)}</span>
+                <StarRating
+                  rating={averageRating}
+                  size="md"
+                />
+                <span className="ml-2 text-sm text-gray-600">
+                  ({reviews.length} reviews)
+                </span>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Review Statistics */}
+        {reviews.length > 0 && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+            {/* Rating Distribution */}
+            <div className="bg-gray-50 rounded-lg p-6">
+              <h3 className="font-semibold mb-4">Rating Distribution</h3>
+              <div className="space-y-2">
+                {[5, 4, 3, 2, 1].map((rating) => {
+                  const count = ratingDistribution[rating] || 0
+                  const percentage = reviews.length > 0 ? (count / reviews.length) * 100 : 0
+                  return (
+                    <div key={rating} className="flex items-center gap-2">
+                      <span className="text-sm w-8">{rating}★</span>
+                      <div className="flex-1 bg-gray-200 rounded-full h-2">
+                        <div 
+                          className="bg-yellow-400 h-2 rounded-full" 
+                          style={{ width: `${percentage}%` }}
+                        />
+                      </div>
+                      <span className="text-sm text-gray-600 w-12">{count}</span>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+
+            {/* Review Form for Authenticated Users */}
+            {isAuthenticated && (
+              <div>
+                <ReviewForm
+                  onSubmit={handleReviewSubmit}
+                  isSubmitting={isSubmittingReview}
+                />
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Review Form for Authenticated Users (when no reviews) */}
+        {isAuthenticated && reviews.length === 0 && (
           <div className="mb-8">
             <ReviewForm
               onSubmit={handleReviewSubmit}
@@ -315,41 +384,64 @@ export default function ProductPage({ params }: PageProps) {
           </div>
         )}
 
+        {/* Review Sorting */}
+        {reviews.length > 0 && (
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-semibold">All Reviews</h3>
+            <select
+              value={reviewSortBy}
+              onChange={(e) => setReviewSortBy(e.target.value as 'newest' | 'oldest' | 'highest' | 'lowest')}
+              className="border rounded-lg px-3 py-1 text-sm"
+            >
+              <option value="newest">Newest First</option>
+              <option value="oldest">Oldest First</option>
+              <option value="highest">Highest Rated</option>
+              <option value="lowest">Lowest Rated</option>
+            </select>
+          </div>
+        )}
+
         {/* Existing Reviews */}
         {reviews.length === 0 ? (
-          <p className="text-gray-600">
-            {isAuthenticated 
-              ? "No reviews yet. Be the first to review this product!" 
-              : "No reviews yet. Sign in to be the first to review this product!"
-            }
-          </p>
+          <div className="text-center py-12">
+            <div className="text-gray-400 mb-4">
+              <Star className="w-16 h-16 mx-auto" />
+            </div>
+            <p className="text-gray-600">
+              {isAuthenticated 
+                ? "No reviews yet. Be the first to review this product!" 
+                : "No reviews yet. Sign in to be the first to review this product!"
+              }
+            </p>
+          </div>
         ) : (
           <div className="space-y-6">
-            {reviews.map((review) => (
+            {sortedReviews.map((review) => (
               <Card key={review.id}>
                 <CardContent className="pt-6">
-                  <div className="flex items-start justify-between mb-2">
-                    <div>
-                      <h4 className="font-semibold">{review.title}</h4>
-                      <p className="text-sm text-gray-600">{review.user.name}</p>
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex-1">
+                      <h4 className="font-semibold text-lg mb-1">{review.title}</h4>
+                      <p className="text-sm text-gray-600 mb-2">{review.user.name}</p>
+                      <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2">
+                          <StarRating
+                            rating={review.rating}
+                            size="sm"
+                            showValue={true}
+                          />
+                        </div>
+                      </div>
                     </div>
-                    <div className="flex items-center">
-                      {[...Array(5)].map((_, i) => (
-                        <Star
-                          key={i}
-                          className={`w-4 h-4 ${
-                            i < review.rating 
-                              ? 'text-yellow-400 fill-current' 
-                              : 'text-gray-300'
-                          }`}
-                        />
-                      ))}
+                    <div className="text-sm text-gray-500">
+                      {new Date(review.createdAt).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                      })}
                     </div>
                   </div>
-                  <p className="text-gray-700">{review.comment}</p>
-                  <p className="text-sm text-gray-500 mt-2">
-                    {new Date(review.createdAt).toLocaleDateString()}
-                  </p>
+                  <p className="text-gray-700 leading-relaxed">{review.comment}</p>
                 </CardContent>
               </Card>
             ))}
@@ -361,35 +453,41 @@ export default function ProductPage({ params }: PageProps) {
       {relatedProducts.length > 0 && (
         <div>
           <h2 className="text-2xl font-bold mb-6">Related Products</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {relatedProducts.map((relatedProduct) => (
-              <Card key={relatedProduct.id} className="hover:shadow-lg transition-shadow">
-                <CardContent className="flex flex-col items-center">
-                  <Link href={`/products/${relatedProduct.slug}`}>
-                    <Image 
-                      src={relatedProduct.images[0] || "/Images/p1.jpg"} 
-                      alt={relatedProduct.name} 
-                      width={300} 
-                      height={200} 
-                      className="rounded-md object-cover mb-4" 
-                    />
-                  </Link>
-                  <CardTitle className="text-lg font-semibold mb-2 text-center">
-                    {relatedProduct.name}
-                  </CardTitle>
-                  <div className="text-[var(--primary)] font-bold text-xl mb-2">
-                    ${relatedProduct.price}
-                  </div>
-                  <Link 
-                    href={`/products/${relatedProduct.slug}`} 
-                    className="text-[var(--primary)] underline mt-2"
-                  >
-                    View Product
-                  </Link>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+          <Carousel className="w-full">
+            <CarouselContent>
+              {relatedProducts.map((relatedProduct) => (
+                <CarouselItem key={relatedProduct.id} className="basis-80 max-w-xs">
+                  <Card className="hover:shadow-lg transition-shadow">
+                    <CardContent className="flex flex-col items-center">
+                      <Link href={`/products/${relatedProduct.slug}`}>
+                        <Image 
+                          src={relatedProduct.images[0] || "/Images/p1.jpg"} 
+                          alt={relatedProduct.name} 
+                          width={300} 
+                          height={200} 
+                          className="rounded-md object-cover mb-4" 
+                        />
+                      </Link>
+                      <CardTitle className="text-lg font-semibold mb-2 text-center">
+                        {relatedProduct.name}
+                      </CardTitle>
+                      <div className="text-[var(--primary)] font-bold text-xl mb-2">
+                        ${relatedProduct.price}
+                      </div>
+                      <Link 
+                        href={`/products/${relatedProduct.slug}`} 
+                        className="text-[var(--primary)] underline mt-2"
+                      >
+                        View Product
+                      </Link>
+                    </CardContent>
+                  </Card>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            <CarouselPrevious className="left-2 top-1/2 -translate-y-1/2" />
+            <CarouselNext className="right-2 top-1/2 -translate-y-1/2" />
+          </Carousel>
         </div>
       )}
     </div>

@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardTitle } from "@/components/ui/card"
-import { Star } from "lucide-react"
+import StarRating from "./star-rating"
 
 interface ReviewFormProps {
   onSubmit: (review: { rating: number; title: string; comment: string }) => void
@@ -16,7 +16,6 @@ export default function ReviewForm({ onSubmit, isSubmitting = false }: ReviewFor
   const [rating, setRating] = useState(0)
   const [title, setTitle] = useState("")
   const [comment, setComment] = useState("")
-  const [hoveredRating, setHoveredRating] = useState(0)
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -49,29 +48,13 @@ export default function ReviewForm({ onSubmit, isSubmitting = false }: ReviewFor
           {/* Star Rating */}
           <div>
             <label className="block text-sm font-medium mb-2">Rating</label>
-            <div className="flex items-center gap-1">
-              {[1, 2, 3, 4, 5].map((star) => (
-                <button
-                  key={star}
-                  type="button"
-                  onClick={() => setRating(star)}
-                  onMouseEnter={() => setHoveredRating(star)}
-                  onMouseLeave={() => setHoveredRating(0)}
-                  className="focus:outline-none"
-                >
-                  <Star
-                    className={`w-6 h-6 ${
-                      star <= (hoveredRating || rating)
-                        ? 'text-yellow-400 fill-current'
-                        : 'text-gray-300'
-                    }`}
-                  />
-                </button>
-              ))}
-              <span className="ml-2 text-sm text-gray-600">
-                {rating > 0 && `${rating} star${rating > 1 ? 's' : ''}`}
-              </span>
-            </div>
+            <StarRating
+              rating={rating}
+              size="lg"
+              interactive={true}
+              onRatingChange={setRating}
+              showValue={true}
+            />
           </div>
 
           {/* Review Title */}

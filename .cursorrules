@@ -73,9 +73,9 @@
   - [X] Create `(home)` folder in `app` directory
   - [X] Header with logo, search bar, and navigation
   - [X] Footer with links and social media
-- [ ] Homepage:
-  - [ ] Banner carousel
-  - [ ] Latest products
+- [X] Homepage:
+  - [X] Banner carousel
+  - [X] Latest products
 - [ ] Products Catalog:
   - [ ] Sidebar with categories and filters
   - [ ] Search results

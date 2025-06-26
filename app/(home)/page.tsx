@@ -1,9 +1,31 @@
+"use client"
+
 import Image from "next/image"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { ArrowRight } from "lucide-react"
+import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from "@/components/ui/carousel"
+import { Card, CardContent, CardTitle } from "@/components/ui/card"
+import { useEffect, useState } from "react"
+
+interface Product {
+  id: string
+  name: string
+  price: number
+  images: string[]
+  slug: string
+  categoryId: string
+}
 
 export default function HomePage() {
+  const [latestProducts, setLatestProducts] = useState<Product[]>([])
+
+  useEffect(() => {
+    fetch("/api/products/latest")
+      .then(res => res.json())
+      .then(setLatestProducts)
+  }, [])
+
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
@@ -35,14 +57,40 @@ export default function HomePage() {
               </div>
             </div>
             <div className="relative">
-              <Image
-                src="/Images/banner1.jpg"
-                alt="Professional hair care products"
-                width={600}
-                height={400}
-                className="rounded-lg shadow-2xl"
-                priority
-              />
+              <Carousel className="w-full">
+                <CarouselContent>
+                  <CarouselItem>
+                    <Image
+                      src="/Images/banner1.jpg"
+                      alt="Professional hair care products"
+                      width={600}
+                      height={400}
+                      className="rounded-lg shadow-2xl w-full object-cover"
+                      priority
+                    />
+                  </CarouselItem>
+                  <CarouselItem>
+                    <Image
+                      src="/Images/banner2.jpg"
+                      alt="Professional hair care products"
+                      width={600}
+                      height={400}
+                      className="rounded-lg shadow-2xl w-full object-cover"
+                    />
+                  </CarouselItem>
+                  <CarouselItem>
+                    <Image
+                      src="/Images/banner3.jpg"
+                      alt="Professional hair care products"
+                      width={600}
+                      height={400}
+                      className="rounded-lg shadow-2xl w-full object-cover"
+                    />
+                  </CarouselItem>
+                </CarouselContent>
+                <CarouselPrevious className="left-2 top-1/2 -translate-y-1/2" />
+                <CarouselNext className="right-2 top-1/2 -translate-y-1/2" />
+              </Carousel>
             </div>
           </div>
         </div>
@@ -73,6 +121,32 @@ export default function HomePage() {
               <h3 className="text-xl font-semibold text-[var(--charcoal)]">30-Day Returns</h3>
               <p className="text-[var(--dark-gray)]">Hassle-free returns and exchanges</p>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Latest Products Section */}
+      <section className="py-16 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-[var(--charcoal)] mb-4">Latest Products</h2>
+            <p className="text-[var(--dark-gray)] max-w-2xl mx-auto">Check out our newest arrivals and best sellers.</p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
+            {latestProducts.map(product => (
+              <Card key={product.id} className="hover:shadow-lg transition-shadow">
+                <CardContent className="flex flex-col items-center">
+                  <Link href={`/products/${product.slug}`}>
+                    <Image src={product.images[0] || "/Images/p1.jpg"} alt={product.name} width={300} height={200} className="rounded-md object-cover mb-4" />
+                  </Link>
+                  <CardTitle className="text-lg font-semibold mb-2 text-center">{product.name}</CardTitle>
+                  <div className="text-[var(--primary)] font-bold text-xl mb-2">${product.price}</div>
+                  <Button asChild className="w-full mt-2">
+                    <Link href={`/products/${product.slug}`}>View Product</Link>
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
           </div>
         </div>
       </section>

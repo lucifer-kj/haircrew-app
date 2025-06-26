@@ -26,11 +26,13 @@ model User {
   updatedAt     DateTime  @updatedAt
 
   // Relations
-  accounts      Account[]
-  sessions      Session[]
-  orders        Order[]
-  reviews       Review[]
-  cart          Cart?
+  accounts  Account[]
+  sessions  Session[]
+  orders    Order[]
+  reviews   Review[]
+  cart      Cart?
+  addresses Address[]  @relation("UserAddresses")
+  wishlists Wishlist[] @relation("UserWishlists")
 
   @@map("users")
 }
@@ -75,60 +77,61 @@ model VerificationToken {
 }
 
 model Category {
-  id          String    @id @default(cuid())
-  name        String    @unique
+  id          String   @id @default(cuid())
+  name        String   @unique
   description String?
   image       String?
-  slug        String    @unique
-  isActive    Boolean   @default(true)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  slug        String   @unique
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   // Relations
-  products    Product[]
+  products Product[]
 
   @@map("categories")
 }
 
 model Product {
-  id          String    @id @default(cuid())
-  name        String
-  description String?
-  price       Decimal   @db.Decimal(10, 2)
+  id           String   @id @default(cuid())
+  name         String
+  description  String?
+  price        Decimal  @db.Decimal(10, 2)
   comparePrice Decimal? @db.Decimal(10, 2)
-  images      String[]
-  sku         String    @unique
-  barcode     String?
-  weight      Decimal?  @db.Decimal(8, 2)
-  dimensions  String?
-  stock       Int       @default(0)
-  isActive    Boolean   @default(true)
-  isFeatured  Boolean   @default(false)
-  slug        String    @unique
-  categoryId  String
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  images       String[]
+  sku          String   @unique
+  barcode      String?
+  weight       Decimal? @db.Decimal(8, 2)
+  dimensions   String?
+  stock        Int      @default(0)
+  isActive     Boolean  @default(true)
+  isFeatured   Boolean  @default(false)
+  slug         String   @unique
+  categoryId   String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   // Relations
-  category    Category  @relation(fields: [categoryId], references: [id])
-  orderItems  OrderItem[]
-  reviews     Review[]
-  cartItems   CartItem[]
+  category   Category    @relation(fields: [categoryId], references: [id])
+  orderItems OrderItem[]
+  reviews    Review[]
+  cartItems  CartItem[]
+  wishlists  Wishlist[]  @relation("ProductWishlists")
 
   @@map("products")
 }
 
 model Order {
-  id            String      @id @default(cuid())
-  orderNumber   String      @unique
-  userId        String
-  status        OrderStatus @default(PENDING)
-  total         Decimal     @db.Decimal(10, 2)
-  subtotal      Decimal     @db.Decimal(10, 2)
-  tax           Decimal     @db.Decimal(10, 2) @default(0)
-  shipping      Decimal     @db.Decimal(10, 2) @default(0)
-  discount      Decimal     @db.Decimal(10, 2) @default(0)
-  currency      String      @default("USD")
+  id          String      @id @default(cuid())
+  orderNumber String      @unique
+  userId      String
+  status      OrderStatus @default(PENDING)
+  total       Decimal     @db.Decimal(10, 2)
+  subtotal    Decimal     @db.Decimal(10, 2)
+  tax         Decimal     @default(0) @db.Decimal(10, 2)
+  shipping    Decimal     @default(0) @db.Decimal(10, 2)
+  discount    Decimal     @default(0) @db.Decimal(10, 2)
+  currency    String      @default("USD")
   
   // Shipping info
   shippingAddress Json?
@@ -140,13 +143,13 @@ model Order {
   stripePaymentId String?
   
   // Timestamps
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-  paidAt          DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  paidAt    DateTime?
 
   // Relations
-  user        User        @relation(fields: [userId], references: [id])
-  orderItems  OrderItem[]
+  user       User        @relation(fields: [userId], references: [id])
+  orderItems OrderItem[]
 
   @@map("orders")
 }
@@ -160,26 +163,26 @@ model OrderItem {
   createdAt DateTime @default(now())
 
   // Relations
-  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  product   Product  @relation(fields: [productId], references: [id])
+  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id])
 
   @@map("order_items")
 }
 
 model Review {
-  id        String   @id @default(cuid())
-  userId    String
-  productId String
-  rating    Int
-  title     String?
-  comment   String?
-  isVerified Boolean @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id         String   @id @default(cuid())
+  userId     String
+  productId  String
+  rating     Int
+  title      String?
+  comment    String?
+  isVerified Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
   // Relations
-  user      User     @relation(fields: [userId], references: [id])
-  product   Product  @relation(fields: [productId], references: [id])
+  user    User    @relation(fields: [userId], references: [id])
+  product Product @relation(fields: [productId], references: [id])
 
   @@unique([userId, productId])
   @@map("reviews")
@@ -192,8 +195,8 @@ model Cart {
   updatedAt DateTime @updatedAt
 
   // Relations
-  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  items     CartItem[]
+  user  User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items CartItem[]
 
   @@map("carts")
 }
@@ -207,12 +210,34 @@ model CartItem {
   updatedAt DateTime @updatedAt
 
   // Relations
-  cart      Cart      @relation(fields: [cartId], references: [id], onDelete: Cascade)
-  product   Product   @relation(fields: [productId], references: [id])
+  cart    Cart    @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id])
 
   @@unique([cartId, productId])
   @@map("cart_items")
 }
+
+model Address {
+  id      String @id @default(uuid())
+  userId  String
+  line1   String
+  city    String
+  pincode String
+  state   String
+  country String
+  user    User   @relation("UserAddresses", fields: [userId], references: [id])
+}
+
+model Wishlist {
+  id        String   @id @default(uuid())
+  userId    String
+  productId String
+  createdAt DateTime @default(now())
+
+  user    User    @relation("UserWishlists", fields: [userId], references: [id])
+  product Product @relation("ProductWishlists", fields: [productId], references: [id])
+}
+
 
 // Enums
 enum UserRole {
@@ -237,3 +262,4 @@ enum PaymentStatus {
   REFUNDED
   PARTIALLY_REFUNDED
 }
+

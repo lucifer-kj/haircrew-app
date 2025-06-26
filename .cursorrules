@@ -103,11 +103,11 @@
   - [X] Shipping information
   - [X] Payment integration (UPI QR)
   - [X] Order confirmation
-- [X] User dashboard:
-  - [X] Order history
-  - [X] Profile management
-  - [X] Saved addresses
-  - [X] Wishlist
+- [] User dashboard:
+  - [] Order history
+  - [] Profile management
+  - [] Saved addresses
+  - [] Wishlist
 
 ### 4. Admin Dashboard [ ]
 
@@ -206,3 +206,8 @@
 - [ ] User guide
 - [ ] Admin documentation
 - [ ] Deployment guide
+
+- [X] Hydration/navigation fixes
+- [X] Dialog accessibility
+- [X] Order confirmation/history
+- [ ] Dashboard features: likes, reviews, addresses

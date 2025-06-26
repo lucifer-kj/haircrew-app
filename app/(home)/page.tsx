@@ -4,9 +4,9 @@ import Image from "next/image"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { ArrowRight } from "lucide-react"
-import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from "@/components/ui/carousel"
-import { Card, CardContent, CardTitle } from "@/components/ui/card"
 import { useEffect, useState } from "react"
+import ProductCard from "@/components/product-card"
+import AutoCarousel from "@/components/auto-carousel"
 
 interface Product {
   id: string
@@ -57,40 +57,25 @@ export default function HomePage() {
               </div>
             </div>
             <div className="relative">
-              <Carousel className="w-full">
-                <CarouselContent>
-                  <CarouselItem>
-              <Image
-                src="/Images/banner1.jpg"
-                alt="Professional hair care products"
-                width={600}
-                height={400}
-                      className="rounded-lg shadow-2xl w-full object-cover"
-                priority
+              <AutoCarousel 
+                images={[
+                  {
+                    src: "/Images/banner1.jpg",
+                    alt: "Professional hair care products"
+                  },
+                  {
+                    src: "/Images/banner2.jpg",
+                    alt: "Professional hair care products"
+                  },
+                  {
+                    src: "/Images/banner3.jpg",
+                    alt: "Professional hair care products"
+                  }
+                ]}
+                interval={4000}
+                showControls={true}
+                showIndicators={true}
               />
-                  </CarouselItem>
-                  <CarouselItem>
-                    <Image
-                      src="/Images/banner2.jpg"
-                      alt="Professional hair care products"
-                      width={600}
-                      height={400}
-                      className="rounded-lg shadow-2xl w-full object-cover"
-                    />
-                  </CarouselItem>
-                  <CarouselItem>
-                    <Image
-                      src="/Images/banner3.jpg"
-                      alt="Professional hair care products"
-                      width={600}
-                      height={400}
-                      className="rounded-lg shadow-2xl w-full object-cover"
-                    />
-                  </CarouselItem>
-                </CarouselContent>
-                <CarouselPrevious className="left-2 top-1/2 -translate-y-1/2" />
-                <CarouselNext className="right-2 top-1/2 -translate-y-1/2" />
-              </Carousel>
             </div>
           </div>
         </div>
@@ -105,7 +90,7 @@ export default function HomePage() {
                 <span className="text-white text-2xl">🚚</span>
               </div>
               <h3 className="text-xl font-semibold text-[var(--charcoal)]">Free Shipping</h3>
-              <p className="text-[var(--dark-gray)]">Free shipping on orders over $50</p>
+              <p className="text-[var(--dark-gray)]">Free shipping on orders over ₹500</p>
             </div>
             <div className="text-center space-y-4">
               <div className="w-16 h-16 bg-[var(--primary)] rounded-full flex items-center justify-center mx-auto">
@@ -134,18 +119,11 @@ export default function HomePage() {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
             {latestProducts.map(product => (
-              <Card key={product.id} className="hover:shadow-lg transition-shadow">
-                <CardContent className="flex flex-col items-center">
-                  <Link href={`/products/${product.slug}`}>
-                    <Image src={product.images[0] || "/Images/p1.jpg"} alt={product.name} width={300} height={200} className="rounded-md object-cover mb-4" />
-                  </Link>
-                  <CardTitle className="text-lg font-semibold mb-2 text-center">{product.name}</CardTitle>
-                  <div className="text-[var(--primary)] font-bold text-xl mb-2">${product.price}</div>
-                  <Button asChild className="w-full mt-2">
-                    <Link href={`/products/${product.slug}`}>View Product</Link>
-                  </Button>
-                </CardContent>
-              </Card>
+              <ProductCard
+                key={product.id}
+                product={product}
+                showWishlist={false}
+              />
             ))}
           </div>
         </div>

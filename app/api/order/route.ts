@@ -31,6 +31,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
     const userId = session.user.id
+    // Defensive check: ensure user exists
+    const user = await prisma.user.findUnique({ where: { id: userId } })
+    if (!user) {
+      return NextResponse.json({ error: "User not found. Please sign in again." }, { status: 401 })
+    }
     const body = await req.json()
     const { method, status, items, /* amount, */ shipping, createdAt } = body as {
       method: string
@@ -58,7 +63,7 @@ export async function POST(req: NextRequest) {
     const order = await prisma.order.create({
       data: {
         orderNumber: generateOrderNumber(),
-        userId,
+        userId: userId,
         status: orderStatus,
         paymentStatus,
         paymentMethod: method,
@@ -82,5 +87,41 @@ export async function POST(req: NextRequest) {
   } catch (e) {
     console.error(e)
     return NextResponse.json({ error: "Failed to create order" }, { status: 500 })
+  }
+}
+
+export async function GET(req: NextRequest) {
+  try {
+    const session = await auth()
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+    const userId = session.user.id
+    const { searchParams } = new URL(req.url)
+    const id = searchParams.get("id")
+    if (!id) {
+      return NextResponse.json({ error: "Order ID required" }, { status: 400 })
+    }
+    const order = await prisma.order.findUnique({
+      where: { id },
+      include: { orderItems: true },
+    })
+    if (!order || order.userId !== userId) {
+      return NextResponse.json({ error: "Order not found" }, { status: 404 })
+    }
+    return NextResponse.json({
+      id: order.id,
+      orderNumber: order.orderNumber,
+      total: order.total,
+      createdAt: order.createdAt,
+      status: order.status,
+      paymentStatus: order.paymentStatus,
+      paymentMethod: order.paymentMethod,
+      orderItems: order.orderItems,
+      shippingAddress: order.shippingAddress,
+    })
+  } catch (e) {
+    console.error(e)
+    return NextResponse.json({ error: "Failed to fetch order" }, { status: 500 })
   }
 } 

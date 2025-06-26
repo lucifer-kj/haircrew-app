@@ -11,6 +11,7 @@ import ReviewForm from "@/components/review-form"
 import StarRating from "@/components/star-rating"
 import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from "@/components/ui/carousel"
 import { useCartStore } from "@/store/cart-store"
+import { useSession } from "next-auth/react"
 
 interface Product {
   id: string
@@ -62,6 +63,9 @@ export default function ProductPage({ params }: PageProps) {
   const [isSubmittingReview, setIsSubmittingReview] = useState(false)
   const [reviewSortBy, setReviewSortBy] = useState<'newest' | 'oldest' | 'highest' | 'lowest'>('newest')
   const addToCart = useCartStore((state) => state.addItem)
+  const { data: session } = useSession()
+  const [wishlistLoading, setWishlistLoading] = useState(false)
+  const [inWishlist, setInWishlist] = useState(false)
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -104,6 +108,17 @@ export default function ProductPage({ params }: PageProps) {
 
     fetchProduct()
   }, [params])
+
+  // Check if product is in wishlist on load
+  useEffect(() => {
+    if (product && session?.user) {
+      fetch("/api/user/wishlist", { credentials: "include" })
+        .then(res => res.json())
+        .then(data => {
+          setInWishlist(data.some((item: { id: string }) => item.id === product.id))
+        })
+    }
+  }, [product, session])
 
   const handleAddToCart = () => {
     if (!product) return
@@ -178,6 +193,37 @@ export default function ProductPage({ params }: PageProps) {
     }
   })
 
+  const handleWishlist = async () => {
+    if (!session?.user || !product) return
+    setWishlistLoading(true)
+    if (inWishlist) {
+      await fetch("/api/user/wishlist", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ productId: product.id }),
+        credentials: "include"
+      })
+      setInWishlist(false)
+    } else {
+      await fetch("/api/user/wishlist", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ productId: product.id }),
+        credentials: "include"
+      })
+      setInWishlist(true)
+    }
+    setWishlistLoading(false)
+  }
+
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      minimumFractionDigits: 2,
+    }).format(price)
+  }
+
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-8">
@@ -210,6 +256,19 @@ export default function ProductPage({ params }: PageProps) {
           <li className="text-[var(--charcoal)]">{product.name}</li>
         </ol>
       </nav>
+
+      {/* Wishlist Button */}
+      <div className="flex justify-end mb-2">
+        <Button
+          variant="ghost"
+          size="icon"
+          aria-label={inWishlist ? "Remove from wishlist" : "Add to wishlist"}
+          onClick={handleWishlist}
+          disabled={wishlistLoading}
+        >
+          <Heart className={`w-6 h-6 ${inWishlist ? "fill-[var(--primary)] text-[var(--primary)]" : "text-gray-400"}`} />
+        </Button>
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16">
         {/* Image Gallery */}
@@ -261,11 +320,11 @@ export default function ProductPage({ params }: PageProps) {
           <div className="space-y-2">
             <div className="flex items-center gap-3">
               <span className="text-3xl font-bold text-[var(--primary)]">
-                ${product.price}
+                {formatPrice(product.price)}
               </span>
               {product.comparePrice && product.comparePrice > product.price && (
                 <span className="text-lg text-gray-500 line-through">
-                  ${product.comparePrice}
+                  {formatPrice(product.comparePrice)}
                 </span>
               )}
             </div>
@@ -481,7 +540,7 @@ export default function ProductPage({ params }: PageProps) {
                         {relatedProduct.name}
                       </CardTitle>
                       <div className="text-[var(--primary)] font-bold text-xl mb-2">
-                        ${relatedProduct.price}
+                        {formatPrice(relatedProduct.price)}
                       </div>
                       <Link 
                         href={`/products/${relatedProduct.slug}`} 
@@ -501,4 +560,4 @@ export default function ProductPage({ params }: PageProps) {
       )}
     </div>
   )
-} 
+}

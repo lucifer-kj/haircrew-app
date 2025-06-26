@@ -1,13 +1,12 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import Link from "next/link"
-import Image from "next/image"
 import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { ChevronLeft, ChevronRight, Search, X } from "lucide-react"
+import { useSession } from "next-auth/react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { ChevronLeft, ChevronRight } from "lucide-react"
+import ProductCard from "@/components/product-card"
 
 interface Category {
   id: string
@@ -41,6 +40,18 @@ export default function ProductsPage() {
   const [currentPage, setCurrentPage] = useState(1)
   const [loading, setLoading] = useState(false)
   const pageSize = 9
+  const { data: session } = useSession()
+  const [wishlist, setWishlist] = useState<string[]>([])
+  const [wishlistLoading, setWishlistLoading] = useState<string | null>(null)
+
+  // Check for search parameter from header redirect
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search)
+    const searchParam = urlParams.get('search')
+    if (searchParam) {
+      setSearch(searchParam)
+    }
+  }, [])
 
   useEffect(() => {
     fetch("/api/categories")
@@ -66,11 +77,53 @@ export default function ProductsPage() {
       .finally(() => setLoading(false))
   }, [selectedCategory, search, priceRange, stockStatus, sortBy, currentPage])
 
+  // Fetch wishlist on load
+  useEffect(() => {
+    if (session?.user) {
+      fetch("/api/user/wishlist", { credentials: "include" })
+        .then(res => res.json())
+        .then(data => setWishlist(data.map((item: { id: string }) => item.id)))
+    }
+  }, [session])
+
   const totalPages = Math.ceil(total / pageSize)
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page)
     window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  const handleWishlist = async (productId: string) => {
+    if (!session?.user) return
+    setWishlistLoading(productId)
+    if (wishlist.includes(productId)) {
+      await fetch("/api/user/wishlist", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ productId }),
+        credentials: "include"
+      })
+      setWishlist(wishlist.filter(id => id !== productId))
+    } else {
+      await fetch("/api/user/wishlist", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ productId }),
+        credentials: "include"
+      })
+      setWishlist([...wishlist, productId])
+    }
+    setWishlistLoading(null)
+  }
+
+  const clearSearch = () => {
+    setSearch("")
+    setCurrentPage(1)
+  }
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault()
+    setCurrentPage(1)
   }
 
   return (
@@ -106,10 +159,10 @@ export default function ProductsPage() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Prices</SelectItem>
-            <SelectItem value="0-25">$0 - $25</SelectItem>
-            <SelectItem value="25-50">$25 - $50</SelectItem>
-            <SelectItem value="50-100">$50 - $100</SelectItem>
-            <SelectItem value="100+">$100+</SelectItem>
+            <SelectItem value="0-500">₹0 - ₹500</SelectItem>
+            <SelectItem value="500-1000">₹500 - ₹1000</SelectItem>
+            <SelectItem value="1000-2000">₹1000 - ₹2000</SelectItem>
+            <SelectItem value="2000+">₹2000+</SelectItem>
           </SelectContent>
         </Select>
 
@@ -134,16 +187,35 @@ export default function ProductsPage() {
             <h1 className="text-3xl font-bold">Products</h1>
             <p className="text-gray-600 mt-1">
               {loading ? "Loading..." : `${total} product${total !== 1 ? 's' : ''} found`}
+              {search && (
+                <span className="ml-2 text-sm text-gray-500">
+                  for &quot;{search}&quot;
+                </span>
+              )}
             </p>
           </div>
           <div className="flex gap-2">
-            <Input
-              type="text"
-              placeholder="Search products..."
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              className="max-w-xs"
-            />
+            <form onSubmit={handleSearch} className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <Input
+                type="search"
+                placeholder="Search products..."
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                className="pl-10 pr-10 max-w-xs"
+              />
+              {search && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 hover:bg-transparent"
+                  onClick={clearSearch}
+                >
+                  <X className="h-4 w-4 text-gray-400" />
+                </Button>
+              )}
+            </form>
             <Select value={sortBy} onValueChange={setSortBy}>
               <SelectTrigger className="w-40">
                 <SelectValue placeholder="Sort by" />
@@ -160,6 +232,25 @@ export default function ProductsPage() {
           </div>
         </div>
 
+        {/* Search Results Summary */}
+        {search && (
+          <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-blue-800">
+                Showing results for: <strong>&quot;{search}&quot;</strong>
+              </span>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={clearSearch}
+                className="text-blue-600 hover:text-blue-800"
+              >
+                Clear search
+              </Button>
+            </div>
+          </div>
+        )}
+
         {/* Product Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
           {loading ? (
@@ -168,16 +259,14 @@ export default function ProductsPage() {
             <div className="col-span-full text-center text-gray-500 py-12">No products found.</div>
           ) : (
             products.map(product => (
-              <Card key={product.id} className="hover:shadow-lg transition-shadow">
-                <CardContent className="flex flex-col items-center">
-                  <Link href={`/products/${product.slug}`}>
-                    <Image src={product.images[0] || "/Images/p1.jpg"} alt={product.name} width={300} height={200} className="rounded-md object-cover mb-4" />
-                  </Link>
-                  <CardTitle className="text-lg font-semibold mb-2 text-center">{product.name}</CardTitle>
-                  <div className="text-[var(--primary)] font-bold text-xl mb-2">${product.price}</div>
-                  <Link href={`/products/${product.slug}`} className="text-[var(--primary)] underline mt-2">View Product</Link>
-                </CardContent>
-              </Card>
+              <ProductCard
+                key={product.id}
+                product={product}
+                showWishlist={true}
+                onWishlistToggle={handleWishlist}
+                isInWishlist={wishlist.includes(product.id)}
+                wishlistLoading={wishlistLoading === product.id}
+              />
             ))
           )}
         </div>

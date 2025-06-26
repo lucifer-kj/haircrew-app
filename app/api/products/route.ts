@@ -34,17 +34,17 @@ export async function GET(req: NextRequest) {
     // Price range filter
     if (priceRange && priceRange !== 'all') {
       switch (priceRange) {
-        case '0-25':
-          where.price = { gte: 0, lte: 25 };
+        case '0-500':
+          where.price = { gte: 0, lte: 500 };
           break;
-        case '25-50':
-          where.price = { gte: 25, lte: 50 };
+        case '500-1000':
+          where.price = { gte: 500, lte: 1000 };
           break;
-        case '50-100':
-          where.price = { gte: 50, lte: 100 };
+        case '1000-2000':
+          where.price = { gte: 1000, lte: 2000 };
           break;
-        case '100+':
-          where.price = { gte: 100 };
+        case '2000+':
+          where.price = { gte: 2000 };
           break;
       }
     }

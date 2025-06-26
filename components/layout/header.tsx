@@ -1,12 +1,111 @@
 "use client"
 
 import Link from "next/link"
-import { Search, User, Menu } from "lucide-react"
+import { Search, User, Menu, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { useSession } from "next-auth/react"
-import { useState } from "react"
+import { useSession, signOut } from "next-auth/react"
+import { useState, useEffect, Suspense } from "react"
+import { useRouter, useSearchParams } from 'next/navigation'
 import CartDrawer from "@/components/cart-drawer"
+
+// Separate component for search functionality that uses useSearchParams
+function SearchBar() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const [searchQuery, setSearchQuery] = useState('')
+
+  // Sync input with URL param
+  useEffect(() => {
+    const search = searchParams.get('search')
+    if (search) setSearchQuery(search)
+  }, [searchParams])
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (searchQuery.trim()) {
+      router.push(`/products?search=${encodeURIComponent(searchQuery.trim())}`)
+    }
+  }
+
+  const clearSearch = () => {
+    setSearchQuery('')
+    router.push('/products')
+  }
+
+  return (
+    <form onSubmit={handleSearch} className="relative w-full">
+      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+      <Input
+        type="search"
+        placeholder="Search products..."
+        className="pl-10 pr-10 py-2 border-gray-300 focus:border-[var(--primary)] focus:ring-[var(--primary)]"
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+      />
+      {searchQuery && (
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 hover:bg-transparent"
+          onClick={clearSearch}
+        >
+          <X className="h-4 w-4 text-gray-400" />
+        </Button>
+      )}
+    </form>
+  )
+}
+
+// Mobile search component
+function MobileSearchBar() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const [searchQuery, setSearchQuery] = useState('')
+
+  // Sync input with URL param
+  useEffect(() => {
+    const search = searchParams.get('search')
+    if (search) setSearchQuery(search)
+  }, [searchParams])
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (searchQuery.trim()) {
+      router.push(`/products?search=${encodeURIComponent(searchQuery.trim())}`)
+    }
+  }
+
+  const clearSearch = () => {
+    setSearchQuery('')
+    router.push('/products')
+  }
+
+  return (
+    <form onSubmit={handleSearch} className="relative">
+      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+      <Input
+        type="search"
+        placeholder="Search products..."
+        className="pl-10 pr-10 py-2 border-gray-300 focus:border-[var(--primary)] focus:ring-[var(--primary)]"
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+      />
+      {searchQuery && (
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 hover:bg-transparent"
+          onClick={clearSearch}
+        >
+          <X className="h-4 w-4 text-gray-400" />
+        </Button>
+      )}
+    </form>
+  )
+}
 
 export function Header() {
   const { data: session } = useSession()
@@ -55,14 +154,19 @@ export function Header() {
 
           {/* Search Bar */}
           <div className="hidden lg:flex items-center flex-1 max-w-md mx-8">
-            <div className="relative w-full">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <Input
-                type="text"
-                placeholder="Search products..."
-                className="pl-10 pr-4 py-2 border-gray-300 focus:border-[var(--primary)] focus:ring-[var(--primary)]"
-              />
-            </div>
+            <Suspense fallback={
+              <div className="relative w-full">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Input
+                  type="search"
+                  placeholder="Search products..."
+                  className="pl-10 pr-10 py-2 border-gray-300 focus:border-[var(--primary)] focus:ring-[var(--primary)]"
+                  disabled
+                />
+              </div>
+            }>
+              <SearchBar />
+            </Suspense>
           </div>
 
           {/* Right side actions */}
@@ -74,7 +178,7 @@ export function Header() {
 
             {/* User menu */}
             {session ? (
-              <div className="relative">
+              <div className="relative group">
                 <Button
                   variant="ghost"
                   size="sm"
@@ -83,6 +187,14 @@ export function Header() {
                   <User className="w-5 h-5" />
                   <span className="hidden sm:block">{session.user?.name || session.user?.email}</span>
                 </Button>
+                <div className="absolute right-0 mt-2 w-40 bg-white border rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity z-50">
+                  <button
+                    className="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                    onClick={() => signOut({ callbackUrl: "/" })}
+                  >
+                    Sign Out
+                  </button>
+                </div>
                 {/* Dropdown menu would go here */}
               </div>
             ) : (
@@ -125,6 +237,22 @@ export function Header() {
                 Contact
               </Link>
             </nav>
+            {/* Mobile Search */}
+            <div className="mt-4">
+              <Suspense fallback={
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <Input
+                    type="search"
+                    placeholder="Search products..."
+                    className="pl-10 pr-10 py-2 border-gray-300 focus:border-[var(--primary)] focus:ring-[var(--primary)]"
+                    disabled
+                  />
+                </div>
+              }>
+                <MobileSearchBar />
+              </Suspense>
+            </div>
           </div>
         )}
       </div>

@@ -101,13 +101,13 @@
   - [X] Cart persistence
 - [X] Checkout process:
   - [X] Shipping information
-  - [ ] Payment integration (UPI QR)
-  - [ ] Order confirmation
-- [ ] User dashboard:
-  - [ ] Order history
-  - [ ] Profile management
-  - [ ] Saved addresses
-  - [ ] Wishlist
+  - [X] Payment integration (UPI QR)
+  - [X] Order confirmation
+- [X] User dashboard:
+  - [X] Order history
+  - [X] Profile management
+  - [X] Saved addresses
+  - [X] Wishlist
 
 ### 4. Admin Dashboard [ ]
 

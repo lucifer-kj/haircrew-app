@@ -6,6 +6,7 @@ import { useCartStore } from "@/store/cart-store"
 import { Button } from "@/components/ui/button"
 import QRCode from "qrcode"
 import Image from "next/image"
+import { useSession, signIn } from "next-auth/react"
 
 const UPI_ID = "owner@upi"
 const UPI_NAME = "Owner"
@@ -22,6 +23,7 @@ interface ShippingInfo {
 
 export default function OrderReviewPage() {
   const router = useRouter()
+  const { data: session, status } = useSession()
   const { items, getTotal, clearCart } = useCartStore()
   const [shipping, setShipping] = useState<ShippingInfo | null>(null)
   const [paymentMethod, setPaymentMethod] = useState<"COD" | "UPI">("COD")
@@ -30,6 +32,7 @@ export default function OrderReviewPage() {
   const [isPlacing, setIsPlacing] = useState(false)
   const [step, setStep] = useState<"review" | "upi" | "confirmation">("review")
   const [orderId, setOrderId] = useState<string>("")
+  const [error, setError] = useState<string>("")
 
   useEffect(() => {
     const data = sessionStorage.getItem("checkout_shipping")
@@ -51,8 +54,25 @@ export default function OrderReviewPage() {
     return null
   }
 
+  // Session loading state
+  if (status === "loading") {
+    return <div className="text-center py-12">Checking authentication...</div>
+  }
+
+  // Not authenticated
+  if (!session) {
+    return (
+      <div className="container mx-auto px-4 py-12 max-w-md text-center">
+        <h2 className="text-xl font-bold mb-4">Sign in required</h2>
+        <p className="mb-6">You must be signed in to place an order.</p>
+        <Button onClick={() => signIn()}>Sign In</Button>
+      </div>
+    )
+  }
+
   const handlePlaceOrder = async () => {
     setIsPlacing(true)
+    setError("")
     const orderData = {
       method: paymentMethod,
       status: paymentMethod === "COD" ? "pending" : "payment_pending_confirmation",
@@ -65,6 +85,7 @@ export default function OrderReviewPage() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(orderData),
+      credentials: "include",
     })
     const data = await res.json()
     setIsPlacing(false)
@@ -72,20 +93,25 @@ export default function OrderReviewPage() {
       setOrderId(data.id)
       clearCart()
       setStep(paymentMethod === "COD" ? "confirmation" : "upi")
+    } else if (res.status === 401) {
+      setError("You must be signed in to place an order. Please sign in and try again.")
     } else {
-      alert(data.error || "Failed to place order")
+      setError(data.error || "Failed to place order")
     }
   }
 
   const handlePaid = async () => {
     setIsPlacing(true)
+    setError("")
     // Update order status to payment_pending_confirmation
-    const res = await fetch(`/api/order/${orderId}/confirm-upi`, { method: "POST" })
+    const res = await fetch(`/api/order/${orderId}/confirm-upi`, { method: "POST", credentials: "include" })
     setIsPlacing(false)
     if (res.ok) {
       setStep("confirmation")
+    } else if (res.status === 401) {
+      setError("You must be signed in to confirm payment. Please sign in and try again.")
     } else {
-      alert("Failed to update order status")
+      setError("Failed to update order status")
     }
   }
 
@@ -117,6 +143,8 @@ export default function OrderReviewPage() {
           <span>₹{getTotal().toFixed(2)}</span>
         </div>
       </div>
+      {/* Error message */}
+      {error && <div className="mb-4 text-red-600 text-center">{error}</div>}
       {/* Payment Method */}
       {step === "review" && (
         <form onSubmit={e => { e.preventDefault(); handlePlaceOrder() }} className="space-y-6">

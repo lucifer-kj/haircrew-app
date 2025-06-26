@@ -60,14 +60,14 @@ export default function HomePage() {
               <Carousel className="w-full">
                 <CarouselContent>
                   <CarouselItem>
-                    <Image
-                      src="/Images/banner1.jpg"
-                      alt="Professional hair care products"
-                      width={600}
-                      height={400}
+              <Image
+                src="/Images/banner1.jpg"
+                alt="Professional hair care products"
+                width={600}
+                height={400}
                       className="rounded-lg shadow-2xl w-full object-cover"
-                      priority
-                    />
+                priority
+              />
                   </CarouselItem>
                   <CarouselItem>
                     <Image

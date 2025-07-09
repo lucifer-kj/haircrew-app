@@ -50,6 +50,7 @@ export default function OrderReviewPage() {
     }
   }, [items, router])
 
+  // UPI QR Code - Bookmark this part
   useEffect(() => {
     if (paymentMethod === "UPI") {
       const upi = `upi://pay?pa=${UPI_ID}&pn=${encodeURIComponent(UPI_NAME)}&am=${getTotal()}&cu=INR`

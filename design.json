@@ -1,295 +1,315 @@
 {
-  "designSystem": {
-    "name": "Beauty E-commerce Design System",
-    "description": "Clean, modern beauty and wellness e-commerce design with premium aesthetics and user-friendly interface patterns",
-    "version": "1.0.0"
-  },
-  "colorPalette": {
-    "primary": {
-      "brand": "#FF1493",
-      "brandSecondary": "#E91E63",
-      "accent": "#FF69B4"
+    "project_meta": {
+      "name": "HairCrew Design System",
+      "type": "ecommerce_website",
+      "category": "hair_care",
+      "framework": "nextjs_typescript",
+      "styling": "tailwind_css",
+      "animation_library": "framer_motion",
+      "ui_library": "aceternity_ui"
     },
-    "neutral": {
-      "white": "#FFFFFF",
-      "lightGray": "#F8F9FA",
-      "mediumGray": "#E9ECEF",
-      "darkGray": "#6C757D",
-      "charcoal": "#343A40",
-      "black": "#000000"
+    "design_philosophy": {
+      "approach": "modern_minimalist",
+      "layout_system": "bento_grid_cards",
+      "responsiveness": "mobile_first",
+      "interaction_pattern": "micro_animations",
+      "visual_hierarchy": "clean_structured",
+      "user_experience": "intuitive_navigation"
     },
-    "semantic": {
-      "success": "#28A745",
-      "warning": "#FFC107",
-      "error": "#DC3545",
-      "info": "#17A2B8"
-    },
-    "gradients": {
-      "heroBackground": "linear-gradient(135deg, #FFE5F0 0%, #F0F8FF 100%)",
-      "cardOverlay": "linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.3) 100%)"
-    }
-  },
-  "typography": {
-    "fontFamily": {
-      "primary": "Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-      "headings": "Poppins, Inter, sans-serif"
-    },
-    "fontSizes": {
-      "xs": "12px",
-      "sm": "14px",
-      "base": "16px",
-      "lg": "18px",
-      "xl": "20px",
-      "2xl": "24px",
-      "3xl": "30px",
-      "4xl": "36px",
-      "5xl": "48px"
-    },
-    "fontWeights": {
-      "normal": 400,
-      "medium": 500,
-      "semibold": 600,
-      "bold": 700
-    },
-    "lineHeights": {
-      "tight": 1.2,
-      "normal": 1.5,
-      "relaxed": 1.6
-    }
-  },
-  "spacing": {
-    "scale": "8px base",
-    "values": {
-      "xs": "4px",
-      "sm": "8px",
-      "md": "16px",
-      "lg": "24px",
-      "xl": "32px",
-      "2xl": "48px",
-      "3xl": "64px",
-      "4xl": "96px"
-    }
-  },
-  "layout": {
-    "containerMaxWidth": "1200px",
-    "gridSystem": {
-      "columns": 12,
-      "gutterWidth": "24px"
-    },
-    "breakpoints": {
-      "mobile": "320px",
-      "tablet": "768px",
-      "desktop": "1024px",
-      "large": "1200px"
-    },
-    "sections": {
-      "header": {
-        "height": "80px",
-        "sticky": true,
-        "background": "white",
-        "shadow": "0 2px 4px rgba(0,0,0,0.1)"
-      },
-      "hero": {
-        "minHeight": "500px",
-        "backgroundStyle": "gradient with product imagery"
-      },
-      "content": {
-        "padding": "64px 0",
-        "maxWidth": "1200px"
-      }
-    }
-  },
-  "components": {
-    "buttons": {
+    "color_palette": {
       "primary": {
-        "background": "linear-gradient(135deg, #FF1493, #E91E63)",
-        "color": "white",
-        "padding": "12px 24px",
-        "borderRadius": "6px",
-        "fontWeight": 600,
-        "fontSize": "14px",
-        "textTransform": "none",
-        "hoverEffect": "transform: translateY(-1px); box-shadow: 0 4px 12px rgba(233, 30, 99, 0.3)"
+        "hex": "#000000",
+        "usage": "text, headers, navigation, primary_buttons",
+        "accessibility": "high_contrast"
       },
       "secondary": {
-        "background": "transparent",
-        "color": "#FF1493",
-        "border": "2px solid #FF1493",
-        "padding": "10px 22px",
-        "borderRadius": "6px"
+        "hex": "#9929EA",
+        "usage": "cta_buttons, accents, hover_states, brand_highlights",
+        "accessibility": "sufficient_contrast"
       },
-      "ghost": {
-        "background": "transparent",
-        "color": "#6C757D",
-        "padding": "8px 16px",
-        "fontSize": "14px"
+      "background": {
+        "hex": "#EAE4D5",
+        "usage": "page_background, card_backgrounds, neutral_sections",
+        "accessibility": "light_neutral"
+      },
+      "accent": {
+        "hex": "#B6B09F",
+        "usage": "borders, subtle_accents, secondary_text, dividers",
+        "accessibility": "medium_contrast"
       }
     },
-    "cards": {
-      "product": {
-        "background": "white",
-        "borderRadius": "12px",
-        "padding": "0",
-        "shadow": "0 2px 8px rgba(0,0,0,0.08)",
-        "hoverEffect": "transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.12)",
-        "imageAspectRatio": "1:1",
-        "contentPadding": "16px"
+    "typography": {
+      "hierarchy": {
+        "h1": {
+          "size": "clamp(2rem, 4vw, 3.5rem)",
+          "weight": "700",
+          "line_height": "1.2",
+          "color": "primary"
+        },
+        "h2": {
+          "size": "clamp(1.5rem, 3vw, 2.5rem)",
+          "weight": "600",
+          "line_height": "1.3",
+          "color": "primary"
+        },
+        "h3": {
+          "size": "clamp(1.25rem, 2.5vw, 1.75rem)",
+          "weight": "600",
+          "line_height": "1.4",
+          "color": "primary"
+        },
+        "body": {
+          "size": "clamp(0.875rem, 1.5vw, 1rem)",
+          "weight": "400",
+          "line_height": "1.6",
+          "color": "primary"
+        },
+        "caption": {
+          "size": "clamp(0.75rem, 1.2vw, 0.875rem)",
+          "weight": "500",
+          "line_height": "1.5",
+          "color": "accent"
+        }
       },
-      "promotional": {
-        "borderRadius": "16px",
-        "overflow": "hidden",
-        "minHeight": "300px",
-        "backgroundBlend": "overlay",
-        "textOverlay": true
+      "font_family": "system_ui_stack"
+    },
+    "layout_structure": {
+      "header": {
+        "type": "sticky_navigation",
+        "height": "4rem",
+        "background": "background",
+        "shadow": "subtle_on_scroll",
+        "components": [
+          {
+            "element": "logo",
+            "position": "left",
+            "size": "2rem_height"
+          },
+          {
+            "element": "navigation_menu",
+            "position": "center_left",
+            "items": ["category_1", "category_2", "category_3", "category_4"],
+            "style": "horizontal_list"
+          },
+          {
+            "element": "search_bar",
+            "position": "center",
+            "width": "max_24rem",
+            "style": "rounded_full"
+          },
+          {
+            "element": "user_actions",
+            "position": "right",
+            "components": ["account_icon", "cart_icon", "signin_button"]
+          }
+        ]
       },
-      "category": {
-        "background": "white",
-        "borderRadius": "8px",
-        "padding": "24px 16px",
-        "textAlign": "center",
-        "shadow": "0 1px 3px rgba(0,0,0,0.05)"
+      "hero_section": {
+        "type": "bento_grid",
+        "grid_config": {
+          "desktop": "grid_cols_4_rows_3",
+          "tablet": "grid_cols_2_rows_4",
+          "mobile": "grid_cols_1_rows_auto"
+        },
+        "card_variations": [
+          {
+            "type": "main_hero",
+            "span": "col_span_2_row_span_2",
+            "content": "hero_image_with_overlay_text",
+            "style": "rounded_2xl_shadow_lg"
+          },
+          {
+            "type": "category_card",
+            "span": "col_span_1_row_span_1",
+            "content": "category_image_with_label",
+            "style": "rounded_xl_shadow_md"
+          },
+          {
+            "type": "promo_card",
+            "span": "col_span_1_row_span_1",
+            "content": "promotional_content",
+            "style": "rounded_xl_gradient_background"
+          }
+        ]
+      },
+      "product_grid": {
+        "type": "responsive_grid",
+        "gap": "1.5rem",
+        "grid_config": {
+          "desktop": "grid_cols_4",
+          "tablet": "grid_cols_2",
+          "mobile": "grid_cols_1"
+        },
+        "card_style": "rounded_xl_shadow_hover_lift"
+      },
+      "newsletter_section": {
+        "type": "full_width_cta",
+        "background": "primary",
+        "text_color": "background",
+        "layout": "centered_content_with_form",
+        "style": "rounded_none_dramatic_padding"
       }
     },
-    "navigation": {
-      "topBar": {
-        "background": "#FF1493",
-        "color": "white",
-        "fontSize": "14px",
-        "padding": "8px 0",
-        "textAlign": "center"
+    "component_specifications": {
+      "cards": {
+        "base_style": {
+          "border_radius": "0.75rem",
+          "shadow": "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
+          "background": "white",
+          "padding": "1.5rem",
+          "transition": "all 0.3s ease"
+        },
+        "hover_effects": {
+          "transform": "translateY(-2px)",
+          "shadow": "0 10px 25px -5px rgba(0, 0, 0, 0.15)",
+          "scale": "1.02"
+        },
+        "variants": {
+          "product_card": {
+            "image_aspect": "4:3",
+            "content_padding": "1rem",
+            "price_color": "secondary",
+            "button_style": "rounded_full_secondary_bg"
+          },
+          "category_card": {
+            "image_aspect": "16:9",
+            "overlay": "gradient_overlay",
+            "text_position": "bottom_left",
+            "text_color": "white"
+          }
+        }
       },
-      "mainNav": {
-        "background": "white",
-        "height": "80px",
-        "justifyContent": "space-between",
-        "alignItems": "center",
-        "padding": "0 24px"
+      "buttons": {
+        "primary": {
+          "background": "secondary",
+          "color": "white",
+          "padding": "0.75rem 2rem",
+          "border_radius": "9999px",
+          "font_weight": "600",
+          "hover": "transform_scale_105_shadow_lg"
+        },
+        "secondary": {
+          "background": "transparent",
+          "color": "primary",
+          "border": "2px solid primary",
+          "padding": "0.75rem 2rem",
+          "border_radius": "9999px",
+          "font_weight": "600",
+          "hover": "bg_primary_text_background"
+        },
+        "ghost": {
+          "background": "transparent",
+          "color": "accent",
+          "padding": "0.5rem 1rem",
+          "border_radius": "0.5rem",
+          "font_weight": "500",
+          "hover": "bg_accent_bg_opacity_10"
+        }
       },
-      "categoryNav": {
-        "display": "flex",
-        "gap": "32px",
-        "fontSize": "16px",
-        "fontWeight": 500
+      "form_elements": {
+        "input": {
+          "background": "white",
+          "border": "1px solid accent",
+          "border_radius": "0.75rem",
+          "padding": "0.75rem 1rem",
+          "focus": "border_secondary_shadow_secondary_glow"
+        },
+        "search_bar": {
+          "background": "white",
+          "border": "1px solid accent",
+          "border_radius": "9999px",
+          "padding": "0.75rem 1.5rem",
+          "width": "100%",
+          "max_width": "24rem"
+        }
       }
     },
-    "forms": {
-      "input": {
-        "background": "white",
-        "border": "1px solid #E9ECEF",
-        "borderRadius": "6px",
-        "padding": "12px 16px",
-        "fontSize": "16px",
-        "focusBorder": "#FF1493",
-        "focusShadow": "0 0 0 3px rgba(255, 20, 147, 0.1)"
+    "animation_patterns": {
+      "page_transitions": {
+        "type": "fade_slide",
+        "duration": "0.3s",
+        "easing": "ease_in_out"
       },
-      "searchBar": {
-        "background": "#F8F9FA",
-        "borderRadius": "24px",
-        "padding": "12px 20px",
-        "border": "none",
-        "width": "400px"
+      "micro_animations": {
+        "hover_lift": {
+          "transform": "translateY(-2px)",
+          "duration": "0.2s",
+          "easing": "ease_out"
+        },
+        "scale_on_hover": {
+          "transform": "scale(1.02)",
+          "duration": "0.2s",
+          "easing": "ease_out"
+        },
+        "fade_in_up": {
+          "initial": "opacity_0_translateY_20px",
+          "animate": "opacity_1_translateY_0px",
+          "duration": "0.4s",
+          "easing": "ease_out"
+        }
+      },
+      "scroll_animations": {
+        "parallax_sections": {
+          "speed": "0.5x",
+          "elements": "background_images_decorative_elements"
+        },
+        "reveal_on_scroll": {
+          "threshold": "0.1",
+          "animation": "fade_in_up",
+          "stagger": "0.1s"
+        }
       }
     },
-    "badges": {
-      "sale": {
-        "background": "#DC3545",
-        "color": "white",
-        "borderRadius": "4px",
-        "padding": "4px 8px",
-        "fontSize": "12px",
-        "fontWeight": 600,
-        "position": "absolute",
-        "top": "8px",
-        "left": "8px"
+    "responsive_breakpoints": {
+      "mobile": {
+        "max_width": "640px",
+        "grid_cols": 1,
+        "padding": "1rem",
+        "font_scale": "0.9"
       },
-      "new": {
-        "background": "#28A745",
-        "color": "white"
+      "tablet": {
+        "min_width": "641px",
+        "max_width": "1024px",
+        "grid_cols": 2,
+        "padding": "2rem",
+        "font_scale": "1.0"
+      },
+      "desktop": {
+        "min_width": "1025px",
+        "grid_cols": 4,
+        "padding": "3rem",
+        "font_scale": "1.1"
       }
     },
-    "modals": {
-      "overlay": {
-        "background": "rgba(0,0,0,0.6)",
-        "backdropFilter": "blur(4px)"
+    "accessibility_guidelines": {
+      "color_contrast": "wcag_aa_compliant",
+      "focus_indicators": "visible_2px_secondary_outline",
+      "keyboard_navigation": "full_support",
+      "screen_reader": "semantic_html_aria_labels",
+      "motion_preference": "respect_prefers_reduced_motion"
+    },
+    "performance_considerations": {
+      "images": {
+        "format": "webp_with_fallback",
+        "loading": "lazy_except_above_fold",
+        "optimization": "responsive_srcset"
       },
-      "content": {
-        "background": "white",
-        "borderRadius": "12px",
-        "maxWidth": "500px",
-        "padding": "32px",
-        "shadow": "0 20px 40px rgba(0,0,0,0.15)"
+      "animations": {
+        "hardware_acceleration": "transform_opacity_only",
+        "performance": "60fps_target",
+        "reduced_motion": "disable_decorative_animations"
+      },
+      "code_splitting": {
+        "strategy": "route_based_component_based",
+        "lazy_loading": "below_fold_components"
       }
+    },
+    "implementation_notes": {
+      "css_custom_properties": "use_for_theme_colors",
+      "component_composition": "atomic_design_principles",
+      "state_management": "zustand_or_context_api",
+      "testing": "jest_react_testing_library",
+      "bundling": "webpack_optimization",
+      "seo": "next_head_structured_data"
     }
-  },
-  "imagery": {
-    "productPhotos": {
-      "aspectRatio": "1:1",
-      "background": "white or subtle gradient",
-      "style": "clean, well-lit, minimal props"
-    },
-    "heroImages": {
-      "style": "lifestyle photography with products in natural settings",
-      "overlay": "subtle gradients or color overlays",
-      "composition": "asymmetrical, modern"
-    },
-    "icons": {
-      "style": "outlined, minimal",
-      "weight": "1.5px stroke",
-      "size": "20px default"
-    }
-  },
-  "interactions": {
-    "hover": {
-      "cards": "lift effect with enhanced shadow",
-      "buttons": "subtle scale and shadow increase",
-      "images": "slight zoom or overlay change"
-    },
-    "transitions": {
-      "duration": "0.2s",
-      "easing": "ease-out",
-      "properties": ["transform", "box-shadow", "opacity"]
-    },
-    "loading": {
-      "skeleton": "shimmer effect with subtle animation",
-      "spinners": "minimal, brand-colored"
-    }
-  },
-  "patterns": {
-    "heroSection": {
-      "layout": "split layout with text on left, product imagery on right",
-      "background": "gradient with subtle texture",
-      "ctaPlacement": "prominent, contrasting button"
-    },
-    "productGrid": {
-      "columns": {
-        "mobile": 2,
-        "tablet": 3,
-        "desktop": 4
-      },
-      "gap": "24px",
-      "aspectRatio": "consistent 1:1 for images"
-    },
-    "categoryNavigation": {
-      "style": "horizontal scrolling on mobile, grid on desktop",
-      "iconStyle": "simple, outlined icons above text",
-      "spacing": "generous padding for touch targets"
-    },
-    "promotionalBanners": {
-      "layout": "full-width or grid-based",
-      "textOverlay": "high contrast with background",
-      "ctaVisibility": "prominent, consistent button styling"
-    }
-  },
-  "accessibility": {
-    "colorContrast": "WCAG AA compliant",
-    "focusIndicators": "visible, high contrast outlines",
-    "textSizing": "minimum 16px for body text",
-    "touchTargets": "minimum 44px for interactive elements"
-  },
-  "responsive": {
-    "approach": "mobile-first design",
-    "navigation": "hamburger menu on mobile, full nav on desktop",
-    "typography": "fluid scaling between breakpoints",
-    "images": "responsive with appropriate sizing"
   }
-}

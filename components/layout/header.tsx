@@ -1,20 +1,19 @@
 "use client"
 
 import Link from "next/link"
-import { Search, User, Menu, X, Settings, LogOut, ShoppingCart, Trash2 } from "lucide-react"
+import { Search, User, Menu, X, ShoppingCart, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { useSession, signOut } from "next-auth/react"
-import { useState, useEffect, Suspense } from "react"
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useState, useEffect } from "react"
+import { useRouter } from 'next/navigation'
 import { useCartStore } from "@/store/cart-store"
+import Image from "next/image"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { AnimatePresence, motion } from "framer-motion"
 
-// Autocomplete search stub
+type SearchResult = { id: string; name: string; slug: string };
 function AutocompleteSearchBar() {
   const [search, setSearch] = useState("");
-  const [results, setResults] = useState([]);
+  const [results, setResults] = useState<SearchResult[]>([]);
   const [show, setShow] = useState(false);
   const router = useRouter();
   useEffect(() => {
@@ -22,7 +21,7 @@ function AutocompleteSearchBar() {
       // TODO: Replace with real API call
       fetch(`/api/products/latest?search=${encodeURIComponent(search)}`)
         .then(res => res.json())
-        .then(data => setResults(data.slice(0, 5)));
+        .then((data: SearchResult[]) => setResults(data.slice(0, 5)));
       setShow(true);
     } else {
       setShow(false);
@@ -51,7 +50,7 @@ function AutocompleteSearchBar() {
             {results.length === 0 && (
               <li className="px-4 py-2 text-gray-500">No results</li>
             )}
-            {results.map((item: any) => (
+            {results.map((item) => (
               <li
                 key={item.id}
                 className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
@@ -68,7 +67,6 @@ function AutocompleteSearchBar() {
 }
 
 export function Header() {
-  const { data: session } = useSession();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const { items, removeItem, updateQuantity, clearCart, getTotal, getCount } = useCartStore();
@@ -168,7 +166,7 @@ export function Header() {
                     <div className="space-y-4">
                       {items.map(item => (
                         <div key={item.id} className="flex gap-3 items-center bg-white rounded-lg shadow-sm p-2 border">
-                          <img src={item.image} alt={item.name} width={48} height={48} className="rounded object-cover border w-12 h-12" />
+                          <Image src={item.image} alt={item.name} width={48} height={48} className="rounded object-cover border w-12 h-12" />
                           <div className="flex-1">
                             <div className="font-semibold text-sm mb-1">
                               <Link href={`/products/${item.slug}`}>{item.name}</Link>

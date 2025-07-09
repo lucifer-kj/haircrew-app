@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button"
 import { ArrowRight } from "lucide-react"
 import { useEffect, useState } from "react"
 import ProductCard from "@/components/product-card"
-import AutoCarousel from "@/components/auto-carousel"
 import { useSession } from "next-auth/react"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { useRef } from "react"
@@ -54,7 +53,7 @@ export default function HomePage() {
     return () => {
       if (heroTimeout.current) clearTimeout(heroTimeout.current);
     };
-  }, [heroIndex]);
+  }, [heroIndex, heroSlides.length]);
 
   useEffect(() => {
     if (!session) setShowSignInPopover(true);

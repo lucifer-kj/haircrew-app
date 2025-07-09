@@ -10,6 +10,7 @@ import AutoCarousel from "@/components/auto-carousel"
 import { useSession } from "next-auth/react"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { useRef } from "react"
+import { useCallback } from "react"
 
 interface Product {
   id: string
@@ -65,6 +66,9 @@ export default function HomePage() {
       .then(setLatestProducts)
   }, [])
 
+  const [showAllProducts, setShowAllProducts] = useState(false);
+  const handleViewMore = useCallback(() => setShowAllProducts(true), []);
+
   return (
     <div className="min-h-screen">
       {/* Sign-In Popover */}
@@ -92,7 +96,7 @@ export default function HomePage() {
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-4 grid-rows-2 gap-6 h-[440px]">
             {/* Main Hero Card as Carousel */}
-            <div className="relative col-span-2 row-span-2 bg-white rounded-2xl shadow-lg flex flex-col justify-end overflow-hidden group hover:-translate-y-1 hover:shadow-2xl transition-all duration-200">
+            <div className="relative col-span-4 lg:col-span-2 row-span-2 bg-white rounded-2xl shadow-lg flex flex-col justify-end overflow-hidden group hover:-translate-y-1 hover:shadow-2xl transition-all duration-200">
               {heroSlides.map((slide, idx) => (
                 <div
                   key={slide.image}
@@ -116,8 +120,8 @@ export default function HomePage() {
                 </div>
               ))}
             </div>
-            {/* Right Side: 2x2 Grid of Cards */}
-            <div className="col-span-2 row-span-2 grid grid-cols-2 grid-rows-2 gap-6 h-full">
+            {/* Right Side: 2x2 Grid of Cards (hidden on mobile/tablet) */}
+            <div className="hidden lg:grid col-span-2 row-span-2 grid-cols-2 grid-rows-2 gap-6 h-full">
               {/* Shampoo Card */}
               <Link href="/categories/shampoo" className="h-full w-full rounded-xl shadow-md flex flex-col justify-end p-0 overflow-hidden group relative" style={{ minHeight: 0 }}>
                 <div className="absolute inset-0 w-full h-full rounded-xl transition-transform duration-300 scale-110 group-hover:scale-100 bg-cover bg-center" style={{ backgroundImage: 'url(/Images/c-shampoo.jpg)' }} />
@@ -160,7 +164,7 @@ export default function HomePage() {
       </section>
 
       {/* Features Section */}
-      <section className="py-16 bg-white">
+      <section className="py-16 bg-white hidden md:block">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="text-center space-y-4">
@@ -196,7 +200,7 @@ export default function HomePage() {
             <p className="text-[var(--dark-gray)] max-w-2xl mx-auto">Check out our newest arrivals and best sellers.</p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
-            {latestProducts.map(product => (
+            {(showAllProducts ? latestProducts : latestProducts.slice(0, 3)).map(product => (
               <ProductCard
                 key={product.id}
                 product={product}
@@ -204,6 +208,16 @@ export default function HomePage() {
               />
             ))}
           </div>
+          {!showAllProducts && latestProducts.length > 3 && (
+            <div className="flex justify-center mt-8">
+              <button
+                onClick={handleViewMore}
+                className="px-6 py-2 bg-secondary text-white rounded-full font-semibold shadow hover:bg-secondary/90 transition"
+              >
+                View More
+              </button>
+            </div>
+          )}
         </div>
       </section>
 

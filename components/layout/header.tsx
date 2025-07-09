@@ -92,11 +92,11 @@ export function Header() {
 
   return (
     <>
-      {/* Top promo bar */}
-      <div className="bg-gradient-to-r from-secondary to-[#B13BFF] text-white font-bold text-sm py-2">
+      {/* Top promo bar (hidden on mobile) */}
+      <div className="hidden md:block bg-gradient-to-r from-secondary to-[#B13BFF] text-white font-bold text-sm py-2">
         <div className="container mx-auto px-4">
           <p className="text-center text-sm">
-            🎉 Free shipping on orders over $50! Shop now
+            🎉 Free shipping on orders over ₹250! Shop now
           </p>
         </div>
       </div>

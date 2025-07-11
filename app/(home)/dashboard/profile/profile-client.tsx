@@ -7,9 +7,9 @@ import Image from "next/image"
 interface ProfileClientProps {
   user: {
     id: string
-    name: string | null
-    email: string | null
-    image: string | null
+    name: string
+    email: string
+    image: string
     memberSince: string
   }
   stats: {
@@ -20,12 +20,6 @@ interface ProfileClientProps {
 }
 
 export default function ProfileClient({ user, stats }: ProfileClientProps) {
-  const memberSince = new Date(user.memberSince).toLocaleDateString(undefined, {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  })
-
   return (
     <div 
       className="min-h-screen py-12 px-4"
@@ -45,6 +39,8 @@ export default function ProfileClient({ user, stats }: ProfileClientProps) {
                   <Image 
                     src={user.image} 
                     alt={user.name || "User"} 
+                    width={112}
+                    height={112}
                     className="h-full w-full object-cover"
                   />
                 ) : (
@@ -70,7 +66,7 @@ export default function ProfileClient({ user, stats }: ProfileClientProps) {
                 
                 <div className="flex items-center justify-center md:justify-start gap-2 text-slate-700">
                   <Calendar className="h-4 w-4 text-primary" />
-                  <span>Member since {memberSince}</span>
+                  <span>Member since {user.memberSince}</span>
                 </div>
               </div>
             </div>

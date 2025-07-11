@@ -1,5 +1,5 @@
 import React from "react";
-import type { Metadata, Viewport } from "next";
+import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/components/providers/session-provider";
@@ -22,17 +22,10 @@ const geistMono = Geist_Mono({
   display: "swap", // Optimize font loading
 });
 
-// Viewport configuration (moved from metadata)
-export const viewport: Viewport = {
-  width: "device-width",
-  initialScale: 1,
-  maximumScale: 5,
-  themeColor: "#9929EA",
-};
-
 export const metadata: Metadata = {
   title: "HairCrew - Professional Hair Care Products",
   description: "Your trusted partner for professional hair care products. Quality, innovation, and beauty in every bottle.",
+  viewport: "width=device-width, initial-scale=1, maximum-scale=5",
   // Improve SEO and sharing
   openGraph: {
     type: "website",
@@ -48,21 +41,31 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
-      <body>
+    <html lang="en">
+      <head>
+        {/* Preconnect to important domains for faster loading */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        {/* Preload critical assets */}
+        <link rel="preload" href="/Images/banner1.jpg" as="image" />
+      </head>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+      >
         <AuthProvider>
-          <ErrorBoundary>
-            <ClientRoot>
-              <AnimatedLayoutClient>
-                <Header />
-                <main>
-                  {children}
-                </main>
-                <RoutePrefetcher />
-                <Footer />
-              </AnimatedLayoutClient>
-            </ClientRoot>
-          </ErrorBoundary>
+          <ClientRoot>
+            <div className="min-h-screen flex flex-col">
+              <Header />
+              <main className="flex-1">
+                <ErrorBoundary>
+                  <AnimatedLayoutClient>{children}</AnimatedLayoutClient>
+                </ErrorBoundary>
+              </main>
+              <Footer />
+              {/* Route prefetcher - improves navigation performance */}
+              <RoutePrefetcher />
+            </div>
+          </ClientRoot>
         </AuthProvider>
       </body>
     </html>

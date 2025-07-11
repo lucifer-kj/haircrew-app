@@ -52,7 +52,7 @@
     /* Brand Colors from design.json */
     --primary: #9929EA;
     --primary-dark: #7e20c6;
-    --secondary: #02BEF9;
+    --secondary: #400c68;
     --background: #EAE4D5;
     --accent: #B6B09F;
 
@@ -61,7 +61,7 @@
     --light-gray: #F8F9FA;
     --medium-gray: #E9ECEF;
     --dark-gray: #6C757D;
-    --charcoal: #343A40;
+    --charcoal: #484e53;
     --black: #000000;
 
     /* Semantic Colors */

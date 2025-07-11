@@ -98,7 +98,7 @@ function MobileTabBar() {
               transition={{ type: "spring", stiffness: 300, damping: 22 }}
             >
               <div className="relative">
-                <tab.icon className="w-6 h-6 mb-1" />
+              <tab.icon className="w-6 h-6 mb-1" />
                 {tab.badge && (
                   <span className="absolute -top-1 -right-1 bg-secondary text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
                     {tab.badge}
@@ -355,30 +355,30 @@ export function Header() {
                     <div className="p-4 border-b">
                       <AutocompleteSearchBar />
                     </div>
-                    
-                    {/* Mobile Categories */}
+                  
+                  {/* Mobile Categories */}
                     <div className="p-4 border-b">
                       <h3 className="font-semibold text-gray-900 mb-3">Categories</h3>
-                      {categories.map(cat => (
+                    {categories.map(cat => (
                         <details key={cat.slug} className="group mb-2">
                           <summary className="flex items-center justify-between cursor-pointer py-2 font-medium">
-                            {cat.name}
+                          {cat.name}
                             <svg className="w-4 h-4 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                             </svg>
                           </summary>
                           <div className="pl-4 mt-1 space-y-1">
-                            {cat.sub.map(sub => (
-                              <Link
-                                key={sub}
-                                href={`/categories/${cat.slug}?type=${encodeURIComponent(sub)}`}
+                          {cat.sub.map(sub => (
+                            <Link
+                              key={sub}
+                              href={`/categories/${cat.slug}?type=${encodeURIComponent(sub)}`}
                                 className="block py-1.5 text-gray-600 hover:text-secondary transition-colors"
-                                onClick={() => setMobileNavOpen(false)}
-                              >
-                                {sub}
-                              </Link>
-                            ))}
-                          </div>
+                              onClick={() => setMobileNavOpen(false)}
+                            >
+                              {sub}
+                            </Link>
+                          ))}
+                        </div>
                         </details>
                       ))}
                     </div>
@@ -411,16 +411,16 @@ export function Header() {
                       </div>
                     </div>
                   </div>
-                  
+
                   {/* Mobile User Actions */}
                   <div className="p-4 border-t mt-auto">
-                    <div className="space-y-2">
-                      <Link href="/dashboard/profile" className="block w-full text-center py-3 rounded bg-secondary text-white font-bold hover:bg-secondary/90 transition" onClick={() => setMobileNavOpen(false)}>
+                  <div className="space-y-2">
+                    <Link href="/dashboard/profile" className="block w-full text-center py-3 rounded bg-secondary text-white font-bold hover:bg-secondary/90 transition" onClick={() => setMobileNavOpen(false)}>
                         My Account
-                      </Link>
+                    </Link>
                       <button className="block w-full text-center py-3 rounded bg-gray-100 text-gray-800 font-bold hover:bg-gray-200 transition" onClick={() => setMobileNavOpen(false)}>
-                        Sign Out
-                      </button>
+                      Sign Out
+                    </button>
                     </div>
                   </div>
                 </div>

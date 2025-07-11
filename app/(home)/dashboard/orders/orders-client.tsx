@@ -1,29 +1,47 @@
 "use client"
 
+import { motion } from "framer-motion"
 import { PackageSearch, ExternalLink } from "lucide-react"
 import Link from "next/link"
-import { motion } from "framer-motion"
 import { GlassCard, GlassBadge } from "@/components/ui/glass-card"
 
-type OrderItem = {
+// Order status badge with glass effect
+function OrderStatusBadge({ status }: { status: string }) {
+  const getVariant = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'delivered': return 'success'
+      case 'shipped': return 'info'
+      case 'processing': return 'warning'
+      case 'cancelled': return 'danger'
+      default: return 'default'
+    }
+  }
+
+  return (
+    <GlassBadge variant={getVariant(status)}>
+      {status}
+    </GlassBadge>
+  )
+}
+
+interface OrderItem {
   id: string
   productId: string
   orderId: string
-  price: string
   quantity: number
+  price: string
   createdAt: string
   product?: {
     name: string
-    images?: string[]
+    images: string[]
     slug: string
   }
-  name?: string
 }
 
-type Order = {
+interface Order {
   id: string
   orderNumber: string
-  total: string | number
+  total: string
   status: string
   createdAt: string
   orderItems: OrderItem[]
@@ -40,17 +58,6 @@ export default function OrdersClient({ orders }: OrdersClientProps) {
       style: 'currency',
       currency: 'INR',
     }).format(Number(value))
-  }
-
-  // Map status to variant
-  const getStatusVariant = (status: string): "default" | "success" | "warning" | "danger" | "info" | "primary" | "secondary" => {
-    switch (status.toLowerCase()) {
-      case 'delivered': return 'success'
-      case 'shipped': return 'info'
-      case 'processing': return 'warning'
-      case 'cancelled': return 'danger'
-      default: return 'default'
-    }
   }
 
   return (
@@ -101,9 +108,7 @@ export default function OrdersClient({ orders }: OrdersClientProps) {
                     <div>
                       <div className="flex items-center gap-2 mb-3">
                         <h3 className="font-semibold text-lg">Order #{order.orderNumber}</h3>
-                        <GlassBadge variant={getStatusVariant(order.status)}>
-                          {order.status}
-                        </GlassBadge>
+                        <OrderStatusBadge status={order.status} />
                       </div>
                       <p className="text-sm text-slate-500 mb-1">
                         Placed on {new Date(order.createdAt).toLocaleDateString(undefined, {
@@ -142,7 +147,7 @@ export default function OrdersClient({ orders }: OrdersClientProps) {
                               }}
                             />
                             <div className="flex-1 min-w-0">
-                              <p className="text-sm font-medium truncate">{item.name || item.product?.name}</p>
+                              <p className="text-sm font-medium truncate">{item.product?.name}</p>
                               <p className="text-xs text-slate-500">
                                 {formatCurrency(item.price)} × {item.quantity}
                               </p>

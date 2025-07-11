@@ -7,7 +7,7 @@ import {
   Star, CreditCard, ChevronRight, ShoppingBag
 } from 'lucide-react'
 import { Decimal } from '@prisma/client/runtime/library'
-import { GlassCard, GlassButton } from "@/components/ui/glass-card"
+import { GlassCard, GlassButton, GlassBadge } from "@/components/ui/glass-card"
 
 // Define interfaces
 interface Order {
@@ -48,10 +48,9 @@ interface WishlistItem {
 
 interface DashboardClientProps {
   user: {
+    name?: string
+    email?: string
     id: string
-    name?: string | null
-    email?: string | null
-    image?: string | null
   }
   initialOrders: Order[]
   initialAddresses: Address[]
@@ -64,21 +63,10 @@ export default function DashboardClient({
   initialAddresses, 
   initialWishlist 
 }: DashboardClientProps) {
-  const [activeSection] = useState('overview')
   const [orders] = useState<Order[]>(initialOrders)
   const [addresses] = useState<Address[]>(initialAddresses)
   const [wishlist] = useState<WishlistItem[]>(initialWishlist)
   const router = useRouter()
-
-  const getStatusColor = (status: string) => {
-    switch (status.toLowerCase()) {
-      case 'delivered': return 'bg-emerald-500 text-white'
-      case 'shipped': return 'bg-blue-500 text-white'
-      case 'processing': return 'bg-amber-500 text-white'
-      case 'cancelled': return 'bg-rose-500 text-white'
-      default: return 'bg-slate-500 text-white'
-    }
-  }
 
   const menuItems = [
     {
@@ -155,9 +143,7 @@ export default function DashboardClient({
             <p className="mt-1 text-white/80">Welcome to your dashboard</p>
           </div>
           <div className="hidden md:block">
-            <div 
-              className="bg-white/20 backdrop-blur-md rounded-full px-5 py-2 text-white font-medium shadow-inner"
-            >
+            <div className="bg-white/20 backdrop-blur-md rounded-full px-5 py-2 text-white font-medium shadow-inner">
               {initialOrders.length} Orders • {initialWishlist.length} Saved Items
             </div>
           </div>
@@ -172,7 +158,7 @@ export default function DashboardClient({
             {menuItems.map((item) => (
               <GlassCard 
                 key={item.id}
-                gradient={item.id === activeSection}
+                gradient={item.id === 'overview'}
                 onClick={() => handleNavigate(item.href)}
                 className="bg-white dark:bg-slate-800/50"
               >
@@ -235,16 +221,19 @@ export default function DashboardClient({
                         <p className="font-bold text-slate-900 dark:text-white">
                           {formatCurrency(order.total.toString())}
                         </p>
-                        <span className={`text-xs mt-1 px-2 py-1 rounded-full inline-block ${getStatusColor(order.status)}`}>
+                        <GlassBadge variant={order.status.toLowerCase() === 'delivered' ? 'success' : 
+                                        order.status.toLowerCase() === 'shipped' ? 'info' : 
+                                        order.status.toLowerCase() === 'processing' ? 'warning' : 
+                                        order.status.toLowerCase() === 'cancelled' ? 'danger' : 'default'}>
                           {order.status}
-                        </span>
+                        </GlassBadge>
                       </div>
                     </div>
                     
                     {order.orderItems && order.orderItems.length > 0 && (
                       <div className="mt-3 text-xs text-slate-500 dark:text-slate-400">
                         <p className="line-clamp-1">
-                          {order.orderItems.map(item => item.name || item.product?.name).join(', ')}
+                          {order.orderItems.map(item => item.product?.name).filter(Boolean).join(', ')}
                         </p>
                       </div>
                     )}

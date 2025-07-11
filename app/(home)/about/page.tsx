@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Heart, Shield, Truck, Star, Users, Award } from "lucide-react"
+import NewsletterSection from "@/components/newsletter-section"
 
 export default function AboutPage() {
   const features = [
@@ -138,6 +139,11 @@ export default function AboutPage() {
             </div>
           </div>
         </div>
+      </div>
+      
+      {/* Newsletter Section - Only on About page */}
+      <div className="mt-16">
+        <NewsletterSection />
       </div>
     </div>
   )

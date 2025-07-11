@@ -3,7 +3,7 @@
 import Image from "next/image"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useMemo } from "react"
 import { useSession } from "next-auth/react"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { useRef } from "react"
@@ -14,6 +14,8 @@ import { useScrollReveal } from "@/lib/useScrollReveal";
 import { useStaggeredChildren } from "@/lib/useStaggeredChildren";
 import { useReducedMotion } from "@/lib/useReducedMotion";
 import { MarqueeEffectDoubleExample } from "@/components/ui/marquee-demo";
+import NewsletterSection from "@/components/newsletter-section";
+import { HeroSkeleton } from "@/components/ui/skeleton-loader";
 import type { Product as ProductType } from "@/types/product";
 
 export default function HomePage() {
@@ -21,8 +23,9 @@ export default function HomePage() {
   const { data: session } = useSession();
   const [showSignInPopover, setShowSignInPopover] = useState(false);
   const [mobile, setMobile] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
   // Hero carousel logic
-  const heroSlides = [
+  const heroSlides = useMemo(() => [
     {
       image: "/Images/banner1.jpg",
       headline: "Transform Your Hair Journey",
@@ -38,7 +41,7 @@ export default function HomePage() {
       headline: "Nourish. Style. Shine.",
       desc: "Find the perfect products for your unique hair goals."
     },
-  ];
+  ], []);
   const [heroIndex, setHeroIndex] = useState(0);
   const heroTimeout = useRef<NodeJS.Timeout | null>(null);
   useEffect(() => {
@@ -55,11 +58,29 @@ export default function HomePage() {
     if (!session) setShowSignInPopover(true);
   }, [session]);
 
+  // Preload hero images to prevent layout shifts
   useEffect(() => {
+    // Preload hero images
+    heroSlides.forEach(slide => {
+      if (typeof window !== 'undefined') {
+        const img = new window.Image();
+        img.src = slide.image;
+      }
+    });
+    
+    // Fetch products data and then set loading to false
     fetch("/api/products/latest")
       .then(res => res.json())
-      .then(setLatestProducts)
-  }, [])
+      .then((data) => {
+        setLatestProducts(data);
+        // Immediately set loading to false after data is loaded
+        setIsLoading(false);
+      })
+      .catch(err => {
+        console.error("Failed to fetch latest products:", err);
+        setIsLoading(false);
+      });
+  }, [heroSlides])
 
   const handleViewMore = useCallback(() => {
     // Handle view more logic here
@@ -95,27 +116,30 @@ export default function HomePage() {
         <PopoverTrigger asChild><span /></PopoverTrigger>
       </Popover>
       {/* Hero Section - Bento Grid */}
-      <motion.section
-        ref={heroRef}
-        initial="hidden"
-        animate={heroInView ? "show" : "hidden"}
-        variants={reduced ? undefined : {
-          hidden: {
-            opacity: 0,
-            y: 20,
-            transition: { duration: 0.4 }
-          },
-          show: {
-            opacity: 1, 
-            y: 0,
-            transition: {
-              duration: 0.4,
-              ease: [0.25, 0.1, 0.25, 1.0]
+      {isLoading ? (
+        <HeroSkeleton />
+      ) : (
+        <motion.section
+          ref={heroRef}
+          initial="hidden"
+          animate={heroInView ? "show" : "hidden"}
+          variants={reduced ? undefined : {
+            hidden: {
+              opacity: 0,
+              y: 20,
+              transition: { duration: 0.4 }
+            },
+            show: {
+              opacity: 1, 
+              y: 0,
+              transition: {
+                duration: 0.4,
+                ease: [0.25, 0.1, 0.25, 1.0]
+              }
             }
-          }
-        }}
-        className="relative bg-gradient-to-r from-[var(--hero-gradient)] flex items-center justify-center h-[520px]"
-      >
+          }}
+          className="relative bg-gradient-to-r from-[var(--hero-gradient)] flex items-center justify-center h-[520px]"
+        >
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-4 grid-rows-2 gap-6 h-[440px]">
             {/* Main Hero Card as Carousel */}
@@ -124,8 +148,14 @@ export default function HomePage() {
                 <div
                   key={slide.image}
                   className={`absolute inset-0 w-full h-full transition-opacity duration-700 ${idx === heroIndex ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}
-                  style={{ backgroundImage: `url(${slide.image})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
                 >
+                  <Image 
+                    src={slide.image}
+                    alt={slide.headline}
+                    fill
+                    priority={idx === 0}
+                    className="object-cover"
+                  />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-0" />
                   <div className="relative z-10 p-8 flex flex-col justify-end h-full">
                     <h1 className="text-3xl md:text-4xl font-bold text-white mb-4 drop-shadow-lg">
@@ -200,6 +230,7 @@ export default function HomePage() {
           </div>
         </div>
       </motion.section>
+      )}
 
       {/* Marquee Section (replaces Features Section) */}
       <MarqueeEffectDoubleExample />
@@ -207,7 +238,7 @@ export default function HomePage() {
       {/* Latest Products Section */}
       <LatestProductsSection
         products={latestProducts}
-        loading={latestProducts.length === 0}
+        loading={isLoading || latestProducts.length === 0}
         onViewAll={latestProducts.length > 3 ? handleViewMore : undefined}
       />
 
@@ -275,6 +306,9 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* Newsletter Section - Only on homepage */}
+      <NewsletterSection />
     </div>
   )
 } 

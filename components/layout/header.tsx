@@ -70,16 +70,19 @@ function AutocompleteSearchBar() {
 
 function MobileTabBar() {
   const pathname = usePathname();
+  const { getCount } = useCartStore();
+  const cartCount = getCount();
   const tabs = [
     { href: "/", icon: Home, label: "Home" },
     { href: "/search", icon: SearchIcon, label: "Search" },
-    { href: "/cart", icon: ShoppingCart, label: "Cart" },
+    { href: "/cart", icon: ShoppingCart, label: "Cart", badge: cartCount > 0 ? cartCount : null },
     { href: "/dashboard/profile", icon: UserIcon, label: "Account" },
   ];
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t flex justify-around items-center h-16 lg:hidden">
       {tabs.map(tab => {
-        const active = pathname === tab.href || (tab.href === "/" && pathname === "/home");
+        const active = pathname === tab.href || (tab.href === "/" && pathname === "/home") || 
+                      (tab.href === "/dashboard/profile" && pathname.startsWith("/dashboard"));
         return (
           <Link
             key={tab.href}
@@ -94,7 +97,14 @@ function MobileTabBar() {
               whileTap={{ scale: 0.92 }}
               transition={{ type: "spring", stiffness: 300, damping: 22 }}
             >
-              <tab.icon className="w-6 h-6 mb-1" />
+              <div className="relative">
+                <tab.icon className="w-6 h-6 mb-1" />
+                {tab.badge && (
+                  <span className="absolute -top-1 -right-1 bg-secondary text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+                    {tab.badge}
+                  </span>
+                )}
+              </div>
               {tab.label}
             </motion.div>
           </Link>
@@ -156,13 +166,10 @@ export function Header() {
           {/* Logo */}
           <motion.a
             href="/"
-            className="flex items-center space-x-2 hover:opacity-80 transition-opacity"
+            className="flex items-center hover:opacity-80 transition-opacity"
             whileHover={reduced ? undefined : { scale: 1.03 }}
             whileTap={reduced ? undefined : { scale: 0.98 }}
           >
-            <div className="w-10 h-10 bg-secondary rounded-full flex items-center justify-center">
-              <span className="text-white font-bold text-xl">H</span>
-            </div>
             <span className="text-2xl font-bold bg-gradient-to-r from-black via-secondary to-secondary bg-clip-text text-transparent">HairCrew</span>
           </motion.a>
 
@@ -204,11 +211,11 @@ export function Header() {
 
           {/* Right side actions */}
           <div className="flex items-center space-x-4">
-            {/* Cart */}
+            {/* Cart - Hidden on mobile/small screens */}
             <Popover>
               <PopoverTrigger asChild>
                 <motion.button
-                  className="relative p-2 text-gray-700 hover:text-secondary transition-colors"
+                  className="relative p-2 text-gray-700 hover:text-secondary transition-colors hidden md:flex"
                   whileHover={reduced ? undefined : { scale: 1.05 }}
                   whileTap={reduced ? undefined : { scale: 0.95 }}
                 >
@@ -279,11 +286,11 @@ export function Header() {
               </PopoverContent>
             </Popover>
 
-            {/* User Menu */}
+            {/* User Menu - Hidden on mobile/small screens */}
             <Popover>
               <PopoverTrigger asChild>
                 <motion.button
-                  className="p-2 text-gray-700 hover:text-secondary transition-colors"
+                  className="p-2 text-gray-700 hover:text-secondary transition-colors hidden md:flex"
                   whileHover={reduced ? undefined : { scale: 1.05 }}
                   whileTap={reduced ? undefined : { scale: 0.95 }}
                 >
@@ -323,60 +330,100 @@ export function Header() {
         <AnimatePresence>
           {mobileNavOpen && (
             <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              className="lg:hidden border-t bg-white"
+              initial={{ opacity: 0, x: "100%" }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: "100%" }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              className="lg:hidden fixed inset-y-0 right-0 w-[80%] max-w-sm bg-white shadow-xl z-50 overflow-y-auto"
             >
               <FocusTrap>
-                <div className="p-4 space-y-4">
-                  {/* Mobile Search */}
-                  <AutocompleteSearchBar />
-                  
-                  {/* Mobile Categories */}
-                  <div className="space-y-2">
-                    <h3 className="font-semibold text-gray-900">Categories</h3>
-                    {categories.map(cat => (
-                      <div key={cat.slug} className="space-y-1">
-                        <Link
-                          href={`/categories/${cat.slug}`}
-                          className="block py-2 text-gray-700 hover:text-secondary transition-colors"
-                          onClick={() => setMobileNavOpen(false)}
-                        >
-                          {cat.name}
-                        </Link>
-                        <div className="ml-4 space-y-1">
-                          {cat.sub.map(sub => (
-                            <Link
-                              key={sub}
-                              href={`/categories/${cat.slug}?type=${encodeURIComponent(sub)}`}
-                              className="block py-1 text-sm text-gray-500 hover:text-secondary transition-colors"
-                              onClick={() => setMobileNavOpen(false)}
-                            >
-                              {sub}
-                            </Link>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Mobile User Actions */}
-                  <div className="space-y-2">
-                    <Link href="/dashboard/profile" className="block w-full text-center py-3 rounded bg-secondary text-white font-bold hover:bg-secondary/90 transition" onClick={() => setMobileNavOpen(false)}>
-                      Profile
-                    </Link>
-                    <Link href="/dashboard/orders" className="block w-full text-center py-3 rounded bg-gray-100 text-black font-bold hover:bg-gray-200 transition" onClick={() => setMobileNavOpen(false)}>
-                      Orders
-                    </Link>
-                    <Link href="/dashboard/wishlist" className="block w-full text-center py-3 rounded bg-gray-100 text-black font-bold hover:bg-gray-200 transition" onClick={() => setMobileNavOpen(false)}>
-                      Wishlist
-                    </Link>
-                    <button className="block w-full text-center py-3 rounded bg-red-100 text-red-600 font-bold hover:bg-red-200 transition" onClick={() => setMobileNavOpen(false)}>
-                      Sign Out
+                <div className="flex flex-col h-full">
+                  {/* Header */}
+                  <div className="flex items-center justify-between p-4 border-b">
+                    <span className="font-bold text-lg">Menu</span>
+                    <button
+                      onClick={() => setMobileNavOpen(false)}
+                      className="p-2 text-gray-500 hover:text-secondary rounded-full"
+                    >
+                      <X className="w-5 h-5" />
                     </button>
                   </div>
-                </div> {/* End .p-4 space-y-4 */}
+                  
+                  {/* Content */}
+                  <div className="flex-1 overflow-y-auto">
+                    {/* Mobile Search */}
+                    <div className="p-4 border-b">
+                      <AutocompleteSearchBar />
+                    </div>
+                    
+                    {/* Mobile Categories */}
+                    <div className="p-4 border-b">
+                      <h3 className="font-semibold text-gray-900 mb-3">Categories</h3>
+                      {categories.map(cat => (
+                        <details key={cat.slug} className="group mb-2">
+                          <summary className="flex items-center justify-between cursor-pointer py-2 font-medium">
+                            {cat.name}
+                            <svg className="w-4 h-4 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                            </svg>
+                          </summary>
+                          <div className="pl-4 mt-1 space-y-1">
+                            {cat.sub.map(sub => (
+                              <Link
+                                key={sub}
+                                href={`/categories/${cat.slug}?type=${encodeURIComponent(sub)}`}
+                                className="block py-1.5 text-gray-600 hover:text-secondary transition-colors"
+                                onClick={() => setMobileNavOpen(false)}
+                              >
+                                {sub}
+                              </Link>
+                            ))}
+                          </div>
+                        </details>
+                      ))}
+                    </div>
+                    
+                    {/* Footer Links - Moved from footer */}
+                    <div className="p-4 border-b">
+                      <h3 className="font-semibold text-gray-900 mb-3">Information</h3>
+                      <div className="grid grid-cols-2 gap-2">
+                        <Link href="/help" className="py-1.5 text-gray-600 hover:text-secondary transition-colors" onClick={() => setMobileNavOpen(false)}>
+                          Help Center
+                        </Link>
+                        <Link href="/shipping" className="py-1.5 text-gray-600 hover:text-secondary transition-colors" onClick={() => setMobileNavOpen(false)}>
+                          Shipping Info
+                        </Link>
+                        <Link href="/returns" className="py-1.5 text-gray-600 hover:text-secondary transition-colors" onClick={() => setMobileNavOpen(false)}>
+                          Returns Policy
+                        </Link>
+                        <Link href="/about" className="py-1.5 text-gray-600 hover:text-secondary transition-colors" onClick={() => setMobileNavOpen(false)}>
+                          About Us
+                        </Link>
+                        <Link href="/contact" className="py-1.5 text-gray-600 hover:text-secondary transition-colors" onClick={() => setMobileNavOpen(false)}>
+                          Contact Us
+                        </Link>
+                        <Link href="/privacy" className="py-1.5 text-gray-600 hover:text-secondary transition-colors" onClick={() => setMobileNavOpen(false)}>
+                          Privacy Policy
+                        </Link>
+                        <Link href="/terms" className="py-1.5 text-gray-600 hover:text-secondary transition-colors" onClick={() => setMobileNavOpen(false)}>
+                          Terms of Service
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Mobile User Actions */}
+                  <div className="p-4 border-t mt-auto">
+                    <div className="space-y-2">
+                      <Link href="/dashboard/profile" className="block w-full text-center py-3 rounded bg-secondary text-white font-bold hover:bg-secondary/90 transition" onClick={() => setMobileNavOpen(false)}>
+                        My Account
+                      </Link>
+                      <button className="block w-full text-center py-3 rounded bg-gray-100 text-gray-800 font-bold hover:bg-gray-200 transition" onClick={() => setMobileNavOpen(false)}>
+                        Sign Out
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </FocusTrap>
             </motion.div>
           )}

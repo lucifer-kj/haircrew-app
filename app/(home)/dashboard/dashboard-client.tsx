@@ -140,131 +140,102 @@ export default function DashboardClient({
 
   return (
     <div className="w-full space-y-6">
-      {/* Welcome Section */}
-      <div className="text-center space-y-2">
-        <h1 className="text-3xl font-bold text-gray-900">Welcome back, {user?.name || 'User'}!</h1>
-        <p className="text-gray-600">Manage your account and view your activity</p>
+      {/* Welcome Section - Simplified for mobile */}
+      <div className="text-center space-y-2 px-4">
+        <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Hello, {user?.name || 'User'}</h1>
+        <p className="text-sm text-gray-600">Manage your account and orders</p>
       </div>
 
-      {/* Bento Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {/* Dashboard Cards - More mobile-friendly layout */}
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4 px-4">
         {dashboardCards.map((card) => {
           const IconComponent = card.icon
           return (
             <Card 
               key={card.id}
-              className="group cursor-pointer transition-all duration-300 hover:shadow-lg hover:scale-105 border-2 hover:border-primary/20"
+              className="group cursor-pointer transition-all border hover:border-primary/20 h-full"
               onClick={() => handleCardClick(card.href)}
             >
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <div className={`p-3 rounded-lg ${card.color}`}>
-                    <IconComponent className="h-6 w-6 text-white" />
-                  </div>
-                  {card.stats !== null && (
-                    <Badge variant="secondary" className="text-sm">
-                      {card.stats}
-                    </Badge>
-                  )}
+              <CardContent className="p-4 flex flex-col items-center text-center space-y-2">
+                <div className={`p-2 md:p-3 rounded-full ${card.color}`}>
+                  <IconComponent className="h-5 w-5 text-white" />
                 </div>
-              </CardHeader>
-              <CardContent className="pt-0">
-                <CardTitle className="text-lg mb-2 group-hover:text-primary transition-colors">
+                <CardTitle className="text-base md:text-lg group-hover:text-primary transition-colors">
                   {card.title}
                 </CardTitle>
-                <p className="text-sm text-muted-foreground">
-                  {card.description}
-                </p>
+                {card.stats !== null && (
+                  <Badge variant="secondary" className="text-xs">
+                    {card.stats}
+                  </Badge>
+                )}
               </CardContent>
             </Card>
           )
         })}
       </div>
 
-      {/* Quick Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+      {/* Simplified Quick Stats for mobile */}
+      <div className="grid grid-cols-3 gap-3 px-4">
         <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center space-x-4">
-              <div className="p-3 bg-blue-100 rounded-lg">
-                <PackageSearch className="h-6 w-6 text-blue-600" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-600">Total Orders</p>
-                <p className="text-2xl font-bold text-gray-900">{orders.length}</p>
-              </div>
-            </div>
+          <CardContent className="p-3 md:p-4 text-center">
+            <p className="text-xs md:text-sm font-medium text-gray-600">Orders</p>
+            <p className="text-lg md:text-xl font-bold text-gray-900">{orders.length}</p>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center space-x-4">
-              <div className="p-3 bg-green-100 rounded-lg">
-                <Heart className="h-6 w-6 text-green-600" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-600">Wishlist Items</p>
-                <p className="text-2xl font-bold text-gray-900">{wishlist.length}</p>
-              </div>
-            </div>
+          <CardContent className="p-3 md:p-4 text-center">
+            <p className="text-xs md:text-sm font-medium text-gray-600">Wishlist</p>
+            <p className="text-lg md:text-xl font-bold text-gray-900">{wishlist.length}</p>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center space-x-4">
-              <div className="p-3 bg-purple-100 rounded-lg">
-                <MapPin className="h-6 w-6 text-purple-600" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-600">Saved Addresses</p>
-                <p className="text-2xl font-bold text-gray-900">{addresses.length}</p>
-              </div>
-            </div>
+          <CardContent className="p-3 md:p-4 text-center">
+            <p className="text-xs md:text-sm font-medium text-gray-600">Addresses</p>
+            <p className="text-lg md:text-xl font-bold text-gray-900">{addresses.length}</p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Recent Orders Preview */}
+      {/* Recent Orders Preview - Simplified for mobile */}
       {orders.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <PackageSearch className="h-5 w-5" />
-              Recent Orders
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {orders.slice(0, 3).map(order => (
-                <div key={order.id} className="flex items-center justify-between p-4 border rounded-lg">
-                  <div>
-                    <p className="font-medium">Order #{order.orderNumber}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {new Date(order.createdAt).toLocaleDateString()}
-                    </p>
+        <div className="px-4">
+          <Card>
+            <CardHeader className="p-4 pb-0">
+              <CardTitle className="text-base md:text-lg flex items-center gap-2">
+                <PackageSearch className="h-4 w-4" />
+                Recent Orders
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-4">
+              <div className="space-y-3">
+                {orders.slice(0, 3).map(order => (
+                  <div key={order.id} className="p-3 border rounded-lg text-sm">
+                    <div className="flex justify-between">
+                      <span className="font-medium">#{order.orderNumber}</span>
+                      <Badge className={getStatusColor(order.status)}>{order.status}</Badge>
+                    </div>
+                    <div className="flex justify-between mt-2 text-xs text-gray-500">
+                      <span>{new Date(order.createdAt).toLocaleDateString()}</span>
+                      <span>₹{parseFloat(order.total.toString()).toFixed(2)}</span>
+                    </div>
                   </div>
-                  <div className="text-right">
-                    <p className="font-medium">₹{parseFloat(order.total.toString()).toFixed(2)}</p>
-                    <Badge className={getStatusColor(order.status)}>
-                      {order.status.toLowerCase()}
-                    </Badge>
-                  </div>
-                </div>
-              ))}
+                ))}
+              </div>
               {orders.length > 3 && (
                 <Button 
-                  className="w-full border border-gray-300 bg-white hover:bg-gray-50 text-gray-900"
+                  variant="outline" 
+                  className="w-full mt-4 text-sm" 
                   onClick={() => router.push('/dashboard/orders')}
                 >
                   View All Orders
                 </Button>
               )}
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </div>
       )}
     </div>
-  )
+  );
 } 

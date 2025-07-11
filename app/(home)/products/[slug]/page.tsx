@@ -260,11 +260,10 @@ export default function ProductPage({ params }: PageProps) {
       {/* Wishlist Button */}
       <div className="flex justify-end mb-2">
         <Button
-          variant="ghost"
-          size="icon"
           aria-label={inWishlist ? "Remove from wishlist" : "Add to wishlist"}
           onClick={handleWishlist}
           disabled={wishlistLoading}
+          className="p-2 bg-transparent hover:bg-gray-100 rounded-full"
         >
           <Heart className={`w-6 h-6 ${inWishlist ? "fill-[var(--primary)] text-[var(--primary)]" : "text-gray-400"}`} />
         </Button>
@@ -344,19 +343,17 @@ export default function ProductPage({ params }: PageProps) {
               <label className="font-medium">Quantity:</label>
               <div className="flex items-center border rounded-lg">
                 <Button
-                  variant="ghost"
-                  size="sm"
                   onClick={() => setQuantity(Math.max(1, quantity - 1))}
                   disabled={quantity <= 1}
+                  className="px-3 py-1 bg-transparent hover:bg-gray-100 rounded"
                 >
                   -
                 </Button>
                 <span className="px-4 py-2 min-w-[60px] text-center">{quantity}</span>
                 <Button
-                  variant="ghost"
-                  size="sm"
                   onClick={() => setQuantity(quantity + 1)}
                   disabled={quantity >= product.stock}
+                  className="px-3 py-1 bg-transparent hover:bg-gray-100 rounded"
                 >
                   +
                 </Button>
@@ -365,18 +362,17 @@ export default function ProductPage({ params }: PageProps) {
 
             <div className="flex gap-3">
               <Button 
-                size="lg" 
-                className="flex-1 bg-[var(--primary)] hover:bg-[var(--primary-secondary)]"
+                className="flex-1 bg-[var(--primary)] hover:bg-[var(--primary-secondary)] text-white text-lg py-3"
                 onClick={handleAddToCart}
                 disabled={product.stock === 0}
               >
                 <ShoppingCart className="w-5 h-5 mr-2" />
                 Add to Cart
               </Button>
-              <Button variant="outline" size="lg">
+              <Button className="border border-gray-300 bg-white hover:bg-gray-50 text-gray-900 text-lg py-3">
                 <Heart className="w-5 h-5" />
               </Button>
-              <Button variant="outline" size="lg">
+              <Button className="border border-gray-300 bg-white hover:bg-gray-50 text-gray-900 text-lg py-3">
                 <Share2 className="w-5 h-5" />
               </Button>
             </div>

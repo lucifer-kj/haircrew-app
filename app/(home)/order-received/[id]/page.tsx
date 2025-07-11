@@ -74,9 +74,11 @@ export default function OrderReceivedPage({ params }: { params: tParams }) {
             <div className="text-center">
               <h2 className="text-xl font-bold mb-4 text-red-600">Order Not Found</h2>
               <p className="mb-6">We couldn&apos;t find your order. Please check your order ID or contact support.</p>
-              <Button asChild className="bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded-md shadow-md">
-                <Link href="/dashboard">Go to Dashboard</Link>
-              </Button>
+              <Link href="/dashboard" className="inline-block">
+                <Button className="bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded-md shadow-md">
+                  Go to Dashboard
+                </Button>
+              </Link>
             </div>
           ) : (
             <div className="text-center">
@@ -86,9 +88,11 @@ export default function OrderReceivedPage({ params }: { params: tParams }) {
                 <div><b>Date:</b> {order?.createdAt ? new Date(order.createdAt).toLocaleString() : ""}</div>
                 <div><b>Status:</b> {order?.status}</div>
               </div>
-              <Button asChild className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded-md shadow-md mt-2">
-                <Link href="/dashboard">Go to Dashboard</Link>
-              </Button>
+              <Link href="/dashboard" className="w-full inline-block mt-2">
+                <Button className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded-md shadow-md">
+                  Go to Dashboard
+                </Button>
+              </Link>
             </div>
           )}
         </div>

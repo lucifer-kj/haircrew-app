@@ -255,8 +255,7 @@ export default function DashboardClient({
               ))}
               {orders.length > 3 && (
                 <Button 
-                  variant="outline" 
-                  className="w-full"
+                  className="w-full border border-gray-300 bg-white hover:bg-gray-50 text-gray-900"
                   onClick={() => router.push('/dashboard/orders')}
                 >
                   View All Orders

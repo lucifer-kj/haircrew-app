@@ -3,25 +3,21 @@
 import Image from "next/image"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { ArrowRight } from "lucide-react"
 import { useEffect, useState } from "react"
-import ProductCard from "@/components/product-card"
 import { useSession } from "next-auth/react"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { useRef } from "react"
 import { useCallback } from "react"
-
-interface Product {
-  id: string
-  name: string
-  price: number
-  images: string[]
-  slug: string
-  categoryId: string
-}
+import LatestProductsSection from "@/components/latest-products-section";
+import { motion } from "framer-motion";
+import { useScrollReveal } from "@/lib/useScrollReveal";
+import { useStaggeredChildren } from "@/lib/useStaggeredChildren";
+import { useReducedMotion } from "@/lib/useReducedMotion";
+import { MarqueeEffectDoubleExample } from "@/components/ui/marquee-demo";
+import type { Product as ProductType } from "@/types/product";
 
 export default function HomePage() {
-  const [latestProducts, setLatestProducts] = useState<Product[]>([])
+  const [latestProducts, setLatestProducts] = useState<ProductType[]>([])
   const { data: session } = useSession();
   const [showSignInPopover, setShowSignInPopover] = useState(false);
   const [mobile, setMobile] = useState("");
@@ -65,8 +61,16 @@ export default function HomePage() {
       .then(setLatestProducts)
   }, [])
 
-  const [showAllProducts, setShowAllProducts] = useState(false);
-  const handleViewMore = useCallback(() => setShowAllProducts(true), []);
+  const handleViewMore = useCallback(() => {
+    // Handle view more logic here
+  }, []);
+
+  const reduced = useReducedMotion();
+  // Hero scroll reveal
+  const [heroRef, heroInView] = useScrollReveal();
+  // Removed unused scroll reveal refs
+  // Staggered grid for features
+  const { parent: featuresParent, child: featuresChild } = useStaggeredChildren();
 
   return (
     <div className="min-h-screen">
@@ -91,7 +95,27 @@ export default function HomePage() {
         <PopoverTrigger asChild><span /></PopoverTrigger>
       </Popover>
       {/* Hero Section - Bento Grid */}
-      <section className="relative bg-gradient-to-r from-[var(--hero-gradient)] flex items-center justify-center h-[520px]">
+      <motion.section
+        ref={heroRef}
+        initial="hidden"
+        animate={heroInView ? "show" : "hidden"}
+        variants={reduced ? undefined : {
+          hidden: {
+            opacity: 0,
+            y: 20,
+            transition: { duration: 0.4 }
+          },
+          show: {
+            opacity: 1, 
+            y: 0,
+            transition: {
+              duration: 0.4,
+              ease: [0.25, 0.1, 0.25, 1.0]
+            }
+          }
+        }}
+        className="relative bg-gradient-to-r from-[var(--hero-gradient)] flex items-center justify-center h-[520px]"
+      >
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-4 grid-rows-2 gap-6 h-[440px]">
             {/* Main Hero Card as Carousel */}
@@ -106,22 +130,28 @@ export default function HomePage() {
                   <div className="relative z-10 p-8 flex flex-col justify-end h-full">
                     <h1 className="text-3xl md:text-4xl font-bold text-white mb-4 drop-shadow-lg">
                       {slide.headline}
-                    </h1>
+              </h1>
                     <p className="text-base text-white/90 mb-6 max-w-md drop-shadow">
                       {slide.desc}
-                    </p>
-                    <Link href="/products">
-                      <Button size="lg" className="bg-secondary hover:bg-secondary/90 text-white rounded-full font-semibold shadow-md">
-                        Shop Now
-                      </Button>
-                    </Link>
-                  </div>
-                </div>
+              </p>
+                <Link href="/products">
+                  <Button className="bg-secondary hover:bg-secondary/90 text-white rounded-full font-semibold shadow-md px-8 py-3 text-lg">
+                    Shop Now
+                  </Button>
+                </Link>
+              </div>
+            </div>
               ))}
             </div>
             {/* Right Side: 2x2 Grid of Cards (hidden on mobile/tablet) */}
-            <div className="hidden lg:grid col-span-2 row-span-2 grid-cols-2 grid-rows-2 gap-6 h-full">
+            <motion.div
+              className="hidden lg:grid col-span-2 row-span-2 grid-cols-2 grid-rows-2 gap-6 h-full"
+              initial="hidden"
+              animate={heroInView ? "show" : "hidden"}
+              variants={reduced ? undefined : featuresParent}
+            >
               {/* Shampoo Card */}
+              <motion.div variants={reduced ? undefined : featuresChild}>
               <Link href="/categories/shampoo" className="h-full w-full rounded-xl shadow-md flex flex-col justify-end p-0 overflow-hidden group relative" style={{ minHeight: 0 }}>
                 <div className="absolute inset-0 w-full h-full rounded-xl transition-transform duration-300 scale-110 group-hover:scale-100 bg-cover bg-center" style={{ backgroundImage: 'url(/Images/c-shampoo.jpg)' }} />
                 <div className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-t from-black/80 via-black/40 to-transparent backdrop-blur-sm" />
@@ -130,7 +160,9 @@ export default function HomePage() {
                   <p className="text-lg font-semibold text-white text-left max-w-xs">Cleansing and nourishing formulas for all hair types.</p>
                 </div>
               </Link>
+              </motion.div>
               {/* Conditioners Card */}
+              <motion.div variants={reduced ? undefined : featuresChild}>
               <Link href="/categories/conditioner" className="h-full w-full rounded-xl shadow-md flex flex-col justify-end p-0 overflow-hidden group relative" style={{ minHeight: 0 }}>
                 <div className="absolute inset-0 w-full h-full rounded-xl transition-transform duration-300 scale-110 group-hover:scale-100 bg-cover bg-center" style={{ backgroundImage: 'url(/Images/c-conditioner.jpg)' }} />
                 <div className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-t from-black/80 via-black/40 to-transparent backdrop-blur-sm" />
@@ -139,7 +171,9 @@ export default function HomePage() {
                   <p className="text-lg font-semibold text-white text-left max-w-xs">Hydrating and smoothing conditioners for silky hair.</p>
                 </div>
               </Link>
+              </motion.div>
               {/* Treatments Card */}
+              <motion.div variants={reduced ? undefined : featuresChild}>
               <Link href="/categories/treatment" className="h-full w-full rounded-xl shadow-md flex flex-col justify-end p-0 overflow-hidden group relative" style={{ minHeight: 0 }}>
                 <div className="absolute inset-0 w-full h-full rounded-xl transition-transform duration-300 scale-110 group-hover:scale-100 bg-cover bg-center" style={{ backgroundImage: 'url(/Images/p4.jpg)' }} />
                 <div className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-t from-black/80 via-black/40 to-transparent backdrop-blur-sm" />
@@ -148,77 +182,34 @@ export default function HomePage() {
                   <p className="text-lg font-semibold text-white text-left max-w-xs">Repair and restore with intensive treatments.</p>
                 </div>
               </Link>
+              </motion.div>
               {/* Promo Card */}
+              <motion.div variants={reduced ? undefined : featuresChild}>
               <Link href="/products?promo=new" className="h-full w-full rounded-xl shadow-md flex flex-col justify-end p-0 overflow-hidden group relative bg-gradient-to-br from-secondary to-[#B13BFF]" style={{ minHeight: 0 }}>
                 <div className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-t from-black/80 via-black/40 to-transparent backdrop-blur-sm rounded-xl" />
                 <div className="relative z-10 flex flex-col justify-end h-full w-full pl-8 pb-8">
                   <h3 className="text-2xl font-extrabold font-headings text-white mb-2 text-left">New Arrivals</h3>
                   <p className="text-lg font-semibold text-white text-left max-w-xs mb-3">Explore the latest in hair care innovation.</p>
-                  <Button size="lg" className="bg-white text-secondary rounded-full font-bold shadow hover:bg-gray-100 w-fit">Shop New</Button>
+                  <Button className="bg-white text-secondary rounded-full font-bold shadow hover:bg-gray-100 w-fit px-8 py-3 text-lg">
+                    Shop New
+                  </Button>
                 </div>
               </Link>
-            </div>
+              </motion.div>
+            </motion.div>
           </div>
         </div>
-      </section>
+      </motion.section>
 
-      {/* Features Section */}
-      <section className="py-16 bg-white hidden md:block">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="text-center space-y-4">
-              <div className="w-16 h-16 bg-secondary rounded-full flex items-center justify-center mx-auto">
-                <span className="text-white text-2xl">🚚</span>
-              </div>
-              <h3 className="text-xl font-semibold text-[var(--charcoal)]">Free Shipping</h3>
-              <p className="text-[var(--dark-gray)]">Free shipping on orders over ₹500</p>
-            </div>
-            <div className="text-center space-y-4">
-              <div className="w-16 h-16 bg-secondary rounded-full flex items-center justify-center mx-auto">
-                <span className="text-white text-2xl">✨</span>
-              </div>
-              <h3 className="text-xl font-semibold text-[var(--charcoal)]">Premium Quality</h3>
-              <p className="text-[var(--dark-gray)]">Professional-grade products</p>
-            </div>
-            <div className="text-center space-y-4">
-              <div className="w-16 h-16 bg-secondary rounded-full flex items-center justify-center mx-auto">
-                <span className="text-white text-2xl">🛡️</span>
-              </div>
-              <h3 className="text-xl font-semibold text-[var(--charcoal)]">30-Day Returns</h3>
-              <p className="text-[var(--dark-gray)]">Hassle-free returns and exchanges</p>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* Marquee Section (replaces Features Section) */}
+      <MarqueeEffectDoubleExample />
 
       {/* Latest Products Section */}
-      <section className="py-16 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-[var(--charcoal)] mb-4">Latest Products</h2>
-            <p className="text-[var(--dark-gray)] max-w-2xl mx-auto">Check out our newest arrivals and best sellers.</p>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
-            {(showAllProducts ? latestProducts : latestProducts.slice(0, 3)).map(product => (
-              <ProductCard
-                key={product.id}
-                product={product}
-                showWishlist={false}
-              />
-            ))}
-          </div>
-          {!showAllProducts && latestProducts.length > 3 && (
-            <div className="flex justify-center mt-8">
-              <button
-                onClick={handleViewMore}
-                className="px-6 py-2 bg-secondary text-white rounded-full font-semibold shadow hover:bg-secondary/90 transition"
-              >
-                View More
-              </button>
-            </div>
-          )}
-        </div>
-      </section>
+      <LatestProductsSection
+        products={latestProducts}
+        loading={latestProducts.length === 0}
+        onViewAll={latestProducts.length > 3 ? handleViewMore : undefined}
+      />
 
       {/* Featured Categories */}
       <section className="py-16 bg-[var(--light-gray)]">
@@ -282,23 +273,6 @@ export default function HomePage() {
               </div>
             </Link>
           </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="py-16 bg-[var(--primary)] text-white">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold mb-4">Ready to Transform Your Hair?</h2>
-          <p className="text-lg mb-8 max-w-2xl mx-auto">
-            Join thousands of professionals who trust HairCrew for their hair care needs. 
-            Start your journey to beautiful, healthy hair today.
-          </p>
-          <Link href="/products">
-            <Button size="lg" variant="secondary" className="bg-white text-[var(--primary)] hover:bg-gray-100">
-              Explore Products
-              <ArrowRight className="ml-2 w-4 h-4" />
-            </Button>
-          </Link>
         </div>
       </section>
     </div>

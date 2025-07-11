@@ -1,34 +1,48 @@
+"use client";
+
 import Link from "next/link"
 import { Facebook, Twitter, Instagram, Youtube, Mail, Phone, MapPin } from "lucide-react"
+import NewsletterSection from "@/components/newsletter-section";
+import { motion } from "framer-motion";
+import { fadeIn } from "@/lib/motion.config";
+import { useScrollReveal } from "@/lib/useScrollReveal";
+import { useReducedMotion } from "@/lib/useReducedMotion";
 
 export function Footer() {
+  const reduced = useReducedMotion();
+  const [ref, inView] = useScrollReveal();
   return (
-    <footer className="bg-black text-white">
+    <motion.footer
+      ref={ref}
+      initial="hidden"
+      animate={inView ? "show" : "hidden"}
+      variants={reduced ? undefined : fadeIn}
+      className="bg-[#f7f6f3] text-black pt-0"
+    >
+      {/* Newsletter Signup Section */}
+      <NewsletterSection />
       <div className="container mx-auto px-4 py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Company Info */}
           <div className="space-y-4">
             <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
-                <span className="text-black font-bold text-lg">H</span>
-              </div>
-              <span className="text-2xl font-bold text-white">HairCrew</span>
+              <span className="text-2xl font-bold text-black">HairCrew</span>
             </div>
-            <p className="text-gray-300 text-sm">
+            <p className="text-gray-700 text-sm">
               Your trusted partner for professional hair care products. 
               Quality, innovation, and beauty in every bottle.
             </p>
             <div className="flex space-x-4">
-              <Link href="#" className="text-gray-300 hover:text-secondary transition-colors">
+              <Link href="#" className="text-gray-700 hover:text-secondary transition-colors">
                 <Facebook className="w-5 h-5" />
               </Link>
-              <Link href="#" className="text-gray-300 hover:text-secondary transition-colors">
+              <Link href="#" className="text-gray-700 hover:text-secondary transition-colors">
                 <Twitter className="w-5 h-5" />
               </Link>
-              <Link href="#" className="text-gray-300 hover:text-secondary transition-colors">
+              <Link href="#" className="text-gray-700 hover:text-secondary transition-colors">
                 <Instagram className="w-5 h-5" />
               </Link>
-              <Link href="#" className="text-gray-300 hover:text-secondary transition-colors">
+              <Link href="#" className="text-gray-700 hover:text-secondary transition-colors">
                 <Youtube className="w-5 h-5" />
               </Link>
             </div>
@@ -71,27 +85,27 @@ export function Footer() {
             <h3 className="text-lg font-semibold">Customer Service</h3>
             <ul className="space-y-2">
               <li>
-                <Link href="/help" className="text-gray-300 hover:text-[var(--primary)] transition-colors">
+                <Link href="/help" className="text-gray-700 hover:text-secondary transition-colors">
                   Help Center
                 </Link>
               </li>
               <li>
-                <Link href="/shipping" className="text-gray-300 hover:text-[var(--primary)] transition-colors">
+                <Link href="/shipping" className="text-gray-700 hover:text-secondary transition-colors">
                   Shipping Info
                 </Link>
               </li>
               <li>
-                <Link href="/returns" className="text-gray-300 hover:text-[var(--primary)] transition-colors">
+                <Link href="/returns" className="text-gray-700 hover:text-secondary transition-colors">
                   Returns & Exchanges
                 </Link>
               </li>
               <li>
-                <Link href="/size-guide" className="text-gray-300 hover:text-[var(--primary)] transition-colors">
+                <Link href="/size-guide" className="text-gray-700 hover:text-secondary transition-colors">
                   Size Guide
                 </Link>
               </li>
               <li>
-                <Link href="/faq" className="text-gray-300 hover:text-[var(--primary)] transition-colors">
+                <Link href="/faq" className="text-gray-700 hover:text-secondary transition-colors">
                   FAQ
                 </Link>
               </li>
@@ -141,6 +155,16 @@ export function Footer() {
           </div>
         </div>
       </div>
-    </footer>
+      {/* Instagram Section */}
+      <div className="container mx-auto px-4 pb-8">
+        <h3 className="text-center text-lg font-semibold mb-4">Follow On <span className="italic font-light">Instagram</span></h3>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <div className="bg-gray-200 rounded-xl h-24" />
+          <div className="bg-gray-200 rounded-xl h-24" />
+          <div className="bg-gray-200 rounded-xl h-24" />
+          <div className="bg-gray-200 rounded-xl h-24" />
+        </div>
+      </div>
+    </motion.footer>
   )
 } 

@@ -77,11 +77,11 @@ export default async function WishlistPage() {
                     <p className="text-lg font-bold text-primary mb-3">
                       ₹{parseFloat(item.product.price.toString()).toFixed(2)}
                     </p>
-                    <Button className="w-full" asChild>
-                      <Link href={`/products/${item.product.slug}`}>
+                    <Link href={`/products/${item.product.slug}`} className="w-full inline-block">
+                      <Button className="w-full">
                         View Product
-                      </Link>
-                    </Button>
+                      </Button>
+                    </Link>
                   </CardContent>
                 </Card>
               ))}

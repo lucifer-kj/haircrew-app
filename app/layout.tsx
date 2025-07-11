@@ -1,9 +1,13 @@
+import React from "react";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/components/providers/session-provider";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
+import ClientRoot from "@/components/providers/client-root";
+import { ErrorBoundary } from "@/components/ui/error-boundary";
+import AnimatedLayoutClient from "@/components/providers/animated-layout-client";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,13 +35,17 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <AuthProvider>
-          <div className="min-h-screen flex flex-col">
-            <Header />
-            <main className="flex-1">
-              {children}
-            </main>
-            <Footer />
-          </div>
+          <ClientRoot>
+            <div className="min-h-screen flex flex-col">
+              <Header />
+              <main className="flex-1">
+                <ErrorBoundary>
+                  <AnimatedLayoutClient>{children}</AnimatedLayoutClient>
+                </ErrorBoundary>
+              </main>
+              <Footer />
+            </div>
+          </ClientRoot>
         </AuthProvider>
       </body>
     </html>

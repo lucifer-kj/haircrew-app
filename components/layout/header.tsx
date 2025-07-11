@@ -1,14 +1,16 @@
 "use client"
 
 import Link from "next/link"
-import { Search, User, Menu, X, ShoppingCart, Trash2 } from "lucide-react"
+import { Search, Menu, X, ShoppingCart, Trash2, Home, Search as SearchIcon, User as UserIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useState, useEffect } from "react"
 import { useRouter } from 'next/navigation'
 import { useCartStore } from "@/store/cart-store"
-import Image from "next/image"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { AnimatePresence, motion } from "framer-motion"
+import { useReducedMotion as useFramerReducedMotion } from "framer-motion";
+import { FocusTrap } from "@headlessui/react";
+import { usePathname } from "next/navigation";
 
 type SearchResult = { id: string; name: string; slug: string };
 function AutocompleteSearchBar() {
@@ -55,26 +57,62 @@ function AutocompleteSearchBar() {
                 key={item.id}
                 className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
                 onMouseDown={() => router.push(`/products/${item.slug}`)}
-              >
+        >
                 {item.name}
               </li>
             ))}
           </motion.ul>
-        )}
+      )}
       </AnimatePresence>
     </div>
   );
 }
 
+function MobileTabBar() {
+  const pathname = usePathname();
+  const tabs = [
+    { href: "/", icon: Home, label: "Home" },
+    { href: "/search", icon: SearchIcon, label: "Search" },
+    { href: "/cart", icon: ShoppingCart, label: "Cart" },
+    { href: "/dashboard/profile", icon: UserIcon, label: "Account" },
+  ];
+  return (
+    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t flex justify-around items-center h-16 lg:hidden">
+      {tabs.map(tab => {
+        const active = pathname === tab.href || (tab.href === "/" && pathname === "/home");
+        return (
+          <Link
+            key={tab.href}
+            href={tab.href}
+            className="flex-1"
+            aria-label={tab.label}
+          >
+            <motion.div
+              className="flex flex-col items-center justify-center h-full text-xs font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary transition"
+              initial={false}
+              animate={active ? { scale: 1.1, color: "#9929EA" } : { scale: 1, color: "#6B7280" }}
+              whileTap={{ scale: 0.92 }}
+              transition={{ type: "spring", stiffness: 300, damping: 22 }}
+            >
+              <tab.icon className="w-6 h-6 mb-1" />
+              {tab.label}
+            </motion.div>
+          </Link>
+        );
+      })}
+    </nav>
+  );
+}
+
 export function Header() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const { items, removeItem, updateQuantity, clearCart, getTotal, getCount } = useCartStore();
+  const { items, removeItem, updateQuantity, getTotal, getCount } = useCartStore();
   const cartCount = getCount();
   const router = useRouter();
-
+  const reduced = useFramerReducedMotion();
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 10);
+    const handleScroll = (): void => setScrolled(window.scrollY > 10);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
@@ -87,6 +125,16 @@ export function Header() {
     { name: "Styling", slug: "styling", sub: ["Gels", "Sprays", "Creams"] },
     { name: "Accessories", slug: "accessories", sub: ["Combs", "Brushes", "Clips"] },
   ];
+
+  // Lock body scroll when mobile nav is open
+  useEffect(() => {
+    if (mobileNavOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => { document.body.style.overflow = ""; };
+  }, [mobileNavOpen]);
 
   return (
     <>
@@ -106,21 +154,33 @@ export function Header() {
       >
         <div className="container mx-auto px-4 flex items-center h-20 justify-between">
           {/* Logo */}
-          <Link href="/" className="flex items-center space-x-2 hover:opacity-80 transition-opacity">
+          <motion.a
+            href="/"
+            className="flex items-center space-x-2 hover:opacity-80 transition-opacity"
+            whileHover={reduced ? undefined : { scale: 1.03 }}
+            whileTap={reduced ? undefined : { scale: 0.98 }}
+          >
             <div className="w-10 h-10 bg-secondary rounded-full flex items-center justify-center">
               <span className="text-white font-bold text-xl">H</span>
             </div>
             <span className="text-2xl font-bold bg-gradient-to-r from-black via-secondary to-secondary bg-clip-text text-transparent">HairCrew</span>
-          </Link>
+          </motion.a>
+
+          {/* Spacer for desktop nav */}
+          <div className="hidden lg:flex flex-1 max-w-lg mx-8" />
 
           {/* Desktop Navigation with dropdowns */}
           <nav className="hidden lg:flex items-center space-x-4 mx-8">
             {categories.map(cat => (
               <Popover key={cat.slug}>
                 <PopoverTrigger asChild>
-                  <button className="text-black hover:text-secondary font-medium px-3 py-2 rounded transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary/50">
+                  <motion.button
+                    className="text-black hover:text-secondary font-medium px-3 py-2 rounded transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary/50"
+                    whileHover={reduced ? undefined : { scale: 1.02 }}
+                    whileTap={reduced ? undefined : { scale: 0.98 }}
+                  >
                     {cat.name}
-                  </button>
+                  </motion.button>
                 </PopoverTrigger>
                 <PopoverContent align="start" className="mt-2 p-0 w-48 bg-white border border-gray-200 rounded-xl shadow-lg">
                   <ul className="py-2">
@@ -137,143 +197,192 @@ export function Header() {
             ))}
           </nav>
 
-          {/* Search Bar (centered, desktop) */}
-          <div className="hidden lg:flex flex-1 max-w-lg mx-8">
+          {/* Search Bar */}
+          <div className="hidden md:flex flex-1 max-w-md mx-4">
             <AutocompleteSearchBar />
           </div>
 
-          {/* Right Side: User, Cart, Sign In */}
+          {/* Right side actions */}
           <div className="flex items-center space-x-4">
-            <Link href="/dashboard/profile" className="hidden lg:inline-flex">
-              <User className="w-6 h-6 text-black hover:text-secondary transition-colors" />
-            </Link>
-            {/* Cart icon with badge and popover */}
+            {/* Cart */}
             <Popover>
               <PopoverTrigger asChild>
-                <button className="relative">
+                <motion.button
+                  className="relative p-2 text-gray-700 hover:text-secondary transition-colors"
+                  whileHover={reduced ? undefined : { scale: 1.05 }}
+                  whileTap={reduced ? undefined : { scale: 0.95 }}
+                >
                   <ShoppingCart className="w-6 h-6" />
                   {cartCount > 0 && (
-                    <span className="absolute -top-2 -right-2 bg-secondary text-white text-xs font-bold rounded-full px-1.5 py-0.5 border-2 border-white">{cartCount}</span>
+                    <span className="absolute -top-1 -right-1 bg-secondary text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+                      {cartCount}
+                    </span>
                   )}
-                </button>
+                </motion.button>
               </PopoverTrigger>
-              <PopoverContent align="end" className="w-80 p-0 bg-white border border-gray-200 rounded-xl shadow-lg">
-                <div className="p-4 max-h-96 overflow-y-auto">
-                  <p className="font-semibold mb-2">Cart Summary</p>
+              <PopoverContent align="end" className="w-80 p-0">
+                <div className="p-4">
+                  <h3 className="font-semibold mb-4">Shopping Cart</h3>
                   {items.length === 0 ? (
-                    <div className="text-center text-gray-500 py-8">Your cart is empty.</div>
+                    <p className="text-gray-500 text-center py-8">Your cart is empty</p>
                   ) : (
-                    <div className="space-y-4">
-                      {items.map(item => (
-                        <div key={item.id} className="flex gap-3 items-center bg-white rounded-lg shadow-sm p-2 border">
-                          <Image src={item.image} alt={item.name} width={48} height={48} className="rounded object-cover border w-12 h-12" />
-                          <div className="flex-1">
-                            <div className="font-semibold text-sm mb-1">
-                              <Link href={`/products/${item.slug}`}>{item.name}</Link>
+                    <>
+                      <div className="max-h-64 overflow-y-auto space-y-3">
+                        {items.map((item) => (
+                          <div key={item.id} className="flex items-center space-x-3">
+                            <div className="w-12 h-12 bg-gray-200 rounded-lg flex-shrink-0" />
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium truncate">{item.name}</p>
+                              <p className="text-xs text-gray-500">₹{item.price}</p>
                             </div>
-                            <div className="text-secondary font-bold mb-1 text-xs">₹{item.price}</div>
-                            <div className="flex items-center gap-1">
-                              <Button size="sm" variant="outline" onClick={() => updateQuantity(item.id, item.quantity - 1)} disabled={item.quantity <= 1}>-</Button>
-                              <span className="px-2 font-medium text-xs">{item.quantity}</span>
-                              <Button size="sm" variant="outline" onClick={() => updateQuantity(item.id, item.quantity + 1)} disabled={item.quantity >= item.stock}>+</Button>
+                            <div className="flex items-center space-x-1">
+                              <button
+                                onClick={() => updateQuantity(item.id, Math.max(0, item.quantity - 1))}
+                                className="w-6 h-6 rounded-full border border-gray-300 flex items-center justify-center text-xs hover:bg-gray-100"
+                              >
+                                -
+                              </button>
+                              <span className="text-sm w-8 text-center">{item.quantity}</span>
+                              <button
+                                onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                                className="w-6 h-6 rounded-full border border-gray-300 flex items-center justify-center text-xs hover:bg-gray-100"
+                              >
+                                +
+                              </button>
                             </div>
+                            <button
+                              onClick={() => removeItem(item.id)}
+                              className="text-gray-400 hover:text-red-500 transition-colors"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
                           </div>
-                          <Button variant="ghost" size="icon" onClick={() => removeItem(item.id)}>
-                            <Trash2 className="w-4 h-4 text-red-500" />
+                        ))}
+                      </div>
+                      <div className="border-t pt-4 mt-4">
+                        <div className="flex justify-between items-center mb-4">
+                          <span className="font-semibold">Total:</span>
+                          <span className="font-semibold">₹{getTotal()}</span>
+                        </div>
+                        <div className="space-y-2">
+                          <Button onClick={() => router.push('/cart')} className="w-full bg-secondary hover:bg-secondary/90">
+                            View Cart
+                          </Button>
+                          <Button onClick={() => router.push('/checkout')} className="w-full bg-black hover:bg-gray-800">
+                            Checkout
                           </Button>
                         </div>
-                      ))}
-                    </div>
-                  )}
-                  <div className="rounded-lg border bg-gray-50 p-3 mt-4">
-                    <div className="flex items-center justify-between text-base font-semibold mb-2">
-                      <span>Subtotal</span>
-                      <span>₹{getTotal().toFixed(2)}</span>
-                    </div>
-                    <div className="flex items-center justify-between text-sm text-gray-500">
-                      <span>Shipping</span>
-                      <span>Free</span>
-                    </div>
-                    <div className="flex items-center justify-between text-lg font-bold mt-2">
-                      <span>Total</span>
-                      <span>₹{getTotal().toFixed(2)}</span>
-                    </div>
-                  </div>
-                  <Button
-                    disabled={items.length === 0}
-                    className="w-full bg-secondary hover:bg-secondary/90 text-white text-base font-semibold py-3 rounded-full shadow-md mt-3"
-                    onClick={() => { router.push('/checkout'); }}
-                  >
-                    Go to Checkout
-                  </Button>
-                  {items.length > 0 && (
-                    <Button variant="outline" onClick={clearCart} className="w-full mt-2">Clear Cart</Button>
+                      </div>
+                    </>
                   )}
                 </div>
               </PopoverContent>
             </Popover>
-              <Link href="/auth/signin">
-              <Button className="bg-secondary text-white rounded-full px-6 py-2 font-semibold shadow-md hover:bg-secondary/90 transition">Sign In</Button>
-              </Link>
-            {/* Hamburger for mobile */}
-            <button className="lg:hidden ml-2" onClick={() => setIsMenuOpen(true)} aria-label="Open menu">
-              <Menu className="w-7 h-7 text-black" />
+
+            {/* User Menu */}
+            <Popover>
+              <PopoverTrigger asChild>
+                <motion.button
+                  className="p-2 text-gray-700 hover:text-secondary transition-colors"
+                  whileHover={reduced ? undefined : { scale: 1.05 }}
+                  whileTap={reduced ? undefined : { scale: 0.95 }}
+                >
+                  <UserIcon className="w-6 h-6" />
+                </motion.button>
+              </PopoverTrigger>
+              <PopoverContent align="end" className="w-48 p-0">
+                <div className="p-2">
+                  <Link href="/dashboard/profile" className="block px-3 py-2 text-sm hover:bg-gray-100 rounded">
+                    Profile
+                  </Link>
+                  <Link href="/dashboard/orders" className="block px-3 py-2 text-sm hover:bg-gray-100 rounded">
+                    Orders
+                  </Link>
+                  <Link href="/dashboard/wishlist" className="block px-3 py-2 text-sm hover:bg-gray-100 rounded">
+                    Wishlist
+                  </Link>
+                  <hr className="my-1" />
+                  <button className="block w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded">
+                    Sign Out
+                  </button>
+                </div>
+              </PopoverContent>
+            </Popover>
+
+            {/* Mobile menu button */}
+            <button
+              onClick={() => setMobileNavOpen(!mobileNavOpen)}
+              className="lg:hidden p-2 text-gray-700 hover:text-secondary transition-colors"
+            >
+              {mobileNavOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
           </div>
         </div>
 
-        {/* Mobile Slide-in Menu */}
+        {/* Mobile Navigation */}
         <AnimatePresence>
-        {isMenuOpen && (
+          {mobileNavOpen && (
             <motion.div
-              initial={{ x: "100%" }}
-              animate={{ x: 0 }}
-              exit={{ x: "100%" }}
-              transition={{ type: "tween", duration: 0.3 }}
-              className="fixed inset-0 z-50 bg-black/40"
-              onClick={() => setIsMenuOpen(false)}
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              className="lg:hidden border-t bg-white"
             >
-              <motion.div
-                initial={{ x: "100%" }}
-                animate={{ x: 0 }}
-                exit={{ x: "100%" }}
-                transition={{ type: "tween", duration: 0.3 }}
-                className="absolute right-0 top-0 h-full w-80 bg-white shadow-xl flex flex-col p-6"
-                onClick={(e: React.MouseEvent<HTMLDivElement>) => e.stopPropagation()}
-              >
-                <button className="self-end mb-6" onClick={() => setIsMenuOpen(false)} aria-label="Close menu">
-                  <X className="w-7 h-7 text-black" />
-                </button>
-                <nav className="flex flex-col space-y-6 mt-4">
-                  {categories.map(cat => (
-                    <div key={cat.slug}>
-                      <button className="text-black hover:text-secondary font-medium text-lg w-full text-left flex items-center justify-between" onClick={() => {}}>
-                        {cat.name}
-                        {/* TODO: Expand/collapse subcategories on mobile */}
-                      </button>
-                      <ul className="pl-4 mt-2 space-y-1">
-                        {cat.sub.map(sub => (
-                          <li key={sub}>
-                            <Link href={`/categories/${cat.slug}?type=${encodeURIComponent(sub)}`} className="block px-2 py-1 text-gray-700 hover:bg-secondary/10 hover:text-secondary rounded transition-colors">
-                              {sub}
-              </Link>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  ))}
-                  <Link href="/dashboard/profile" className="text-black hover:text-secondary font-medium text-lg" onClick={() => setIsMenuOpen(false)}>Account</Link>
-                  <Link href="/auth/signin" className="mt-4">
-                    <Button className="bg-secondary text-white rounded-full w-full py-2 font-semibold shadow-md hover:bg-secondary/90 transition">Sign In</Button>
-                </Link>
-            </nav>
-                <div className="mt-8">
+              <FocusTrap>
+                <div className="p-4 space-y-4">
+                  {/* Mobile Search */}
                   <AutocompleteSearchBar />
-                </div>
-              </motion.div>
+                  
+                  {/* Mobile Categories */}
+                  <div className="space-y-2">
+                    <h3 className="font-semibold text-gray-900">Categories</h3>
+                    {categories.map(cat => (
+                      <div key={cat.slug} className="space-y-1">
+                        <Link
+                          href={`/categories/${cat.slug}`}
+                          className="block py-2 text-gray-700 hover:text-secondary transition-colors"
+                          onClick={() => setMobileNavOpen(false)}
+                        >
+                          {cat.name}
+                        </Link>
+                        <div className="ml-4 space-y-1">
+                          {cat.sub.map(sub => (
+                            <Link
+                              key={sub}
+                              href={`/categories/${cat.slug}?type=${encodeURIComponent(sub)}`}
+                              className="block py-1 text-sm text-gray-500 hover:text-secondary transition-colors"
+                              onClick={() => setMobileNavOpen(false)}
+                            >
+                              {sub}
+                            </Link>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Mobile User Actions */}
+                  <div className="space-y-2">
+                    <Link href="/dashboard/profile" className="block w-full text-center py-3 rounded bg-secondary text-white font-bold hover:bg-secondary/90 transition" onClick={() => setMobileNavOpen(false)}>
+                      Profile
+                    </Link>
+                    <Link href="/dashboard/orders" className="block w-full text-center py-3 rounded bg-gray-100 text-black font-bold hover:bg-gray-200 transition" onClick={() => setMobileNavOpen(false)}>
+                      Orders
+                    </Link>
+                    <Link href="/dashboard/wishlist" className="block w-full text-center py-3 rounded bg-gray-100 text-black font-bold hover:bg-gray-200 transition" onClick={() => setMobileNavOpen(false)}>
+                      Wishlist
+                    </Link>
+                    <button className="block w-full text-center py-3 rounded bg-red-100 text-red-600 font-bold hover:bg-red-200 transition" onClick={() => setMobileNavOpen(false)}>
+                      Sign Out
+                    </button>
+                  </div>
+                </div> {/* End .p-4 space-y-4 */}
+              </FocusTrap>
             </motion.div>
           )}
         </AnimatePresence>
+        {/* Mobile Bottom Tab Bar */}
+        <MobileTabBar />
       </motion.header>
     </>
   );

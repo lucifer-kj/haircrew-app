@@ -1,7 +1,27 @@
 import { auth } from "@/auth"
 import { redirect } from "next/navigation"
 import { prisma } from "@/lib/prisma"
-import DashboardClient from "../dashboard-client"
+import ProfileClient from "./profile-client"
+import { Suspense } from "react"
+
+// Simple loading component for server-side rendering
+function ProfileLoading() {
+  return (
+    <div className="min-h-screen py-12 px-4 bg-gradient-to-br from-slate-50 to-slate-100">
+      <div className="container mx-auto max-w-5xl">
+        <div className="animate-pulse">
+          <div className="h-40 bg-slate-200 rounded-xl mb-8"></div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div className="h-32 bg-slate-200 rounded-xl"></div>
+            <div className="h-32 bg-slate-200 rounded-xl"></div>
+            <div className="h-32 bg-slate-200 rounded-xl"></div>
+          </div>
+          <div className="h-64 bg-slate-200 rounded-xl"></div>
+        </div>
+      </div>
+    </div>
+  )
+}
 
 export default async function ProfilePage() {
   const session = await auth()
@@ -16,6 +36,8 @@ export default async function ProfilePage() {
       id: true,
       name: true,
       email: true,
+      image: true,
+      createdAt: true,
     }
   })
 
@@ -23,65 +45,37 @@ export default async function ProfilePage() {
     redirect("/auth/signin")
   }
 
-  // Get user data for dashboard
-  const [ordersRaw, addresses, wishlist] = await Promise.all([
-    prisma.order.findMany({
-      where: { userId: user.id },
-      include: {
-        orderItems: {
-          include: {
-            product: {
-              select: { name: true }
-            }
-          }
-        }
-      },
-      orderBy: { createdAt: 'desc' }
-    }),
-    prisma.address.findMany({
+  const memberSince = user.createdAt.toISOString()
+
+  // Get counts for the profile summary
+  const [ordersCount, addressesCount, wishlistCount] = await Promise.all([
+    prisma.order.count({
       where: { userId: user.id }
     }),
-    prisma.wishlist.findMany({
-      where: { userId: user.id },
-      include: {
-        product: {
-          select: {
-            id: true,
-            name: true,
-            price: true,
-            images: true,
-            slug: true
-          }
-        }
-      },
-      orderBy: { createdAt: 'desc' }
+    prisma.address.count({
+      where: { userId: user.id }
+    }),
+    prisma.wishlist.count({
+      where: { userId: user.id }
     })
   ])
 
-  // Convert Date fields to string for orders
-  const orders = ordersRaw.map(order => ({
-    ...order,
-    createdAt: order.createdAt.toISOString(),
-    orderItems: order.orderItems?.map(item => ({
-      ...item,
-      createdAt: item.createdAt.toISOString(),
-      price: item.price.toString(),
-    }))
-  }))
-
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Profile</h1>
-        <p className="text-gray-600">Manage your account information</p>
-      </div>
-      
-      <DashboardClient 
-        user={user}
-        initialOrders={orders}
-        initialAddresses={addresses}
-        initialWishlist={wishlist}
+    <Suspense fallback={<ProfileLoading />}>
+      <ProfileClient 
+        user={{
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          image: user.image,
+          memberSince
+        }}
+        stats={{
+          ordersCount,
+          addressesCount,
+          wishlistCount
+        }}
       />
-    </div>
+    </Suspense>
   )
 } 

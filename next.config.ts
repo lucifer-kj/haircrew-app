@@ -30,8 +30,6 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
   compress: true,
-  // Optimize production builds
-  swcMinify: true,
   // Improved page loading with better caching
   onDemandEntries: {
     // period (in ms) where the server will keep pages in the buffer

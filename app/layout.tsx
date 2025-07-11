@@ -8,20 +8,31 @@ import { Footer } from "@/components/layout/footer";
 import ClientRoot from "@/components/providers/client-root";
 import { ErrorBoundary } from "@/components/ui/error-boundary";
 import AnimatedLayoutClient from "@/components/providers/animated-layout-client";
+import RoutePrefetcher from "@/components/providers/route-prefetch";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
+  display: "swap", // Optimize font loading
 });
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+  display: "swap", // Optimize font loading
 });
 
 export const metadata: Metadata = {
   title: "HairCrew - Professional Hair Care Products",
   description: "Your trusted partner for professional hair care products. Quality, innovation, and beauty in every bottle.",
+  viewport: "width=device-width, initial-scale=1, maximum-scale=5",
+  // Improve SEO and sharing
+  openGraph: {
+    type: "website",
+    title: "HairCrew - Professional Hair Care Products",
+    description: "Your trusted partner for professional hair care products. Quality, innovation, and beauty in every bottle.",
+    siteName: "HairCrew",
+  },
 };
 
 export default function RootLayout({
@@ -31,6 +42,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        {/* Preconnect to important domains for faster loading */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        {/* Preload critical assets */}
+        <link rel="preload" href="/Images/banner1.jpg" as="image" />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
@@ -44,6 +62,8 @@ export default function RootLayout({
                 </ErrorBoundary>
               </main>
               <Footer />
+              {/* Route prefetcher - improves navigation performance */}
+              <RoutePrefetcher />
             </div>
           </ClientRoot>
         </AuthProvider>

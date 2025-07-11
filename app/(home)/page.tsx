@@ -3,13 +3,13 @@
 import Image from "next/image"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { useEffect, useState, useMemo } from "react"
+import { useEffect, useState, useMemo, Suspense } from "react"
 import { useSession } from "next-auth/react"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { useRef } from "react"
 import { useCallback } from "react"
 import LatestProductsSection from "@/components/latest-products-section";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useScrollReveal } from "@/lib/useScrollReveal";
 import { useStaggeredChildren } from "@/lib/useStaggeredChildren";
 import { useReducedMotion } from "@/lib/useReducedMotion";
@@ -17,14 +17,10 @@ import { MarqueeEffectDoubleExample } from "@/components/ui/marquee-demo";
 import NewsletterSection from "@/components/newsletter-section";
 import { HeroSkeleton } from "@/components/ui/skeleton-loader";
 import type { Product as ProductType } from "@/types/product";
+import { useRouter } from "next/navigation";
 
-export default function HomePage() {
-  const [latestProducts, setLatestProducts] = useState<ProductType[]>([])
-  const { data: session } = useSession();
-  const [showSignInPopover, setShowSignInPopover] = useState(false);
-  const [mobile, setMobile] = useState("");
-  const [isLoading, setIsLoading] = useState(true);
-  // Hero carousel logic
+// Separate component for hero carousel to optimize rendering
+function HeroCarousel() {
   const heroSlides = useMemo(() => [
     {
       image: "/Images/banner1.jpg",
@@ -42,8 +38,25 @@ export default function HomePage() {
       desc: "Find the perfect products for your unique hair goals."
     },
   ], []);
+  
   const [heroIndex, setHeroIndex] = useState(0);
   const heroTimeout = useRef<NodeJS.Timeout | null>(null);
+  const reduced = useReducedMotion();
+  const [heroRef, heroInView] = useScrollReveal();
+  const router = useRouter();
+  const { parent: featuresParent, child: featuresChild } = useStaggeredChildren();
+  
+  // Preload all images when component mounts
+  useEffect(() => {
+    heroSlides.forEach(slide => {
+      if (typeof window !== 'undefined') {
+        const img = new window.Image();
+        img.src = slide.image;
+      }
+    });
+  }, [heroSlides]);
+  
+  // Handle carousel timer
   useEffect(() => {
     if (heroTimeout.current) clearTimeout(heroTimeout.current);
     heroTimeout.current = setTimeout(() => {
@@ -54,44 +67,192 @@ export default function HomePage() {
     };
   }, [heroIndex, heroSlides.length]);
 
+  // Prefetch product page for faster navigation
+  useEffect(() => {
+    router.prefetch('/products');
+  }, [router]);
+  
+  return (
+    <motion.section
+      ref={heroRef}
+      initial="hidden"
+      animate={heroInView ? "show" : "hidden"}
+      variants={reduced ? undefined : {
+        hidden: {
+          opacity: 0,
+          y: 20,
+          transition: { duration: 0.4 }
+        },
+        show: {
+          opacity: 1, 
+          y: 0,
+          transition: {
+            duration: 0.4,
+            ease: [0.25, 0.1, 0.25, 1.0]
+          }
+        }
+      }}
+      className="relative bg-gradient-to-r from-[var(--hero-gradient)] flex items-center justify-center h-[520px]"
+    >
+      <div className="container mx-auto px-4">
+        <div className="grid grid-cols-4 grid-rows-2 gap-6 h-[440px]">
+          {/* Main Hero Card as Carousel */}
+          <div className="relative col-span-4 lg:col-span-2 row-span-2 bg-white rounded-2xl shadow-lg flex flex-col justify-end overflow-hidden group hover:-translate-y-1 hover:shadow-2xl transition-all duration-200">
+            <AnimatePresence mode="wait">
+              {heroSlides.map((slide, idx) => (
+                idx === heroIndex && (
+                  <motion.div
+                    key={slide.image}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.5 }}
+                    className="absolute inset-0 w-full h-full"
+                  >
+                    <Image 
+                      src={slide.image}
+                      alt={slide.headline}
+                      fill
+                      priority={true}
+                      sizes="(max-width: 768px) 100vw, 50vw"
+                      quality={90}
+                      className="object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-0" />
+                    <div className="relative z-10 p-8 flex flex-col justify-end h-full">
+                      <h1 className="text-3xl md:text-4xl font-bold text-white mb-4 drop-shadow-lg">
+                        {slide.headline}
+                      </h1>
+                      <p className="text-base text-white/90 mb-6 max-w-md drop-shadow">
+                        {slide.desc}
+                      </p>
+                      <Link href="/products" prefetch={true}>
+                        <Button className="bg-secondary hover:bg-secondary/90 text-white rounded-full font-semibold shadow-md px-8 py-3 text-lg">
+                          Shop Now
+                        </Button>
+                      </Link>
+                    </div>
+                  </motion.div>
+                )
+              ))}
+            </AnimatePresence>
+          </div>
+          {/* Right Side: 2x2 Grid of Cards (hidden on mobile/tablet) */}
+          <motion.div
+            className="hidden lg:grid col-span-2 row-span-2 grid-cols-2 grid-rows-2 gap-6 h-full"
+            initial="hidden"
+            animate={heroInView ? "show" : "hidden"}
+            variants={reduced ? undefined : featuresParent}
+          >
+            {/* Shampoo Card */}
+            <motion.div variants={reduced ? undefined : featuresChild}>
+              <Link href="/categories/shampoo" prefetch={true} className="h-full w-full rounded-xl shadow-md flex flex-col justify-end p-0 overflow-hidden group relative" style={{ minHeight: 0 }}>
+                <Image 
+                  src="/Images/c-shampoo.jpg"
+                  alt="Shampoo"
+                  fill
+                  sizes="(max-width: 1024px) 0vw, 25vw"
+                  className="object-cover transition-transform duration-300 scale-110 group-hover:scale-100"
+                />
+                <div className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-t from-black/80 via-black/40 to-transparent backdrop-blur-sm" />
+                <div className="relative z-10 flex flex-col justify-end h-full w-full pl-8 pb-8">
+                  <h3 className="text-2xl font-extrabold font-headings text-white mb-2 text-left">Shampoo</h3>
+                  <p className="text-lg font-semibold text-white text-left max-w-xs">Cleansing and nourishing formulas for all hair types.</p>
+                </div>
+              </Link>
+            </motion.div>
+            {/* Conditioners Card */}
+            <motion.div variants={reduced ? undefined : featuresChild}>
+              <Link href="/categories/conditioner" prefetch={true} className="h-full w-full rounded-xl shadow-md flex flex-col justify-end p-0 overflow-hidden group relative" style={{ minHeight: 0 }}>
+                <Image 
+                  src="/Images/c-conditioner.jpg"
+                  alt="Conditioner"
+                  fill
+                  sizes="(max-width: 1024px) 0vw, 25vw"
+                  className="object-cover transition-transform duration-300 scale-110 group-hover:scale-100"
+                />
+                <div className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-t from-black/80 via-black/40 to-transparent backdrop-blur-sm" />
+                <div className="relative z-10 flex flex-col justify-end h-full w-full pl-8 pb-8">
+                  <h3 className="text-2xl font-extrabold font-headings text-white mb-2 text-left">Conditioners</h3>
+                  <p className="text-lg font-semibold text-white text-left max-w-xs">Hydrating and smoothing conditioners for silky hair.</p>
+                </div>
+              </Link>
+            </motion.div>
+            {/* Treatments Card */}
+            <motion.div variants={reduced ? undefined : featuresChild}>
+              <Link href="/categories/treatment" prefetch={true} className="h-full w-full rounded-xl shadow-md flex flex-col justify-end p-0 overflow-hidden group relative" style={{ minHeight: 0 }}>
+                <Image 
+                  src="/Images/p4.jpg"
+                  alt="Treatments"
+                  fill
+                  sizes="(max-width: 1024px) 0vw, 25vw"
+                  className="object-cover transition-transform duration-300 scale-110 group-hover:scale-100"
+                />
+                <div className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-t from-black/80 via-black/40 to-transparent backdrop-blur-sm" />
+                <div className="relative z-10 flex flex-col justify-end h-full w-full pl-8 pb-8">
+                  <h3 className="text-2xl font-extrabold font-headings text-white mb-2 text-left">Treatments</h3>
+                  <p className="text-lg font-semibold text-white text-left max-w-xs">Repair and restore with intensive treatments.</p>
+                </div>
+              </Link>
+            </motion.div>
+            {/* Promo Card */}
+            <motion.div variants={reduced ? undefined : featuresChild}>
+              <Link href="/products?promo=new" prefetch={true} className="h-full w-full rounded-xl shadow-md flex flex-col justify-end p-0 overflow-hidden group relative bg-gradient-to-br from-secondary to-[#B13BFF]" style={{ minHeight: 0 }}>
+                <div className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-t from-black/80 via-black/40 to-transparent backdrop-blur-sm rounded-xl" />
+                <div className="relative z-10 flex flex-col justify-end h-full w-full pl-8 pb-8">
+                  <h3 className="text-2xl font-extrabold font-headings text-white mb-2 text-left">New Arrivals</h3>
+                  <p className="text-lg font-semibold text-white text-left max-w-xs mb-3">Explore the latest in hair care innovation.</p>
+                  <Button className="bg-white text-secondary rounded-full font-bold shadow hover:bg-gray-100 w-fit px-8 py-3 text-lg">
+                    Shop New
+                  </Button>
+                </div>
+              </Link>
+            </motion.div>
+          </motion.div>
+        </div>
+      </div>
+    </motion.section>
+  );
+}
+
+export default function HomePage() {
+  const [latestProducts, setLatestProducts] = useState<ProductType[]>([]);
+  const { data: session } = useSession();
+  const [showSignInPopover, setShowSignInPopover] = useState(false);
+  const [mobile, setMobile] = useState("");
+  const [productsLoading, setProductsLoading] = useState(true);
+  const router = useRouter();
+
+  // Prefetch common navigation paths
+  useEffect(() => {
+    // Prefetch important routes for faster navigation
+    router.prefetch('/products');
+    router.prefetch('/categories');
+    router.prefetch('/cart');
+    router.prefetch('/dashboard/profile');
+  }, [router]);
+
   useEffect(() => {
     if (!session) setShowSignInPopover(true);
   }, [session]);
 
-  // Preload hero images to prevent layout shifts
+  // Fetch latest products
   useEffect(() => {
-    // Preload hero images
-    heroSlides.forEach(slide => {
-      if (typeof window !== 'undefined') {
-        const img = new window.Image();
-        img.src = slide.image;
-      }
-    });
-    
-    // Fetch products data and then set loading to false
     fetch("/api/products/latest")
       .then(res => res.json())
       .then((data) => {
         setLatestProducts(data);
-        // Immediately set loading to false after data is loaded
-        setIsLoading(false);
+        setProductsLoading(false);
       })
       .catch(err => {
         console.error("Failed to fetch latest products:", err);
-        setIsLoading(false);
+        setProductsLoading(false);
       });
-  }, [heroSlides])
-
-  const handleViewMore = useCallback(() => {
-    // Handle view more logic here
   }, []);
 
-  const reduced = useReducedMotion();
-  // Hero scroll reveal
-  const [heroRef, heroInView] = useScrollReveal();
-  // Removed unused scroll reveal refs
-  // Staggered grid for features
-  const { parent: featuresParent, child: featuresChild } = useStaggeredChildren();
+  const handleViewMore = useCallback(() => {
+    router.push('/products');
+  }, [router]);
 
   return (
     <div className="min-h-screen">
@@ -115,130 +276,19 @@ export default function HomePage() {
         </PopoverContent>
         <PopoverTrigger asChild><span /></PopoverTrigger>
       </Popover>
-      {/* Hero Section - Bento Grid */}
-      {isLoading ? (
-        <HeroSkeleton />
-      ) : (
-        <motion.section
-          ref={heroRef}
-          initial="hidden"
-          animate={heroInView ? "show" : "hidden"}
-          variants={reduced ? undefined : {
-            hidden: {
-              opacity: 0,
-              y: 20,
-              transition: { duration: 0.4 }
-            },
-            show: {
-              opacity: 1, 
-              y: 0,
-              transition: {
-                duration: 0.4,
-                ease: [0.25, 0.1, 0.25, 1.0]
-              }
-            }
-          }}
-          className="relative bg-gradient-to-r from-[var(--hero-gradient)] flex items-center justify-center h-[520px]"
-        >
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-4 grid-rows-2 gap-6 h-[440px]">
-            {/* Main Hero Card as Carousel */}
-            <div className="relative col-span-4 lg:col-span-2 row-span-2 bg-white rounded-2xl shadow-lg flex flex-col justify-end overflow-hidden group hover:-translate-y-1 hover:shadow-2xl transition-all duration-200">
-              {heroSlides.map((slide, idx) => (
-                <div
-                  key={slide.image}
-                  className={`absolute inset-0 w-full h-full transition-opacity duration-700 ${idx === heroIndex ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}
-                >
-                  <Image 
-                    src={slide.image}
-                    alt={slide.headline}
-                    fill
-                    priority={idx === 0}
-                    className="object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-0" />
-                  <div className="relative z-10 p-8 flex flex-col justify-end h-full">
-                    <h1 className="text-3xl md:text-4xl font-bold text-white mb-4 drop-shadow-lg">
-                      {slide.headline}
-              </h1>
-                    <p className="text-base text-white/90 mb-6 max-w-md drop-shadow">
-                      {slide.desc}
-              </p>
-                <Link href="/products">
-                  <Button className="bg-secondary hover:bg-secondary/90 text-white rounded-full font-semibold shadow-md px-8 py-3 text-lg">
-                    Shop Now
-                  </Button>
-                </Link>
-              </div>
-            </div>
-              ))}
-            </div>
-            {/* Right Side: 2x2 Grid of Cards (hidden on mobile/tablet) */}
-            <motion.div
-              className="hidden lg:grid col-span-2 row-span-2 grid-cols-2 grid-rows-2 gap-6 h-full"
-              initial="hidden"
-              animate={heroInView ? "show" : "hidden"}
-              variants={reduced ? undefined : featuresParent}
-            >
-              {/* Shampoo Card */}
-              <motion.div variants={reduced ? undefined : featuresChild}>
-              <Link href="/categories/shampoo" className="h-full w-full rounded-xl shadow-md flex flex-col justify-end p-0 overflow-hidden group relative" style={{ minHeight: 0 }}>
-                <div className="absolute inset-0 w-full h-full rounded-xl transition-transform duration-300 scale-110 group-hover:scale-100 bg-cover bg-center" style={{ backgroundImage: 'url(/Images/c-shampoo.jpg)' }} />
-                <div className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-t from-black/80 via-black/40 to-transparent backdrop-blur-sm" />
-                <div className="relative z-10 flex flex-col justify-end h-full w-full pl-8 pb-8">
-                  <h3 className="text-2xl font-extrabold font-headings text-white mb-2 text-left">Shampoo</h3>
-                  <p className="text-lg font-semibold text-white text-left max-w-xs">Cleansing and nourishing formulas for all hair types.</p>
-                </div>
-              </Link>
-              </motion.div>
-              {/* Conditioners Card */}
-              <motion.div variants={reduced ? undefined : featuresChild}>
-              <Link href="/categories/conditioner" className="h-full w-full rounded-xl shadow-md flex flex-col justify-end p-0 overflow-hidden group relative" style={{ minHeight: 0 }}>
-                <div className="absolute inset-0 w-full h-full rounded-xl transition-transform duration-300 scale-110 group-hover:scale-100 bg-cover bg-center" style={{ backgroundImage: 'url(/Images/c-conditioner.jpg)' }} />
-                <div className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-t from-black/80 via-black/40 to-transparent backdrop-blur-sm" />
-                <div className="relative z-10 flex flex-col justify-end h-full w-full pl-8 pb-8">
-                  <h3 className="text-2xl font-extrabold font-headings text-white mb-2 text-left">Conditioners</h3>
-                  <p className="text-lg font-semibold text-white text-left max-w-xs">Hydrating and smoothing conditioners for silky hair.</p>
-                </div>
-              </Link>
-              </motion.div>
-              {/* Treatments Card */}
-              <motion.div variants={reduced ? undefined : featuresChild}>
-              <Link href="/categories/treatment" className="h-full w-full rounded-xl shadow-md flex flex-col justify-end p-0 overflow-hidden group relative" style={{ minHeight: 0 }}>
-                <div className="absolute inset-0 w-full h-full rounded-xl transition-transform duration-300 scale-110 group-hover:scale-100 bg-cover bg-center" style={{ backgroundImage: 'url(/Images/p4.jpg)' }} />
-                <div className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-t from-black/80 via-black/40 to-transparent backdrop-blur-sm" />
-                <div className="relative z-10 flex flex-col justify-end h-full w-full pl-8 pb-8">
-                  <h3 className="text-2xl font-extrabold font-headings text-white mb-2 text-left">Treatments</h3>
-                  <p className="text-lg font-semibold text-white text-left max-w-xs">Repair and restore with intensive treatments.</p>
-                </div>
-              </Link>
-              </motion.div>
-              {/* Promo Card */}
-              <motion.div variants={reduced ? undefined : featuresChild}>
-              <Link href="/products?promo=new" className="h-full w-full rounded-xl shadow-md flex flex-col justify-end p-0 overflow-hidden group relative bg-gradient-to-br from-secondary to-[#B13BFF]" style={{ minHeight: 0 }}>
-                <div className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-t from-black/80 via-black/40 to-transparent backdrop-blur-sm rounded-xl" />
-                <div className="relative z-10 flex flex-col justify-end h-full w-full pl-8 pb-8">
-                  <h3 className="text-2xl font-extrabold font-headings text-white mb-2 text-left">New Arrivals</h3>
-                  <p className="text-lg font-semibold text-white text-left max-w-xs mb-3">Explore the latest in hair care innovation.</p>
-                  <Button className="bg-white text-secondary rounded-full font-bold shadow hover:bg-gray-100 w-fit px-8 py-3 text-lg">
-                    Shop New
-                  </Button>
-                </div>
-              </Link>
-              </motion.div>
-            </motion.div>
-          </div>
-        </div>
-      </motion.section>
-      )}
 
-      {/* Marquee Section (replaces Features Section) */}
+      {/* Hero Section - Rendered immediately with internal loading state */}
+      <Suspense fallback={<HeroSkeleton />}>
+        <HeroCarousel />
+      </Suspense>
+
+      {/* Marquee Section */}
       <MarqueeEffectDoubleExample />
 
       {/* Latest Products Section */}
       <LatestProductsSection
         products={latestProducts}
-        loading={isLoading || latestProducts.length === 0}
+        loading={productsLoading}
         onViewAll={latestProducts.length > 3 ? handleViewMore : undefined}
       />
 
@@ -253,13 +303,14 @@ export default function HomePage() {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <Link href="/categories/shampoo" className="group">
+            <Link href="/categories/shampoo" prefetch={true} className="group">
               <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow">
                 <div className="relative h-64">
                   <Image
                     src="/Images/c-shampoo.jpg"
                     alt="Shampoo"
                     fill
+                    sizes="(max-width: 768px) 100vw, 33vw"
                     className="object-cover group-hover:scale-105 transition-transform duration-300"
                   />
                 </div>
@@ -270,13 +321,14 @@ export default function HomePage() {
               </div>
             </Link>
 
-            <Link href="/categories/conditioner" className="group">
+            <Link href="/categories/conditioner" prefetch={true} className="group">
               <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow">
                 <div className="relative h-64">
                   <Image
                     src="/Images/c-conditioner.jpg"
                     alt="Conditioner"
                     fill
+                    sizes="(max-width: 768px) 100vw, 33vw"
                     className="object-cover group-hover:scale-105 transition-transform duration-300"
                   />
                 </div>
@@ -287,13 +339,14 @@ export default function HomePage() {
               </div>
             </Link>
 
-            <Link href="/categories/treatment" className="group">
+            <Link href="/categories/treatment" prefetch={true} className="group">
               <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow">
                 <div className="relative h-64">
                   <Image
                     src="/Images/c-treatment.jpg"
                     alt="Treatment"
                     fill
+                    sizes="(max-width: 768px) 100vw, 33vw"
                     className="object-cover group-hover:scale-105 transition-transform duration-300"
                   />
                 </div>
@@ -307,8 +360,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Newsletter Section - Only on homepage */}
+      {/* Newsletter Section */}
       <NewsletterSection />
     </div>
-  )
+  );
 } 

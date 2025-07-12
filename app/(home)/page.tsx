@@ -3,211 +3,359 @@
 import Image from "next/image"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
+import { useEffect, useState, useMemo, Suspense } from "react"
+import { useSession } from "next-auth/react"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { useRef } from "react"
+import { useCallback } from "react"
+import LatestProductsSection from "@/components/latest-products-section";
+import { motion, AnimatePresence } from "framer-motion";
+import { useScrollReveal } from "@/lib/useScrollReveal";
+import { useStaggeredChildren } from "@/lib/useStaggeredChildren";
+import { useReducedMotion } from "@/lib/useReducedMotion";
+import { MarqueeEffectDoubleExample } from "@/components/ui/marquee-demo";
 import NewsletterSection from "@/components/newsletter-section";
-import { motion } from "framer-motion";
+import { HeroSkeleton } from "@/components/ui/skeleton-loader";
+import type { Product as ProductType } from "@/types/product";
+import { useRouter } from "next/navigation";
 
-const HERO_BG = "/Images/Image+Background.jpg";
+// Separate component for hero carousel to optimize rendering
+function HeroCarousel() {
+  const heroSlides = useMemo(() => [
+    {
+      image: "/Images/banner1.jpg",
+      headline: "Transform Your Hair Journey",
+      desc: "Discover the latest collection of professional hair care products for every hair type and need."
+    },
+    {
+      image: "/Images/banner2.jpg",
+      headline: "Salon-Quality Results at Home",
+      desc: "Experience professional-grade formulas trusted by stylists worldwide."
+    },
+    {
+      image: "/Images/banner3.jpg",
+      headline: "Nourish. Style. Shine.",
+      desc: "Find the perfect products for your unique hair goals."
+    },
+  ], []);
+  
+  const [heroIndex, setHeroIndex] = useState(0);
+  const heroTimeout = useRef<NodeJS.Timeout | null>(null);
+  const reduced = useReducedMotion();
+  const [heroRef, heroInView] = useScrollReveal();
+  const router = useRouter();
+  const { parent: featuresParent, child: featuresChild } = useStaggeredChildren();
+  
+  // Preload all images when component mounts
+  useEffect(() => {
+    heroSlides.forEach(slide => {
+      if (typeof window !== 'undefined') {
+        const img = new window.Image();
+        img.src = slide.image;
+      }
+    });
+  }, [heroSlides]);
+  
+  // Handle carousel timer
+  useEffect(() => {
+    if (heroTimeout.current) clearTimeout(heroTimeout.current);
+    heroTimeout.current = setTimeout(() => {
+      setHeroIndex((i) => (i + 1) % heroSlides.length);
+    }, 4000);
+    return () => {
+      if (heroTimeout.current) clearTimeout(heroTimeout.current);
+    };
+  }, [heroIndex, heroSlides.length]);
 
-const featuredBooks = [
-  {
-    image: "/Images/Sahih Al-Bukhari.jpg",
-    title: "Sahih Al-Bukhari",
-    author: "Imam Bukhari",
-    description: "Authentic collection of Prophet's sayings",
-    rating: 5,
-    highlight: false,
-  },
-  {
-    image: "/Images/Tafseer Ibn Kathir.jpg",
-    title: "Tafseer Ibn Kathir",
-    author: "Ibn Kathir",
-    description: "Comprehensive Quranic commentary",
-    rating: 5,
-    highlight: false,
-  },
-  {
-    image: "/Images/Riyadh as-Salihin.jpg",
-    title: "Riyadh as-Salihin",
-    author: "Imam Nawawi",
-    description: "Gardens of the righteous collection",
-    rating: 5,
-    highlight: true,
-  },
-];
+  // Prefetch product page for faster navigation
+  useEffect(() => {
+    router.prefetch('/products');
+  }, [router]);
 
-const LEGACY_IMAGE = "/Images/About Naaz Book Depot.jpg";
-
-export default function HomePage() {
   return (
-    <div className="min-h-screen">
-      {/* Header and contact bar handled in layout/header.tsx */}
-
-      {/* Hero Section */}
-      <section className="relative min-h-[520px] flex items-center bg-[var(--islamic-green)] overflow-hidden">
-        <Image
-          src={HERO_BG}
-          alt="Naaz Book Depot Hero Background"
-          fill
-          priority
-          className="object-cover object-center w-full h-full absolute inset-0 z-0"
-        />
-        {/* Islamic geometric SVG pattern overlay */}
-        <div className="absolute inset-0 z-10 pointer-events-none" aria-hidden="true">
-          <svg width="100%" height="100%" viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full opacity-20">
-            <defs>
-              <pattern id="islamicPattern" patternUnits="userSpaceOnUse" width="40" height="40">
-                <path d="M0 20h40M20 0v40" stroke="#D4A853" strokeWidth="1.5" />
-                <circle cx="20" cy="20" r="6" fill="#2D5A4C" fillOpacity="0.5" />
-              </pattern>
-            </defs>
-            <rect width="100%" height="100%" fill="url(#islamicPattern)" />
-          </svg>
-        </div>
-        {/* Green/gold gradient overlay */}
-        <div className="absolute inset-0 z-20 bg-gradient-to-br from-[rgba(45,90,76,0.92)] via-[rgba(212,168,83,0.18)] to-[rgba(61,107,91,0.92)]" />
-        <div className="absolute inset-0 bg-[var(--islamic-green)]/80 z-30" />
-        <div className="container mx-auto px-4 relative z-40 flex flex-col lg:flex-row items-center justify-between py-16 gap-8">
-          {/* Left: Main Content */}
-          <div className="max-w-2xl text-left flex-1">
-            <h1 className="text-5xl md:text-6xl font-headings font-bold text-white mb-4 drop-shadow-lg">
-              Naaz Book Depot
-            </h1>
-            <p className="italic text-xl md:text-2xl text-[var(--islamic-gold)] mb-4 font-serif">
-              &quot;Publishing the Light of Knowledge since 1967&quot;
-            </p>
-            <p className="text-lg md:text-xl text-white mb-8 max-w-xl">
-              A pioneering publishing company since 1967, specializing in authentic Islamic literature and the Qur&apos;an in multiple languages, serving the global Muslim community.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Link href="/about">
-                <Button className="btn-islamic bg-[var(--islamic-gold)] text-[var(--islamic-green)] font-bold px-8 py-3 text-lg shadow-md hover:bg-[var(--islamic-gold-dark)]">
-                  Discover Our Legacy
-                </Button>
-              </Link>
-              <Link href="/products">
-                <Button variant="outline" className="border-2 border-[var(--islamic-gold)] text-white font-bold px-8 py-3 text-lg hover:bg-[var(--islamic-gold)] hover:text-[var(--islamic-green)]">
-                  Explore Books
-                </Button>
-              </Link>
+      <motion.section
+        ref={heroRef}
+        initial="hidden"
+        animate={heroInView ? "show" : "hidden"}
+        variants={reduced ? undefined : {
+          hidden: {
+            opacity: 0,
+            y: 20,
+            transition: { duration: 0.4 }
+          },
+          show: {
+            opacity: 1, 
+            y: 0,
+            transition: {
+              duration: 0.4,
+              ease: [0.25, 0.1, 0.25, 1.0]
+            }
+          }
+        }}
+        className="relative bg-gradient-to-r from-[var(--hero-gradient)] flex items-center justify-center h-[520px]"
+      >
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-4 grid-rows-2 gap-6 h-[440px]">
+            {/* Main Hero Card as Carousel */}
+            <div className="relative col-span-4 lg:col-span-2 row-span-2 bg-white rounded-2xl shadow-lg flex flex-col justify-end overflow-hidden group hover:-translate-y-1 hover:shadow-2xl transition-all duration-200">
+            <AnimatePresence mode="wait">
+              {heroSlides.map((slide, idx) => (
+                idx === heroIndex && (
+                  <motion.div
+                  key={slide.image}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.5 }}
+                    className="absolute inset-0 w-full h-full"
+                  >
+                    <Image 
+                      src={slide.image}
+                      alt={slide.headline}
+                      fill
+                      priority={true}
+                      sizes="(max-width: 768px) 100vw, 50vw"
+                      quality={90}
+                      className="object-cover"
+                    />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-0" />
+                  <div className="relative z-10 p-8 flex flex-col justify-end h-full">
+                    <h1 className="text-3xl md:text-4xl font-bold text-white mb-4 drop-shadow-lg">
+                      {slide.headline}
+              </h1>
+                    <p className="text-base text-white/90 mb-6 max-w-md drop-shadow">
+                      {slide.desc}
+              </p>
+                      <Link href="/products" prefetch={true}>
+                  <Button className="bg-secondary hover:bg-secondary/90 text-white rounded-full font-semibold shadow-md px-8 py-3 text-lg">
+                    Shop Now
+                  </Button>
+                </Link>
+              </div>
+                  </motion.div>
+                )
+              ))}
+            </AnimatePresence>
             </div>
-          </div>
-          {/* Right: Quranic Verse Block */}
-          <div className="flex-1 flex justify-end w-full max-w-md">
+            {/* Right Side: 2x2 Grid of Cards (hidden on mobile/tablet) */}
             <motion.div
-              initial={{ opacity: 0, y: 40 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-              className="glass-card p-8 rounded-2xl shadow-lg w-full max-w-md text-right border-4 border-[var(--islamic-gold)] bg-gradient-to-br from-[var(--islamic-gold)]/10 to-white/10"
+              className="hidden lg:grid col-span-2 row-span-2 grid-cols-2 grid-rows-2 gap-6 h-full"
+              initial="hidden"
+              animate={heroInView ? "show" : "hidden"}
+              variants={reduced ? undefined : featuresParent}
             >
-              <div className="text-arabic text-2xl md:text-3xl mb-4 leading-loose">
-                اقْرَأْ بِاسْمِ رَبِّكَ الَّذِي خَلَقَ<br />
-                خَلَقَ الْإِنسَانَ مِنْ عَلَقٍ<br />
-                اقْرَأْ وَرَبُّكَ الْأَكْرَمُ<br />
-                الَّذِي عَلَّمَ بِالْقَلَمِ<br />
-                عَلَّمَ الْإِنسَانَ مَا لَمْ يَعْلَمْ
-              </div>
-              <div className="text-white text-sm md:text-base italic mb-2">
-                &quot;Read in the name of your Lord who created—<br />
-                Created man from a clot. Read, and your Lord is the Most Generous— Who taught by the pen—<br />
-                — Taught man that which he knew not.&quot;
-              </div>
-              <div className="text-[var(--islamic-gold)] text-xs md:text-sm font-semibold mt-2">
-                (Surah Al-&apos;Alaq, 96:1-5)
-              </div>
+              {/* Shampoo Card */}
+              <motion.div variants={reduced ? undefined : featuresChild}>
+              <Link href="/categories/shampoo" prefetch={true} className="h-full w-full rounded-xl shadow-md flex flex-col justify-end p-0 overflow-hidden group relative" style={{ minHeight: 0 }}>
+                <Image 
+                  src="/Images/c-shampoo.jpg"
+                  alt="Shampoo"
+                  fill
+                  sizes="(max-width: 1024px) 0vw, 25vw"
+                  className="object-cover transition-transform duration-300 scale-110 group-hover:scale-100"
+                />
+                <div className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-t from-black/80 via-black/40 to-transparent backdrop-blur-sm" />
+                <div className="relative z-10 flex flex-col justify-end h-full w-full pl-8 pb-8">
+                  <h3 className="text-2xl font-extrabold font-headings text-white mb-2 text-left">Shampoo</h3>
+                  <p className="text-lg font-semibold text-white text-left max-w-xs">Cleansing and nourishing formulas for all hair types.</p>
+                </div>
+              </Link>
+              </motion.div>
+              {/* Conditioners Card */}
+              <motion.div variants={reduced ? undefined : featuresChild}>
+              <Link href="/categories/conditioner" prefetch={true} className="h-full w-full rounded-xl shadow-md flex flex-col justify-end p-0 overflow-hidden group relative" style={{ minHeight: 0 }}>
+                <Image 
+                  src="/Images/c-conditioner.jpg"
+                  alt="Conditioner"
+                  fill
+                  sizes="(max-width: 1024px) 0vw, 25vw"
+                  className="object-cover transition-transform duration-300 scale-110 group-hover:scale-100"
+                />
+                <div className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-t from-black/80 via-black/40 to-transparent backdrop-blur-sm" />
+                <div className="relative z-10 flex flex-col justify-end h-full w-full pl-8 pb-8">
+                  <h3 className="text-2xl font-extrabold font-headings text-white mb-2 text-left">Conditioners</h3>
+                  <p className="text-lg font-semibold text-white text-left max-w-xs">Hydrating and smoothing conditioners for silky hair.</p>
+                </div>
+              </Link>
+              </motion.div>
+              {/* Treatments Card */}
+              <motion.div variants={reduced ? undefined : featuresChild}>
+              <Link href="/categories/treatment" prefetch={true} className="h-full w-full rounded-xl shadow-md flex flex-col justify-end p-0 overflow-hidden group relative" style={{ minHeight: 0 }}>
+                <Image 
+                  src="/Images/p4.jpg"
+                  alt="Treatments"
+                  fill
+                  sizes="(max-width: 1024px) 0vw, 25vw"
+                  className="object-cover transition-transform duration-300 scale-110 group-hover:scale-100"
+                />
+                <div className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-t from-black/80 via-black/40 to-transparent backdrop-blur-sm" />
+                <div className="relative z-10 flex flex-col justify-end h-full w-full pl-8 pb-8">
+                  <h3 className="text-2xl font-extrabold font-headings text-white mb-2 text-left">Treatments</h3>
+                  <p className="text-lg font-semibold text-white text-left max-w-xs">Repair and restore with intensive treatments.</p>
+                </div>
+              </Link>
+              </motion.div>
+              {/* Promo Card */}
+              <motion.div variants={reduced ? undefined : featuresChild}>
+              <Link href="/products?promo=new" prefetch={true} className="h-full w-full rounded-xl shadow-md flex flex-col justify-end p-0 overflow-hidden group relative bg-gradient-to-br from-secondary to-[#B13BFF]" style={{ minHeight: 0 }}>
+                <div className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-t from-black/80 via-black/40 to-transparent backdrop-blur-sm rounded-xl" />
+                <div className="relative z-10 flex flex-col justify-end h-full w-full pl-8 pb-8">
+                  <h3 className="text-2xl font-extrabold font-headings text-white mb-2 text-left">New Arrivals</h3>
+                  <p className="text-lg font-semibold text-white text-left max-w-xs mb-3">Explore the latest in hair care innovation.</p>
+                  <Button className="bg-white text-secondary rounded-full font-bold shadow hover:bg-gray-100 w-fit px-8 py-3 text-lg">
+                    Shop New
+                  </Button>
+                </div>
+              </Link>
+              </motion.div>
             </motion.div>
           </div>
         </div>
-      </section>
+      </motion.section>
+  );
+}
 
-      {/* Featured Islamic Books Section */}
-      <section className="bg-[#F8F6F3] py-20">
-        <div className="container mx-auto px-4">
-          <h2 className="text-5xl md:text-6xl font-headings font-bold text-[var(--islamic-green)] text-center mb-4">Featured Islamic Books</h2>
-          <div className="flex justify-center mb-6">
-            <div className="h-1 w-20 bg-[var(--islamic-gold)] rounded" />
+export default function HomePage() {
+  const [latestProducts, setLatestProducts] = useState<ProductType[]>([]);
+  const { data: session } = useSession();
+  const [showSignInPopover, setShowSignInPopover] = useState(false);
+  const [mobile, setMobile] = useState("");
+  const [productsLoading, setProductsLoading] = useState(true);
+  const router = useRouter();
+
+  // Prefetch common navigation paths
+  useEffect(() => {
+    // Prefetch important routes for faster navigation
+    router.prefetch('/products');
+    router.prefetch('/categories');
+    router.prefetch('/cart');
+    router.prefetch('/dashboard/profile');
+  }, [router]);
+
+  useEffect(() => {
+    if (!session) setShowSignInPopover(true);
+  }, [session]);
+
+  // Fetch latest products
+  useEffect(() => {
+    fetch("/api/products/latest")
+      .then(res => res.json())
+      .then((data) => {
+        setLatestProducts(data);
+        setProductsLoading(false);
+      })
+      .catch(err => {
+        console.error("Failed to fetch latest products:", err);
+        setProductsLoading(false);
+      });
+  }, []);
+
+  const handleViewMore = useCallback(() => {
+    router.push('/products');
+  }, [router]);
+
+  return (
+    <div className="min-h-screen">
+      {/* Sign-In Popover */}
+      <Popover open={showSignInPopover} onOpenChange={setShowSignInPopover}>
+        <PopoverContent align="center" className="w-96 max-w-full p-6 rounded-xl shadow-2xl border bg-white z-50">
+          <div className="flex flex-col gap-4">
+            <h2 className="text-xl font-bold mb-1">Login or Signup</h2>
+            <p className="text-gray-600 text-sm mb-2">Register now and get exclusive HairCrew rewards instantly!</p>
+            <input
+              type="tel"
+              placeholder="Mobile Number"
+              value={mobile}
+              onChange={e => setMobile(e.target.value)}
+              className="border rounded-lg px-4 py-2 text-base focus:border-secondary focus:ring-2 focus:ring-secondary/20 outline-none"
+              maxLength={10}
+            />
+            <button className="bg-secondary text-white rounded-full py-2 font-semibold shadow hover:bg-secondary/90 transition" disabled={mobile.length !== 10}>Send OTP</button>
+            <button className="text-xs text-gray-400 hover:text-gray-600 mt-2" onClick={() => setShowSignInPopover(false)}>Close</button>
           </div>
-          <p className="text-lg text-center text-[var(--charcoal)]/70 mb-12 max-w-2xl mx-auto">
-            Discover our carefully curated collection of authentic Islamic literature
-          </p>
-          <motion.div
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10"
-            initial="hidden"
-            animate="show"
-            variants={{
-              hidden: {},
-              show: {
-                transition: {
-                  staggerChildren: 0.18,
-                },
-              },
-            }}
-          >
-            {featuredBooks.map((book, idx) => (
-              <motion.div
-                key={book.title}
-                variants={{
-                  hidden: { opacity: 0, y: 40 },
-                  show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 80, damping: 18 } },
-                }}
-                className="bg-white rounded-2xl shadow-lg p-8 flex flex-col items-center text-center transition hover:shadow-xl"
-              >
-                <div className="w-full flex justify-center mb-6">
+        </PopoverContent>
+        <PopoverTrigger asChild><span /></PopoverTrigger>
+      </Popover>
+
+      {/* Hero Section - Rendered immediately with internal loading state */}
+      <Suspense fallback={<HeroSkeleton />}>
+        <HeroCarousel />
+      </Suspense>
+
+      {/* Marquee Section */}
+      <MarqueeEffectDoubleExample />
+
+      {/* Latest Products Section */}
+      <LatestProductsSection
+        products={latestProducts}
+        loading={productsLoading}
+        onViewAll={latestProducts.length > 3 ? handleViewMore : undefined}
+      />
+
+      {/* Featured Categories */}
+      <section className="py-16 bg-[var(--light-gray)]">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-[var(--charcoal)] mb-4">Shop by Category</h2>
+            <p className="text-[var(--dark-gray)] max-w-2xl mx-auto">
+              Explore our comprehensive range of hair care products organized by category
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <Link href="/categories/shampoo" prefetch={true} className="group">
+              <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow">
+                <div className="relative h-64">
                   <Image
-                    src={book.image}
-                    alt={book.title}
-                    width={220}
-                    height={300}
-                    className="rounded-lg object-contain shadow"
+                    src="/Images/c-shampoo.jpg"
+                    alt="Shampoo"
+                    fill
+                    sizes="(max-width: 768px) 100vw, 33vw"
+                    className="object-cover group-hover:scale-105 transition-transform duration-300"
                   />
                 </div>
-                <h3 className={`text-2xl font-headings font-bold mb-2 ${book.highlight ? 'text-[var(--islamic-gold)]' : 'text-[var(--islamic-green)]'}`}>{book.title}</h3>
-                <div className="text-[var(--islamic-green)] font-medium mb-1">{book.author}</div>
-                <div className="text-[var(--charcoal)]/70 mb-3 text-base">{book.description}</div>
-                {book.rating && (
-                  <div className="flex justify-center gap-1 mb-1">
-                    {Array.from({ length: book.rating }).map((_, i) => (
-                      <svg key={i} className="w-5 h-5 text-[var(--islamic-gold)]" fill="currentColor" viewBox="0 0 20 20"><polygon points="10,1 12.59,7.36 19.51,7.36 13.97,11.63 16.56,17.99 10,13.72 3.44,17.99 6.03,11.63 0.49,7.36 7.41,7.36" /></svg>
-                    ))}
-                  </div>
-                )}
-              </motion.div>
-            ))}
-          </motion.div>
-        </div>
-      </section>
-
-      {/* About/Legacy Section */}
-      <section className="bg-[#F8F6F3] py-20">
-        <div className="container mx-auto px-4 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          {/* Left: Text Content */}
-          <div>
-            <h2 className="text-5xl md:text-6xl font-headings font-bold text-[var(--islamic-green)] mb-4">A Legacy of Knowledge<br />Since 1967</h2>
-            <div className="h-1 w-20 bg-[var(--islamic-gold)] rounded mb-6" />
-            <p className="text-lg text-[var(--charcoal)]/90 mb-6 max-w-xl">
-              Founded in the heart of Kolkata, Naaz Book Depot has been a beacon of Islamic knowledge for over five decades. Our journey began with a simple mission: to make authentic Islamic literature accessible to every seeker of knowledge.
-            </p>
-            <p className="text-lg text-[var(--charcoal)]/90 mb-8 max-w-xl">
-              Today, we continue this tradition by expanding our offerings while maintaining our commitment to authenticity and quality in Islamic education.
-            </p>
-            <Link href="/about">
-              <Button className="bg-[var(--islamic-gold)] text-[var(--islamic-green)] font-bold px-8 py-3 text-lg shadow-md hover:bg-[var(--islamic-gold-dark)]">
-                Learn More About Us
-              </Button>
+                <div className="p-6">
+                  <h3 className="text-xl font-semibold text-[var(--charcoal)] mb-2">Shampoo</h3>
+                  <p className="text-[var(--dark-gray)]">Professional shampoos for all hair types</p>
+                </div>
+              </div>
             </Link>
-          </div>
-          {/* Right: Image and Caption */}
-          <div className="flex flex-col items-center">
-            <div className="w-full max-w-md rounded-2xl overflow-hidden shadow-lg mb-4">
-              <Image
-                src={LEGACY_IMAGE}
-                alt="Naaz Book Depot Founder"
-                width={480}
-                height={360}
-                className="object-cover w-full h-full"
-                priority
-              />
-            </div>
-            <div className="text-center text-[var(--islamic-green)] font-medium text-lg">Mohammad Irfan</div>
+
+            <Link href="/categories/conditioner" prefetch={true} className="group">
+              <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow">
+                <div className="relative h-64">
+                  <Image
+                    src="/Images/c-conditioner.jpg"
+                    alt="Conditioner"
+                    fill
+                    sizes="(max-width: 768px) 100vw, 33vw"
+                    className="object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                </div>
+                <div className="p-6">
+                  <h3 className="text-xl font-semibold text-[var(--charcoal)] mb-2">Conditioner</h3>
+                  <p className="text-[var(--dark-gray)]">Nourishing conditioners for healthy hair</p>
+                </div>
+              </div>
+            </Link>
+
+            <Link href="/categories/treatment" prefetch={true} className="group">
+              <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow">
+                <div className="relative h-64">
+                  <Image
+                    src="/Images/c-treatment.jpg"
+                    alt="Treatment"
+                    fill
+                    sizes="(max-width: 768px) 100vw, 33vw"
+                    className="object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                </div>
+                <div className="p-6">
+                  <h3 className="text-xl font-semibold text-[var(--charcoal)] mb-2">Treatment</h3>
+                  <p className="text-[var(--dark-gray)]">Specialized treatments for hair repair</p>
+                </div>
+              </div>
+            </Link>
           </div>
         </div>
       </section>

@@ -2,21 +2,12 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
+import Image from "next/image";
 import { fadeInUp } from "@/lib/motion.config";
 import { useScrollReveal } from "@/lib/useScrollReveal";
 import { useReducedMotion } from "@/lib/useReducedMotion";
 
-export interface NewsletterSectionProps {
-  title?: string;
-  subtitle?: string;
-  className?: string;
-}
-
-export default function NewsletterSection({
-  title = "Stay Updated,",
-  subtitle = "Be the first to know about new products, offers, and book news.",
-  className = "",
-}: NewsletterSectionProps) {
+export default function NewsletterSection() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -50,11 +41,11 @@ export default function NewsletterSection({
       initial="hidden"
       animate={inView ? "show" : "hidden"}
       variants={reduced ? undefined : fadeInUp}
-      className={`w-full rounded-2xl bg-black text-white shadow-lg p-6 sm:p-8 mb-12 mt-0 max-w-3xl mx-auto flex flex-col items-center gap-6 ${className}`}
+      className="w-full rounded-2xl bg-black text-white shadow-lg p-6 sm:p-8 mb-12 mt-0 max-w-3xl lg:max-w-5xl mx-auto flex flex-col md:flex-row items-center gap-8 lg:gap-16"
     >
-      <div className="w-full min-w-0 flex flex-col items-center text-center">
-        <h2 className="text-2xl sm:text-3xl font-bold mb-2" style={{ color: '#9929EA' }}>{title}<span className="font-light text-white italic"> Stay Radiant</span></h2>
-        <p className="text-white/80 mb-4 max-w-md mx-auto">{subtitle}</p>
+      <div className="flex-1 w-full min-w-0">
+        <h2 className="text-2xl sm:text-3xl font-bold mb-2" style={{ color: '#9929EA' }}>Stay Updated,<span className="font-light text-white italic"> Stay Radiant</span></h2>
+        <p className="text-white/80 mb-4 max-w-md lg:max-w-xl">Be the first to know about new products, offers, and hair care tips.</p>
         {success ? (
           <motion.div
             initial={{ opacity: 0, y: 10 }}
@@ -66,7 +57,7 @@ export default function NewsletterSection({
             Thank you for subscribing!
           </motion.div>
         ) : (
-          <form className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto" onSubmit={handleSubmit} aria-label="Newsletter signup form">
+          <form className="flex flex-col sm:flex-row gap-3 max-w-md lg:max-w-xl" onSubmit={handleSubmit} aria-label="Newsletter signup form">
             <label htmlFor="newsletter-email" className="sr-only">Email address</label>
             <input
               id="newsletter-email"
@@ -109,6 +100,22 @@ export default function NewsletterSection({
           </motion.div>
         )}
       </div>
+      <motion.div
+        className="hidden md:block flex-shrink-0"
+        initial={{ scale: 0.95, rotate: -2 }}
+        animate={{ scale: [0.95, 1.05, 1], rotate: [ -2, 2, 0 ] }}
+        transition={{ duration: 2, repeat: Infinity, repeatType: "reverse" }}
+        aria-hidden="true"
+      >
+        <Image
+          src="/Images/banner1.jpg"
+          alt="Newsletter"
+          width={160}
+          height={160}
+          className="w-40 h-40 lg:w-60 object-cover mr-5 lg:mr-10 rounded-xl shadow-lg"
+          priority
+        />
+      </motion.div>
     </motion.section>
   );
 } 

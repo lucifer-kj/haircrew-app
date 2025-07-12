@@ -184,9 +184,9 @@ export default function ProductsPage() {
       <main className="md:col-span-3">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
           <div>
-            <h1 className="text-3xl font-bold">Books</h1>
+            <h1 className="text-3xl font-bold">Products</h1>
             <p className="text-gray-600 mt-1">
-              {loading ? "Loading..." : `${total} book${total !== 1 ? 's' : ''} found`}
+              {loading ? "Loading..." : `${total} product${total !== 1 ? 's' : ''} found`}
               {search && (
                 <span className="ml-2 text-sm text-gray-500">
                   for &quot;{search}&quot;
@@ -284,7 +284,7 @@ export default function ProductsPage() {
             </Button>
             
             {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-              let pageNum: number
+              let pageNum
               if (totalPages <= 5) {
                 pageNum = i + 1
               } else if (currentPage <= 3) {

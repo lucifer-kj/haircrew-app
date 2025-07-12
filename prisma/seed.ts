@@ -9,10 +9,10 @@ async function main() {
   // Create sample users
   console.log('Creating users...')
   const adminUser = await prisma.user.upsert({
-    where: { email: 'admin@naazbook.com' },
+    where: { email: 'admin@haircrew.com' },
     update: {},
     create: {
-      email: 'admin@naazbook.com',
+      email: 'admin@haircrew.com',
       name: 'Admin User',
       password: await hash('admin123', 12),
       role: 'ADMIN',
@@ -21,11 +21,11 @@ async function main() {
   })
 
   const customerUser = await prisma.user.upsert({
-    where: { email: 'customer@naazbook.com' },
+    where: { email: 'customer@haircrew.com' },
     update: {},
     create: {
-      email: 'customer@naazbook.com',
-      name: 'John Reader',
+      email: 'customer@haircrew.com',
+      name: 'John Customer',
       password: await hash('customer123', 12),
       role: 'USER',
       emailVerified: new Date(),
@@ -36,192 +36,235 @@ async function main() {
 
   // Create categories
   console.log('Creating categories...')
-  const quranCategory = await prisma.category.upsert({
-    where: { slug: 'quran-tafseer' },
+  const shampooCategory = await prisma.category.upsert({
+    where: { slug: 'shampoo' },
     update: {},
     create: {
-      name: 'Quran & Tafseer',
-      description: 'Authentic Qurans and detailed Tafseer books.',
-      slug: 'quran-tafseer',
-      image: '/Images/Riyadh as-Salihin.jpg',
+      name: 'Shampoo',
+      description: 'Professional hair care shampoos for all hair types',
+      slug: 'shampoo',
+      image: '/Images/c-shampoo.jpg',
       isActive: true,
     },
   })
 
-  const hadithCategory = await prisma.category.upsert({
-    where: { slug: 'hadith' },
+  const conditionerCategory = await prisma.category.upsert({
+    where: { slug: 'conditioner' },
     update: {},
     create: {
-      name: 'Hadith Collections',
-      description: 'Classical and contemporary collections of Hadith.',
-      slug: 'hadith',
-      image: '/Images/Sahih Al-Bukhari.jpg',
+      name: 'Conditioner',
+      description: 'Nourishing conditioners to keep your hair healthy and smooth',
+      slug: 'conditioner',
+      image: '/Images/c-conditioner.jpg',
       isActive: true,
     },
   })
 
-  const fiqhCategory = await prisma.category.upsert({
-    where: { slug: 'fiqh' },
+  const treatmentCategory = await prisma.category.upsert({
+    where: { slug: 'treatment' },
     update: {},
     create: {
-      name: 'Islamic Jurisprudence',
-      description: 'Books on Fiqh and Islamic law.',
-      slug: 'fiqh',
-      image: '/Images/Tafseer Ibn Kathir.jpg',
-      isActive: true,
-    },
-  })
-
-  const historyCategory = await prisma.category.upsert({
-    where: { slug: 'history' },
-    update: {},
-    create: {
-      name: 'Islamic History',
-      description: 'Books on the history of Islam and Muslim civilizations.',
-      slug: 'history',
-      image: '/Images/tareek_e_islam_akbar_shah_urdu_hasanat.jpg',
+      name: 'Treatment',
+      description: 'Specialized hair treatments for deep conditioning and repair',
+      slug: 'treatment',
+      image: '/Images/c-treatment.jpg',
       isActive: true,
     },
   })
 
   console.log('✅ Categories created')
 
-  // Create products for Quran & Tafseer category
-  console.log('Creating Quran & Tafseer books...')
-  const quranProducts = await Promise.all([
+  // Create products for Shampoo category
+  console.log('Creating shampoo products...')
+  const shampooProducts = await Promise.all([
     prisma.product.upsert({
-      where: { sku: 'QURAN-001' },
+      where: { sku: 'SHAMPOO-001' },
       update: {},
       create: {
-        name: 'The Noble Quran',
-        description: 'A beautiful edition of the Noble Quran with English translation.',
-        price: 14.99,
-        comparePrice: 19.99,
-        images: ['/Images/Riyadh as-Salihin.jpg'],
-        sku: 'QURAN-001',
-        barcode: '9781234567890',
-        weight: 500.00,
-        dimensions: '21x14x3 cm',
-        stock: 100,
-        isActive: true,
-        isFeatured: true,
-        slug: 'the-noble-quran',
-        categoryId: quranCategory.id,
-      },
-    }),
-    prisma.product.upsert({
-      where: { sku: 'TAFSEER-001' },
-      update: {},
-      create: {
-        name: 'Tafseer Ibn Kathir',
-        description: 'Comprehensive tafseer of the Quran by Ibn Kathir.',
-        price: 39.99,
-        comparePrice: 49.99,
-        images: ['/Images/Tafseer Ibn Kathir.jpg'],
-        sku: 'TAFSEER-001',
-        barcode: '9781234567891',
-        weight: 1200.00,
-        dimensions: '24x17x6 cm',
+        name: 'Hydrating Shampoo',
+        description: 'Deeply hydrating shampoo for dry and damaged hair. Enriched with natural oils and vitamins.',
+        price: 24.99,
+        comparePrice: 29.99,
+        images: ['/Images/p1.jpg', '/Images/p2.jpg'],
+        sku: 'SHAMPOO-001',
+        barcode: '1234567890123',
+        weight: 250.00,
+        dimensions: '8x4x2 cm',
         stock: 50,
         isActive: true,
         isFeatured: true,
-        slug: 'tafseer-ibn-kathir',
-        categoryId: quranCategory.id,
-      },
-    }),
-  ])
-
-  // Create products for Hadith category
-  console.log('Creating Hadith books...')
-  const hadithProducts = await Promise.all([
-    prisma.product.upsert({
-      where: { sku: 'HADITH-001' },
-      update: {},
-      create: {
-        name: 'Sahih Al-Bukhari',
-        description: 'The most authentic collection of Hadith.',
-        price: 29.99,
-        comparePrice: 34.99,
-        images: ['/Images/Sahih Al-Bukhari.jpg'],
-        sku: 'HADITH-001',
-        barcode: '9781234567892',
-        weight: 900.00,
-        dimensions: '22x15x5 cm',
-        stock: 60,
-        isActive: true,
-        isFeatured: true,
-        slug: 'sahih-al-bukhari',
-        categoryId: hadithCategory.id,
+        slug: 'hydrating-shampoo',
+        categoryId: shampooCategory.id,
       },
     }),
     prisma.product.upsert({
-      where: { sku: 'HADITH-002' },
+      where: { sku: 'SHAMPOO-002' },
       update: {},
       create: {
-        name: 'Riyadh as-Salihin',
-        description: 'A classic collection of authentic Hadiths.',
-        price: 19.99,
-        comparePrice: 24.99,
-        images: ['/Images/Riyadh as-Salihin.jpg'],
-        sku: 'HADITH-002',
-        barcode: '9781234567893',
-        weight: 700.00,
-        dimensions: '21x14x4 cm',
-        stock: 80,
+        name: 'Volumizing Shampoo',
+        description: 'Adds volume and body to fine, limp hair. Lightweight formula that won\'t weigh hair down.',
+        price: 22.99,
+        comparePrice: 27.99,
+        images: ['/Images/p2.jpg', '/Images/p3.jpg'],
+        sku: 'SHAMPOO-002',
+        barcode: '1234567890124',
+        weight: 250.00,
+        dimensions: '8x4x2 cm',
+        stock: 35,
         isActive: true,
         isFeatured: false,
-        slug: 'riyadh-as-salihin',
-        categoryId: hadithCategory.id,
+        slug: 'volumizing-shampoo',
+        categoryId: shampooCategory.id,
       },
     }),
-  ])
-
-  // Create products for Fiqh category
-  console.log('Creating Fiqh books...')
-  const fiqhProducts = await Promise.all([
     prisma.product.upsert({
-      where: { sku: 'FIQH-001' },
+      where: { sku: 'SHAMPOO-003' },
       update: {},
       create: {
-        name: 'Fiqh-us-Sunnah',
-        description: 'A comprehensive guide to Islamic jurisprudence.',
-        price: 24.99,
-        comparePrice: 29.99,
-        images: ['/Images/Padagogy in Islamic Education.jpeg'],
-        sku: 'FIQH-001',
-        barcode: '9781234567894',
-        weight: 800.00,
-        dimensions: '23x16x4 cm',
+        name: 'Color-Protecting Shampoo',
+        description: 'Sulfate-free shampoo that preserves hair color and prevents fading.',
+        price: 26.99,
+        comparePrice: 31.99,
+        images: ['/Images/p3.jpg', '/Images/p1.jpg'],
+        sku: 'SHAMPOO-003',
+        barcode: '1234567890125',
+        weight: 250.00,
+        dimensions: '8x4x2 cm',
         stock: 40,
         isActive: true,
         isFeatured: true,
-        slug: 'fiqh-us-sunnah',
-        categoryId: fiqhCategory.id,
+        slug: 'color-protecting-shampoo',
+        categoryId: shampooCategory.id,
       },
     }),
   ])
 
-  // Create products for History category
-  console.log('Creating Islamic History books...')
-  const historyProducts = await Promise.all([
+  // Create products for Conditioner category
+  console.log('Creating conditioner products...')
+  const conditionerProducts = await Promise.all([
     prisma.product.upsert({
-      where: { sku: 'HIST-001' },
+      where: { sku: 'COND-001' },
       update: {},
       create: {
-        name: 'Tareekh-e-Islam',
-        description: 'A detailed account of Islamic history.',
-        price: 17.99,
-        comparePrice: 22.99,
-        images: ['/Images/tareek_e_islam_akbar_shah_urdu_hasanat.jpg'],
-        sku: 'HIST-001',
-        barcode: '9781234567895',
-        weight: 600.00,
-        dimensions: '21x14x3 cm',
+        name: 'Moisturizing Conditioner',
+        description: 'Intensive moisture conditioner for dry and damaged hair. Leaves hair soft and manageable.',
+        price: 26.99,
+        comparePrice: 31.99,
+        images: ['/Images/p1.jpg', '/Images/p2.jpg'],
+        sku: 'COND-001',
+        barcode: '1234567890126',
+        weight: 250.00,
+        dimensions: '8x4x2 cm',
+        stock: 45,
+        isActive: true,
+        isFeatured: true,
+        slug: 'moisturizing-conditioner',
+        categoryId: conditionerCategory.id,
+      },
+    }),
+    prisma.product.upsert({
+      where: { sku: 'COND-002' },
+      update: {},
+      create: {
+        name: 'Smoothing Conditioner',
+        description: 'Anti-frizz conditioner that smooths hair cuticles and reduces frizz.',
+        price: 24.99,
+        comparePrice: 29.99,
+        images: ['/Images/p2.jpg', '/Images/p3.jpg'],
+        sku: 'COND-002',
+        barcode: '1234567890127',
+        weight: 250.00,
+        dimensions: '8x4x2 cm',
         stock: 30,
         isActive: true,
         isFeatured: false,
-        slug: 'tareekh-e-islam',
-        categoryId: historyCategory.id,
+        slug: 'smoothing-conditioner',
+        categoryId: conditionerCategory.id,
+      },
+    }),
+    prisma.product.upsert({
+      where: { sku: 'COND-003' },
+      update: {},
+      create: {
+        name: 'Strengthening Conditioner',
+        description: 'Protein-rich conditioner that strengthens hair and reduces breakage.',
+        price: 28.99,
+        comparePrice: 33.99,
+        images: ['/Images/p3.jpg', '/Images/p1.jpg'],
+        sku: 'COND-003',
+        barcode: '1234567890128',
+        weight: 250.00,
+        dimensions: '8x4x2 cm',
+        stock: 25,
+        isActive: true,
+        isFeatured: true,
+        slug: 'strengthening-conditioner',
+        categoryId: conditionerCategory.id,
+      },
+    }),
+  ])
+
+  // Create products for Treatment category
+  console.log('Creating treatment products...')
+  const treatmentProducts = await Promise.all([
+    prisma.product.upsert({
+      where: { sku: 'TREAT-001' },
+      update: {},
+      create: {
+        name: 'Deep Conditioning Mask',
+        description: 'Intensive deep conditioning treatment for severely damaged hair.',
+        price: 34.99,
+        comparePrice: 39.99,
+        images: ['/Images/p1.jpg', '/Images/p2.jpg'],
+        sku: 'TREAT-001',
+        barcode: '1234567890129',
+        weight: 200.00,
+        dimensions: '8x4x2 cm',
+        stock: 20,
+        isActive: true,
+        isFeatured: true,
+        slug: 'deep-conditioning-mask',
+        categoryId: treatmentCategory.id,
+      },
+    }),
+    prisma.product.upsert({
+      where: { sku: 'TREAT-002' },
+      update: {},
+      create: {
+        name: 'Hair Repair Serum',
+        description: 'Lightweight serum that repairs split ends and prevents further damage.',
+        price: 29.99,
+        comparePrice: 34.99,
+        images: ['/Images/p2.jpg', '/Images/p3.jpg'],
+        sku: 'TREAT-002',
+        barcode: '1234567890130',
+        weight: 100.00,
+        dimensions: '6x3x2 cm',
+        stock: 30,
+        isActive: true,
+        isFeatured: false,
+        slug: 'hair-repair-serum',
+        categoryId: treatmentCategory.id,
+      },
+    }),
+    prisma.product.upsert({
+      where: { sku: 'TREAT-003' },
+      update: {},
+      create: {
+        name: 'Scalp Treatment',
+        description: 'Soothing scalp treatment that reduces dandruff and promotes healthy hair growth.',
+        price: 32.99,
+        comparePrice: 37.99,
+        images: ['/Images/p3.jpg', '/Images/p1.jpg'],
+        sku: 'TREAT-003',
+        barcode: '1234567890131',
+        weight: 150.00,
+        dimensions: '7x4x2 cm',
+        stock: 15,
+        isActive: true,
+        isFeatured: true,
+        slug: 'scalp-treatment',
+        categoryId: treatmentCategory.id,
       },
     }),
   ])
@@ -230,7 +273,7 @@ async function main() {
 
   // Create sample reviews
   console.log('Creating sample reviews...')
-  const allProducts = [...quranProducts, ...hadithProducts, ...fiqhProducts, ...historyProducts]
+  const allProducts = [...shampooProducts, ...conditionerProducts, ...treatmentProducts]
   
   for (const product of allProducts) {
     await prisma.review.upsert({
@@ -257,9 +300,9 @@ async function main() {
   console.log('🎉 Database seeding completed successfully!')
   console.log(`📊 Created:`)
   console.log(`   - ${2} users (admin + customer)`)
-  console.log(`   - ${4} categories (Quran & Tafseer, Hadith, Fiqh, History)`)
-  console.log(`   - ${8} products (2 per category)`)
-  console.log(`   - ${8} reviews`)
+  console.log(`   - ${3} categories (shampoo, conditioner, treatment)`)
+  console.log(`   - ${9} products (3 per category)`)
+  console.log(`   - ${9} reviews`)
 }
 
 main()

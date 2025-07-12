@@ -1,8 +1,8 @@
 {
     "project_meta": {
-      "name": "Naaz Book Depot Design System",
+      "name": "HairCrew Design System",
       "type": "ecommerce_website",
-      "category": "islamic_books",
+      "category": "hair_care",
       "framework": "nextjs_typescript",
       "styling": "tailwind_css",
       "animation_library": "framer_motion",

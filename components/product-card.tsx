@@ -52,7 +52,7 @@ export default function ProductCard({
         id: product.id,
         name: product.name,
         price: product.price,
-        image: product.images[0] || "/Images/Riyadh as-Salihin.jpg",
+        image: product.images[0] || "/Images/p1.jpg",
         slug: product.slug,
         stock: product.stock ?? 100,
       },
@@ -103,7 +103,7 @@ export default function ProductCard({
       transition={{ type: "spring", stiffness: 300, damping: 22 }}
       className="h-full"
     >
-      <Card className="group bg-white rounded-xl shadow-md transition-all duration-300 relative overflow-hidden flex flex-col h-full hover:shadow-[0_8px_32px_0_rgba(212,168,83,0.18)]">
+      <Card className="group bg-white rounded-xl shadow-md transition-all duration-300 relative overflow-hidden flex flex-col h-full">
         {/* Wishlist Button */}
         {showWishlist && (
           <Button
@@ -122,31 +122,14 @@ export default function ProductCard({
         {/* Clickable Image and Title */}
         <Link href={`/products/${product.slug}`} className="block focus:outline-none focus:ring-2 focus:ring-secondary rounded-t-xl">
           <div className="relative w-full aspect-[4/3] bg-[#EAE4D5] overflow-hidden flex items-center justify-center">
-            <motion.div
-              whileHover={{ scale: 1.04, y: -6, boxShadow: "0 8px 32px 0 rgba(212,168,83,0.18)" }}
-              transition={{ type: "spring", stiffness: 260, damping: 18 }}
-              className="w-full h-full"
-            >
-              <Image
-                src={product.images[0] || "/Images/Riyadh as-Salihin.jpg"}
-                alt={imageAlt}
-                fill
-                sizes="(max-width: 768px) 100vw, 300px"
-                className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-300"
-                priority={false}
-              />
-              {/* Overlay on hover */}
-              <motion.div
-                initial={{ opacity: 0 }}
-                whileHover={{ opacity: 1 }}
-                transition={{ duration: 0.25 }}
-                className="absolute inset-0 bg-gradient-to-t from-[rgba(212,168,83,0.85)] to-transparent flex items-end justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-              >
-                <span className="mb-4 px-4 py-2 rounded-full bg-white/90 text-[var(--islamic-green)] font-semibold shadow-lg text-sm">
-                  View Details
-                </span>
-              </motion.div>
-            </motion.div>
+            <Image
+              src={product.images[0] || "/Images/p1.jpg"}
+              alt={imageAlt}
+              fill
+              sizes="(max-width: 768px) 100vw, 300px"
+              className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-300"
+              priority={false}
+            />
           </div>
         </Link>
 

@@ -19,8 +19,8 @@ export default async function CategoriesPage() {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Book Categories</h1>
-        <p className="text-gray-600">Browse our wide range of Islamic books and literature</p>
+        <h1 className="text-3xl font-bold text-gray-900">Product Categories</h1>
+        <p className="text-gray-600">Browse our wide range of hair care products</p>
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

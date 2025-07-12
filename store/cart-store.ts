@@ -20,7 +20,7 @@ interface CartState {
   getCount: () => number
 }
 
-const CART_KEY = 'naazbook_cart'
+const CART_KEY = 'haircrew_cart'
 
 const loadCart = (): CartItem[] => {
   if (typeof window === 'undefined') return []

@@ -48,35 +48,69 @@
 @tailwind utilities;
 
 @layer base {
+  html {
+    font-family: var(--font-primary), sans-serif;
+    background: var(--background);
+    color: var(--foreground);
+    scroll-behavior: smooth;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-headings), serif;
+    color: var(--islamic-green);
+    font-weight: 700;
+    line-height: var(--line-tight);
+    letter-spacing: -0.01em;
+  }
+  a {
+    color: var(--islamic-gold);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  a:hover, a:focus {
+    color: var(--islamic-gold-dark);
+    text-decoration: underline;
+  }
   :root {
-    /* Brand Colors from design.json */
-    --primary: #9929EA;
-    --primary-dark: #7e20c6;
-    --secondary: #891997;
-    --background: #EAE4D5;
-    --accent: #B6B09F;
+    /* Brand Colors - Islamic Green & Gold Theme */
+    --primary: #2D5A4C;
+    --primary-dark: #1F3D33;
+    --secondary: #3D6B5B;
+    --background: #F8F6F3;
+    --accent: #D4A853;
 
     /* Neutral Colors */
     --white: #FFFFFF;
-    --light-gray: #F8F9FA;
-    --medium-gray: #E9ECEF;
-    --dark-gray: #6C757D;
-    --charcoal: #484e53;
-    --black: #000000;
+    --light-gray: #F5F5F5;
+    --medium-gray: #E8E6E3;
+    --dark-gray: #6B7280;
+    --charcoal: #374151;
+    --black: #111827;
+
+    /* Islamic Theme Colors */
+    --islamic-green: #2D5A4C;
+    --islamic-green-light: #3D6B5B;
+    --islamic-green-dark: #1F3D33;
+    --islamic-gold: #D4A853;
+    --islamic-gold-dark: #B8941F;
+    --islamic-beige: #F8F6F3;
+    --islamic-cream: #FDF9F3;
 
     /* Semantic Colors */
-    --success: #28A745;
-    --warning: #FFC107;
-    --error: #DC3545;
-    --info: #17A2B8;
+    --success: #059669;
+    --warning: #D97706;
+    --error: #DC2626;
+    --info: #0891B2;
 
     /* Gradients */
-    --hero-gradient: linear-gradient(135deg, #FFE5F0 0%, #F0F8FF 100%);
-    --card-overlay: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.3) 100%);
+    --hero-gradient: linear-gradient(135deg, #2D5A4C 0%, #3D6B5B 50%, #1F3D33 100%);
+    --card-overlay: linear-gradient(180deg, rgba(45,90,76,0) 0%, rgba(45,90,76,0.4) 100%);
+    --gold-gradient: linear-gradient(135deg, #D4A853 0%, #B8941F 100%);
+    --islamic-overlay: linear-gradient(135deg, rgba(45,90,76,0.9) 0%, rgba(61,107,91,0.8) 100%);
 
     /* Typography */
-    --font-primary: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    --font-headings: Poppins, Inter, sans-serif;
+    --font-primary: 'Inter', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    --font-headings: 'Playfair Display', 'Georgia', serif;
+    --font-arabic: 'Amiri', 'Scheherazade New', serif;
     --font-xs: 12px;
     --font-sm: 14px;
     --font-base: 16px;
@@ -86,6 +120,7 @@
     --font-3xl: 30px;
     --font-4xl: 36px;
     --font-5xl: 48px;
+    --font-6xl: 64px;
     --font-normal: 400;
     --font-medium: 500;
     --font-semibold: 600;
@@ -116,69 +151,68 @@
     --radius: 0.75rem;
     
     /* Theme colors */
-    --foreground: #020817;
-    --card: #ffffff;
-    --card-foreground: #020817;
-    --popover: #ffffff;
-    --popover-foreground: #020817;
-    --primary-foreground: #ffffff;
-    --secondary-foreground: #020817;
-    --muted: #f4f4f5;
-    --muted-foreground: #71717a;
-    --accent-foreground: #18181b;
-    --destructive: #ef4444;
-    --destructive-foreground: #ffffff;
-    --border: #e4e4e7;
-    --input: #e4e4e7;
-    --ring: #9929EA;
+    --foreground: #1F3D33;
+    --card: #FFFFFF;
+    --card-foreground: #1F3D33;
+    --popover: #FFFFFF;
+    --popover-foreground: #1F3D33;
+    --primary-foreground: #FFFFFF;
+    --secondary-foreground: #FFFFFF;
+    --muted: #F5F5F5;
+    --muted-foreground: #6B7280;
+    --accent-foreground: #1F3D33;
+    --destructive: #DC2626;
+    --destructive-foreground: #FFFFFF;
+    --border: #E5E7EB;
+    --input: #F3F4F6;
+    --ring: #2D5A4C;
     
-    /* Glass UI effect variables */
-    --glass-bg: rgba(255, 255, 255, 0.7);
-    --glass-border: rgba(255, 255, 255, 0.2);
-    --glass-shadow: rgba(31, 38, 135, 0.05);
-    --glass-highlight: rgba(255, 255, 255, 0.7);
-    --glass-blur: 8px;
+    /* Glass UI effect variables - Islamic theme */
+    --glass-bg: rgba(248, 246, 243, 0.8);
+    --glass-border: rgba(45, 90, 76, 0.2);
+    --glass-shadow: rgba(45, 90, 76, 0.1);
+    --glass-highlight: rgba(212, 168, 83, 0.3);
+    --glass-blur: 12px;
   }
 
   .dark {
-    --background: #000000;
-    --foreground: #EAE4D5;
-    --card: #1a1a1a;
-    --card-foreground: #EAE4D5;
-    --popover: #1a1a1a;
-    --popover-foreground: #EAE4D5;
-    --primary: #EAE4D5;
-    --primary-foreground: #000000;
-    --secondary: #CC66DA;
-    --secondary-foreground: #EAE4D5;
-    --accent: #B13BFF;
-    --accent-dark1: #CC66DA;
-    --accent-dark2: #B13BFF;
-    --muted: oklch(0.269 0 0);
-    --muted-foreground: oklch(0.708 0 0);
-    --destructive: oklch(0.704 0.191 22.216);
-    --border: oklch(1 0 0 / 10%);
-    --input: oklch(1 0 0 / 15%);
-    --ring: oklch(0.556 0 0);
-    --chart-1: oklch(0.488 0.243 264.376);
-    --chart-2: oklch(0.696 0.17 162.48);
-    --chart-3: oklch(0.769 0.188 70.08);
-    --chart-4: oklch(0.627 0.265 303.9);
-    --chart-5: oklch(0.645 0.246 16.439);
-    --sidebar: oklch(0.205 0 0);
-    --sidebar-foreground: oklch(0.985 0 0);
-    --sidebar-primary: oklch(0.488 0.243 264.376);
-    --sidebar-primary-foreground: oklch(0.985 0 0);
-    --sidebar-accent: oklch(0.269 0 0);
-    --sidebar-accent-foreground: oklch(0.985 0 0);
-    --sidebar-border: oklch(1 0 0 / 10%);
-    --sidebar-ring: oklch(0.556 0 0);
+    --background: #0F1419;
+    --foreground: #F8F6F3;
+    --card: #1F2937;
+    --card-foreground: #F8F6F3;
+    --popover: #1F2937;
+    --popover-foreground: #F8F6F3;
+    --primary: #3D6B5B;
+    --primary-foreground: #F8F6F3;
+    --secondary: #2D5A4C;
+    --secondary-foreground: #F8F6F3;
+    --accent: #D4A853;
+    --accent-foreground: #0F1419;
+    --muted: #374151;
+    --muted-foreground: #9CA3AF;
+    --destructive: #EF4444;
+    --border: #374151;
+    --input: #374151;
+    --ring: #3D6B5B;
+    --chart-1: #3D6B5B;
+    --chart-2: #D4A853;
+    --chart-3: #B8941F;
+    --chart-4: #2D5A4C;
+    --chart-5: #1F3D33;
+    --sidebar: #1F2937;
+    --sidebar-foreground: #F8F6F3;
+    --sidebar-primary: #3D6B5B;
+    --sidebar-primary-foreground: #F8F6F3;
+    --sidebar-accent: #374151;
+    --sidebar-accent-foreground: #F8F6F3;
+    --sidebar-border: #374151;
+    --sidebar-ring: #3D6B5B;
     
     /* Dark mode glass UI effect variables */
-    --glass-bg: rgba(15, 15, 20, 0.7);
-    --glass-border: rgba(255, 255, 255, 0.1);
-    --glass-shadow: rgba(0, 0, 0, 0.2);
-    --glass-highlight: rgba(255, 255, 255, 0.05);
+    --glass-bg: rgba(31, 41, 55, 0.8);
+    --glass-border: rgba(61, 107, 91, 0.3);
+    --glass-shadow: rgba(0, 0, 0, 0.3);
+    --glass-highlight: rgba(212, 168, 83, 0.2);
   }
 
   * {
@@ -189,25 +223,44 @@
   }
 }
 
-/* Glass UI components */
+/* Islamic-themed Glass UI components */
 .glass-card {
   background: var(--glass-bg);
   backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
   border: 1px solid var(--glass-border);
-  border-radius: 16px;
-  box-shadow: 0 4px 30px var(--glass-shadow);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px var(--glass-shadow);
   transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
 }
 
 .glass-card:hover {
-  box-shadow: 0 8px 32px 0 var(--glass-shadow);
-  transform: translateY(-2px);
+  box-shadow: 0 12px 40px var(--glass-shadow);
+  transform: translateY(-4px);
+  border-color: var(--islamic-gold);
 }
 
 .glass-card-highlight {
   position: relative;
   overflow: hidden;
+}
+
+.glass-card-highlight::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--islamic-gold),
+    transparent
+  );
+  opacity: 0.6;
 }
 
 .glass-card-highlight::after {
@@ -223,9 +276,134 @@
     var(--glass-highlight),
     transparent
   );
-  transition: all 0.6s ease;
+  transition: all 0.8s ease;
 }
 
 .glass-card-highlight:hover::after {
   left: 100%;
+}
+
+/* Islamic geometric pattern overlay */
+.islamic-pattern {
+  position: relative;
+}
+
+.islamic-pattern::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: radial-gradient(circle at 2px 2px, var(--islamic-gold) 1px, transparent 0);
+  background-size: 20px 20px;
+  opacity: 0.1;
+  pointer-events: none;
+}
+
+/* Enhanced button styles for Islamic theme */
+.btn-islamic {
+  background: linear-gradient(135deg, var(--islamic-green) 0%, var(--islamic-green-light) 100%);
+  color: white;
+  border: 2px solid var(--islamic-gold);
+  border-radius: 8px;
+  padding: 12px 24px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-islamic:hover {
+  background: linear-gradient(135deg, var(--islamic-green-dark) 0%, var(--islamic-green) 100%);
+  border-color: var(--islamic-gold-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(45, 90, 76, 0.3);
+}
+
+.btn-islamic::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(212, 168, 83, 0.2), transparent);
+  transition: left 0.6s ease;
+}
+
+.btn-islamic:hover::before {
+  left: 100%;
+}
+
+/* Typography enhancements */
+.text-islamic-heading {
+  font-family: var(--font-headings);
+  color: var(--islamic-green);
+  font-weight: 700;
+  line-height: var(--line-tight);
+}
+
+.text-arabic {
+  font-family: var(--font-arabic);
+  direction: rtl;
+  text-align: right;
+  line-height: var(--line-relaxed);
+}
+
+/* Custom scrollbar for Islamic theme */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--islamic-beige);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--islamic-green);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--islamic-green-dark);
+}
+
+.nav-link {
+  position: relative;
+  color: var(--islamic-green);
+  font-weight: 500;
+  transition: color 0.2s;
+  padding-bottom: 2px;
+}
+.nav-link:hover,
+.nav-link:focus {
+  color: var(--islamic-gold);
+  outline: none;
+}
+.nav-link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -2px;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(90deg, var(--islamic-gold) 0%, var(--islamic-gold-dark) 100%);
+  border-radius: 2px;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+  z-index: 1;
+}
+.nav-link:hover::after,
+.nav-link:focus::after {
+  transform: scaleX(1);
+}
+
+/* Gold/Green Focus Ring for Accessibility */
+:focus-visible {
+  outline: 2.5px solid var(--islamic-gold);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(212,168,83,0.18), 0 0 0 2px var(--islamic-green-light);
+  transition: outline-color 0.2s, box-shadow 0.2s;
 }

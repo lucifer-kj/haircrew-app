@@ -126,7 +126,7 @@ export default function ProductPage({ params }: PageProps) {
       id: product.id,
       name: product.name,
       price: product.price,
-      image: product.images[0] || "/Images/p1.jpg",
+      image: product.images[0] || "/Images/Riyadh as-Salihin.jpg",
       slug: product.slug,
       stock: product.stock,
     }, quantity)
@@ -274,7 +274,7 @@ export default function ProductPage({ params }: PageProps) {
         <div className="space-y-4">
           <div className="relative aspect-square bg-gray-100 rounded-lg overflow-hidden">
             <Image
-              src={product.images[selectedImage] || "/Images/p1.jpg"}
+              src={product.images[selectedImage] || "/Images/Riyadh as-Salihin.jpg"}
               alt={product.name}
               fill
               className="object-cover"
@@ -525,7 +525,7 @@ export default function ProductPage({ params }: PageProps) {
                     <CardContent className="flex flex-col items-center">
                       <Link href={`/products/${relatedProduct.slug}`}>
                         <Image 
-                          src={relatedProduct.images[0] || "/Images/p1.jpg"} 
+                          src={relatedProduct.images[0] || "/Images/Riyadh as-Salihin.jpg"} 
                           alt={relatedProduct.name} 
                           width={300} 
                           height={200} 

@@ -11,15 +11,16 @@ const IMPORTANT_ROUTES = [
   '/dashboard/profile',
   '/dashboard/orders',
   '/dashboard/wishlist',
-  '/categories/shampoo',
-  '/categories/conditioner',
-  '/categories/treatment',
+  '/categories/quran-tafseer',
+  '/categories/hadith',
+  '/categories/fiqh',
+  '/categories/history',
   '/about',
   '/contact',
 ];
 
 // Categories for dynamic prefetching
-const CATEGORIES = ['shampoo', 'conditioner', 'treatment', 'styling', 'accessories'];
+const CATEGORIES = ['quran-tafseer', 'hadith', 'fiqh', 'history', 'children', 'urdu'];
 
 // Type for NetworkInformation API
 interface NetworkInformation extends Navigator {

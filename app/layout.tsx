@@ -22,16 +22,20 @@ const geistMono = Geist_Mono({
   display: "swap", // Optimize font loading
 });
 
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+};
+
 export const metadata: Metadata = {
-  title: "HairCrew - Professional Hair Care Products",
-  description: "Your trusted partner for professional hair care products. Quality, innovation, and beauty in every bottle.",
-  viewport: "width=device-width, initial-scale=1, maximum-scale=5",
-  // Improve SEO and sharing
+  title: "Naaz Book Depot - Islamic Books & Knowledge",
+  description: "Your trusted source for authentic Islamic books. Spreading knowledge, faith, and light.",
   openGraph: {
     type: "website",
-    title: "HairCrew - Professional Hair Care Products",
-    description: "Your trusted partner for professional hair care products. Quality, innovation, and beauty in every bottle.",
-    siteName: "HairCrew",
+    title: "Naaz Book Depot - Islamic Books & Knowledge",
+    description: "Your trusted source for authentic Islamic books. Spreading knowledge, faith, and light.",
+    siteName: "Naaz Book Depot",
   },
 };
 
@@ -47,7 +51,7 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         {/* Preload critical assets */}
-        <link rel="preload" href="/Images/banner1.jpg" as="image" />
+        <link rel="preload" href="/Images/Image+Background.jpg" as="image" />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}

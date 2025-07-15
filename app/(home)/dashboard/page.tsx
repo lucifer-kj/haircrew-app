@@ -34,7 +34,7 @@ function getDateFormat(filter: string) {
 }
 
 type DashboardPageProps = {
-  searchParams?: { filter?: string }
+  searchParams?: Promise<{ filter?: string }>
 }
 
 export default async function DashboardPage(props: DashboardPageProps) {
@@ -48,7 +48,8 @@ export default async function DashboardPage(props: DashboardPageProps) {
     redirect('/')
   }
 
-  const { filter } = props.searchParams || {}
+  const searchParams = props.searchParams ? await props.searchParams : {};
+  const filter = typeof searchParams.filter === 'string' ? searchParams.filter : undefined;
   const safeFilter = filter || 'monthly'
   const startDate = getStartDate(safeFilter)
   const dateFormat = getDateFormat(safeFilter)

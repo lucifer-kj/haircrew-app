@@ -3,35 +3,36 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
 
-export async function GET(
-  req: NextRequest,
-  { params }: { params: Promise<{ slug: string }> }
-) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ slug: string }> }) {
   try {
     const { slug } = await params;
-    
+    const { searchParams } = new URL(req.url);
+    const page = parseInt(searchParams.get('page') || '1', 10);
+    const pageSize = parseInt(searchParams.get('pageSize') || '10', 10);
     const product = await prisma.product.findUnique({
       where: { slug },
       select: { id: true },
     });
-
     if (!product) {
       return NextResponse.json({ error: 'Product not found' }, { status: 404 });
     }
-
-    const reviews = await prisma.review.findMany({
-      where: { productId: product.id },
-      include: {
-        user: {
-          select: {
-            name: true,
+    const [reviews, total] = await Promise.all([
+      prisma.review.findMany({
+        where: { productId: product.id },
+        include: {
+          user: {
+            select: {
+              name: true,
+            },
           },
         },
-      },
-      orderBy: { createdAt: 'desc' },
-    });
-
-    return NextResponse.json(reviews);
+        orderBy: { createdAt: 'desc' },
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+      }),
+      prisma.review.count({ where: { productId: product.id } })
+    ]);
+    return NextResponse.json({ reviews, total });
   } catch {
     return NextResponse.json({ error: 'Failed to fetch reviews' }, { status: 500 });
   }

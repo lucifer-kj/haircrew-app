@@ -2,6 +2,7 @@ export const runtime = 'nodejs'
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
+import { pusherServer } from '@/lib/pusher';
 
 export async function GET(
   req: NextRequest,
@@ -50,7 +51,13 @@ export async function PATCH(
       where: { slug },
       data: { stock },
     });
-    // Real-time notification removed for serverless compatibility
+    // Pusher: Notify clients of stock update
+    await pusherServer.trigger('products', 'stock-updated', {
+      id: product.id,
+      name: product.name,
+      stock: product.stock,
+      slug: product.slug,
+    });
     return NextResponse.json(product);
   } catch (e) {
     console.error(e);

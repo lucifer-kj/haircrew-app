@@ -1,24 +1,18 @@
 "use client";
 
-import { Product } from "@/types/product";
+import type { Product as ProductType } from '@/types/product';
 import ProductCard from "./product-card";
-import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
-import { useState } from "react";
-
-interface LatestProductsSectionProps {
-  products: Product[];
-  loading?: boolean;
-  onViewAll?: () => void;
-}
 
 const skeletonArray = Array.from({ length: 4 });
 
-export default function LatestProductsSection({ products, loading = false }: LatestProductsSectionProps) {
-  const [showAll, setShowAll] = useState(false);
-  const showViewAll = !showAll && !loading && products.length > 4;
-  // Only show first 4 products unless showAll is true
-  const visibleProducts = showAll ? products : products.slice(0, 4);
+interface LatestProductsSectionProps {
+  products: ProductType[];
+  loading: boolean;
+  onViewAll?: () => void;
+}
+
+export default function LatestProductsSection({ products, loading, onViewAll }: LatestProductsSectionProps) {
   return (
     <section className="py-16 bg-[#EAE4D5]">
       <div className="max-w-7xl mx-auto px-4">
@@ -31,7 +25,7 @@ export default function LatestProductsSection({ products, loading = false }: Lat
           <div className="hidden sm:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {loading
               ? skeletonArray.map((_, i) => <ProductSkeleton key={i} />)
-              : visibleProducts.map((product) => (
+              : products.map((product: ProductType) => (
                   <motion.div
                     key={product.id}
                     whileHover={{ scale: 1.04, boxShadow: "0 8px 32px 0 rgba(153,41,234,0.12)" }}
@@ -43,30 +37,37 @@ export default function LatestProductsSection({ products, loading = false }: Lat
           </div>
           {/* Mobile horizontal scroll with snap */}
           <div className="sm:hidden flex gap-6 overflow-x-auto snap-x pb-2 -mx-4 px-4">
-            {(loading ? skeletonArray : visibleProducts).map((item, i) => (
-              <motion.div
-                key={loading ? i : (item as Product).id}
-                className="min-w-[80vw] max-w-xs snap-center flex-shrink-0"
-                whileHover={{ scale: 1.04, boxShadow: "0 8px 32px 0 rgba(153,41,234,0.12)" }}
-                transition={{ type: "spring", stiffness: 300, damping: 20 }}
-              >
-                {loading ? (
-                  <ProductSkeleton />
-                ) : (
-                  <ProductCard product={item as Product} showWishlist={false} />
-                )}
-              </motion.div>
-            ))}
+            {loading
+              ? skeletonArray.map((_, i) => (
+                  <motion.div
+                    key={i}
+                    className="min-w-[80vw] max-w-xs snap-center flex-shrink-0"
+                    whileHover={{ scale: 1.04, boxShadow: "0 8px 32px 0 rgba(153,41,234,0.12)" }}
+                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                  >
+                    <ProductSkeleton />
+                  </motion.div>
+                ))
+              : products.map((item) => (
+                  <motion.div
+                    key={item.id}
+                    className="min-w-[80vw] max-w-xs snap-center flex-shrink-0"
+                    whileHover={{ scale: 1.04, boxShadow: "0 8px 32px 0 rgba(153,41,234,0.12)" }}
+                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                  >
+                    <ProductCard product={item} showWishlist={false} />
+                  </motion.div>
+                ))}
           </div>
           {/* View All Button */}
-          {showViewAll && (
+          {onViewAll && !loading && products.length > 4 && (
             <div className="flex justify-center mt-8">
-              <Button
-                onClick={() => setShowAll(true)}
+              <button
+                onClick={onViewAll}
                 className="px-6 py-2 bg-[#9929EA] hover:bg-[#9929EA]/90 text-white rounded-full font-semibold shadow transition"
               >
                 View All
-              </Button>
+              </button>
             </div>
           )}
         </div>

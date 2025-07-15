@@ -3,6 +3,7 @@
 import { User, Mail, Calendar, Edit } from "lucide-react"
 import { GlassCard, GlassButton, GlassPanel } from "@/components/ui/glass-card"
 import Image from "next/image"
+import { signOut } from "next-auth/react";
 
 interface ProfileClientProps {
   user: {
@@ -149,6 +150,15 @@ export default function ProfileClient({ user, stats }: ProfileClientProps) {
             </div>
           </div>
         </GlassPanel>
+      </div>
+      {/* Logout Button */}
+      <div className="container mx-auto max-w-5xl mt-8 flex justify-center">
+        <button
+          onClick={() => signOut({ callbackUrl: "/" })}
+          className="px-6 py-3 rounded-full bg-red-500 text-white font-semibold shadow hover:bg-red-600 transition-colors w-full max-w-xs"
+        >
+          Logout
+        </button>
       </div>
     </div>
   )

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
+import { useCartStore } from "@/store/cart-store";
 
 export default function CheckoutPage() {
   const router = useRouter()
@@ -21,6 +22,10 @@ export default function CheckoutPage() {
   // Address auto-fill
   const [addresses, setAddresses] = useState<{ id: string; name: string; phone: string; address: string; city: string; pincode: string; state: string; country: string }[]>([])
   const [selectedAddress, setSelectedAddress] = useState("")
+
+  const { getTotal } = useCartStore();
+  const subtotal = getTotal();
+  const total = subtotal; // Add shipping/discount logic if needed
 
   useEffect(() => {
     fetch("/api/user/addresses", { credentials: "include" })
@@ -145,13 +150,13 @@ export default function CheckoutPage() {
           </form>
         </div>
         {/* Right: Order Summary */}
-        <div className="w-full md:w-96 bg-gray-50 rounded-r-xl p-8 border-l flex flex-col justify-between">
+        <div className="flex-1 p-8 bg-gray-50 rounded-r-xl">
           <h2 className="text-xl font-bold mb-4">Order Summary</h2>
           <div className="space-y-4 flex-1">
             {/* You can map cart items here if needed */}
             <div className="flex items-center justify-between text-base font-semibold">
               <span>Subtotal</span>
-              <span>₹0.00</span> {/* Replace with actual subtotal */}
+              <span>₹{subtotal.toFixed(2)}</span>
             </div>
             <div className="flex items-center justify-between text-sm text-gray-500">
               <span>Shipping</span>
@@ -159,7 +164,7 @@ export default function CheckoutPage() {
             </div>
             <div className="flex items-center justify-between text-lg font-bold mt-4">
               <span>Total</span>
-              <span>₹0.00</span> {/* Replace with actual total */}
+              <span>₹{total.toFixed(2)}</span>
             </div>
           </div>
         </div>

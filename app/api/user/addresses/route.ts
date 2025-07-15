@@ -3,11 +3,21 @@ import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/auth"
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   const session = await auth()
   if (!session?.user?.id) return NextResponse.json([], { status: 200 })
-  const addresses = await prisma.address.findMany({ where: { userId: session.user.id } })
-  return NextResponse.json(addresses)
+  const { searchParams } = new URL(req.url)
+  const page = parseInt(searchParams.get('page') || '1', 10)
+  const pageSize = parseInt(searchParams.get('pageSize') || '10', 10)
+  const [addresses, total] = await Promise.all([
+    prisma.address.findMany({
+      where: { userId: session.user.id },
+      skip: (page - 1) * pageSize,
+      take: pageSize,
+    }),
+    prisma.address.count({ where: { userId: session.user.id } })
+  ])
+  return NextResponse.json({ addresses, total })
 }
 
 export async function POST(req: NextRequest) {

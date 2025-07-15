@@ -1,3 +1,5 @@
+export const revalidate = 300;
+
 export default function ConditionerCategoryPage() {
   return (
     <div className="container mx-auto py-12">

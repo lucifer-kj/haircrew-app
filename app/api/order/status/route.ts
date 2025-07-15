@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
-import { sendOrderConfirmationEmail } from '@/lib/email';
+import { sendOrderConfirmationEmail, sendShippingUpdateEmail } from '@/lib/email';
 import { Prisma } from '@prisma/client';
+import { pusherServer } from '@/lib/pusher';
 
 export async function POST(req: NextRequest) {
   try {
@@ -28,25 +29,48 @@ export async function POST(req: NextRequest) {
         where: { id: orderId },
         data: { paymentStatus: 'PAID', status: 'PROCESSING' },
       });
-      // Real-time notification removed for serverless compatibility
+      // Pusher: Notify admin in real time
+      await pusherServer.trigger('orders', 'order-status-updated', {
+        orderId,
+        status: 'PAID',
+        user: { id: order.userId, name: order.user.name, email: order.user.email },
+      });
       return NextResponse.json({ success: true, order: updated });
     }
     // Admin actions
     if ((session.user as { role?: string }).role === 'ADMIN') {
       let updateData: Prisma.OrderUpdateInput = {};
+      let event: string | null = null;
       if (newStatus === 'CONFIRMED') {
         updateData = { status: 'CONFIRMED' };
+        event = 'order-confirmed';
       } else if (newStatus === 'REFUNDED') {
         updateData = { status: 'REFUNDED', paymentStatus: 'REFUNDED' };
+        event = 'order-refunded';
       } else if (newStatus === 'PROCESSING') {
         updateData = { status: 'PROCESSING' };
+        event = 'order-processing';
+      } else if (newStatus === 'SHIPPED' || newStatus === 'DELIVERED') {
+        updateData = { status: newStatus };
+        event = 'order-shipping';
       } else {
         return NextResponse.json({ error: 'Invalid status' }, { status: 400 });
       }
       const updated = await prisma.order.update({ where: { id: orderId }, data: updateData });
-      // Real-time notification removed for serverless compatibility
+      // Pusher: Notify user/admin of status change
+      if (event) {
+        await pusherServer.trigger('orders', event, {
+          orderId,
+          status: newStatus,
+          user: { id: order.userId, name: order.user.name, email: order.user.email },
+        });
+      }
       if (newStatus === 'CONFIRMED') {
-        await sendOrderConfirmationEmail(order.user.email, orderId);
+        await sendOrderConfirmationEmail(order.user.email, order.user.name || '', orderId);
+      }
+      // Placeholder: send shipping update email
+      if (newStatus === 'SHIPPED' || newStatus === 'DELIVERED') {
+        await sendShippingUpdateEmail(order.user.email, order.user.name || '', orderId, newStatus);
       }
       return NextResponse.json({ success: true, order: updated });
     }

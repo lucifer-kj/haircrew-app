@@ -1,12 +1,12 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { ChevronLeft, ChevronRight, Search, X } from "lucide-react"
 import { useSession } from "next-auth/react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import ProductCard from "@/components/product-card"
+import ProductCard from "@/components/product-card" 
 
 interface Category {
   id: string
@@ -43,6 +43,7 @@ export default function ProductsPage() {
   const { data: session } = useSession()
   const [wishlist, setWishlist] = useState<string[]>([])
   const [wishlistLoading, setWishlistLoading] = useState<string | null>(null)
+  const debounceRef = useRef<NodeJS.Timeout | null>(null)
 
   // Check for search parameter from header redirect
   useEffect(() => {
@@ -60,21 +61,26 @@ export default function ProductsPage() {
   }, [])
 
   useEffect(() => {
-    setLoading(true)
-    let url = `/api/products?page=${currentPage}&pageSize=${pageSize}`
-    if (selectedCategory) url += `&category=${selectedCategory}`
-    if (search) url += `&search=${encodeURIComponent(search)}`
-    if (priceRange !== "all") url += `&priceRange=${priceRange}`
-    if (stockStatus !== "all") url += `&stockStatus=${stockStatus}`
-    if (sortBy !== "newest") url += `&sortBy=${sortBy}`
-    
-    fetch(url)
-      .then(res => res.json())
-      .then((data: ProductsResponse) => {
-        setProducts(data.products)
-        setTotal(data.total)
-      })
-      .finally(() => setLoading(false))
+    if (debounceRef.current) clearTimeout(debounceRef.current)
+    debounceRef.current = setTimeout(() => {
+      setLoading(true)
+      let url = `/api/products?page=${currentPage}&pageSize=${pageSize}`
+      if (selectedCategory) url += `&category=${selectedCategory}`
+      if (search) url += `&search=${encodeURIComponent(search)}`
+      if (priceRange !== "all") url += `&priceRange=${priceRange}`
+      if (stockStatus !== "all") url += `&stockStatus=${stockStatus}`
+      if (sortBy !== "newest") url += `&sortBy=${sortBy}`
+      fetch(url)
+        .then(res => res.json())
+        .then((data: ProductsResponse) => {
+          setProducts(data.products)
+          setTotal(data.total)
+        })
+        .finally(() => setLoading(false))
+    }, 300)
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current)
+    }
   }, [selectedCategory, search, priceRange, stockStatus, sortBy, currentPage])
 
   // Fetch wishlist on load
@@ -284,15 +290,15 @@ export default function ProductsPage() {
             </Button>
             
             {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-              let pageNum
+              let pageNum: number;
               if (totalPages <= 5) {
-                pageNum = i + 1
+                pageNum = i + 1;
               } else if (currentPage <= 3) {
-                pageNum = i + 1
+                pageNum = i + 1;
               } else if (currentPage >= totalPages - 2) {
-                pageNum = totalPages - 4 + i
+                pageNum = totalPages - 4 + i;
               } else {
-                pageNum = currentPage - 2 + i
+                pageNum = currentPage - 2 + i;
               }
               
               return (

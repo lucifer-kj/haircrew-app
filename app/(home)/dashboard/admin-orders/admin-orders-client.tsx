@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { useSocket } from '@/components/providers/socket-provider';
+import { usePusher } from '@/components/providers/socket-provider';
 
 interface OrderItem {
   id: string;
@@ -32,25 +32,48 @@ interface AdminOrdersClientProps {
 
 export default function AdminOrdersClient({ orders: initialOrders }: AdminOrdersClientProps) {
   const [orders, setOrders] = useState<Order[]>(initialOrders);
-  const { socket } = useSocket();
+  const { pusher } = usePusher();
 
   // Real-time updates
   useEffect(() => {
-    if (!socket) return;
-    const handleUserPaid = (data: { orderId: string }) => {
-      // Refetch or optimistically update order status
-      setOrders((prev) => prev.map(o => o.id === data.orderId ? { ...o, status: 'PROCESSING' } : o));
+    if (!pusher) return;
+    const channel = pusher.subscribe('orders');
+    const handleNewOrder = (data: { orderId: string; user: { name: string; email: string }; total: number; createdAt: string }) => {
+      // Optionally refetch or optimistically add new order
+      setOrders((prev) => [
+        {
+          id: data.orderId,
+          orderNumber: 'NEW', // You may want to refetch for full details
+          total: String(data.total),
+          status: 'PENDING',
+          createdAt: data.createdAt,
+          user: data.user,
+          orderItems: [],
+        },
+        ...prev,
+      ]);
+    };
+    const handleOrderStatusUpdated = (data: { orderId: string; status: string }) => {
+      setOrders((prev) => prev.map(o => o.id === data.orderId ? { ...o, status: data.status } : o));
     };
     const handleOrderConfirmed = (data: { orderId: string }) => {
       setOrders((prev) => prev.map(o => o.id === data.orderId ? { ...o, status: 'CONFIRMED' } : o));
     };
-    socket.on('userPaid', handleUserPaid);
-    socket.on('orderConfirmed', handleOrderConfirmed);
-    return () => {
-      socket.off('userPaid', handleUserPaid);
-      socket.off('orderConfirmed', handleOrderConfirmed);
+    const handleOrderRefunded = (data: { orderId: string }) => {
+      setOrders((prev) => prev.map(o => o.id === data.orderId ? { ...o, status: 'REFUNDED' } : o));
     };
-  }, [socket]);
+    channel.bind('new-order', handleNewOrder);
+    channel.bind('order-status-updated', handleOrderStatusUpdated);
+    channel.bind('order-confirmed', handleOrderConfirmed);
+    channel.bind('order-refunded', handleOrderRefunded);
+    return () => {
+      channel.unbind('new-order', handleNewOrder);
+      channel.unbind('order-status-updated', handleOrderStatusUpdated);
+      channel.unbind('order-confirmed', handleOrderConfirmed);
+      channel.unbind('order-refunded', handleOrderRefunded);
+      pusher.unsubscribe('orders');
+    };
+  }, [pusher]);
 
   // Admin actions
   const updateOrderStatus = async (orderId: string, newStatus: string) => {

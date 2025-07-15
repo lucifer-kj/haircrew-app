@@ -2,7 +2,7 @@ import { auth } from '@/auth'
 import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import AdminDashboardLayout from './admin-dashboard-layout'
-import { SocketProvider } from '@/components/providers/socket-provider';
+import { PusherProvider } from '@/components/providers/socket-provider';
 
 import { format } from 'date-fns'
 
@@ -160,7 +160,7 @@ export default async function DashboardPage(props: DashboardPageProps) {
   }
 
   return (
-    <SocketProvider>
+    <PusherProvider>
       <AdminDashboardLayout
         metrics={{
           totalRevenue: revenue,
@@ -180,6 +180,6 @@ export default async function DashboardPage(props: DashboardPageProps) {
         lowStockProducts={lowStockProducts}
         topProducts={topProducts}
       />
-    </SocketProvider>
+    </PusherProvider>
   )
 } 

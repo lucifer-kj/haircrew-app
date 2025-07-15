@@ -1,35 +1,41 @@
 "use client"
 
 import React, { createContext, useContext, useEffect, useRef, useState, ReactNode } from "react";
-import io from "socket.io-client";
+import Pusher from "pusher-js";
 
-// Use the type from the return type of io()
-type SocketType = ReturnType<typeof io> | null;
+// Pusher context type
+interface PusherContextType {
+  pusher: Pusher | null;
+}
 
-const SocketContext = createContext<{ socket: SocketType }>({ socket: null });
+const PusherContext = createContext<PusherContextType>({ pusher: null });
 
-export const useSocket = () => useContext(SocketContext);
+export const usePusher = () => useContext(PusherContext);
 
-export const SocketProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [socket, setSocket] = useState<SocketType>(null);
-  const socketRef = useRef<SocketType>(null);
+export const PusherProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const [pusher, setPusher] = useState<Pusher | null>(null);
+  const pusherRef = useRef<Pusher | null>(null);
 
   useEffect(() => {
-    const s = io({
-      path: "/socket.io",
-      transports: ["websocket"],
+    // TODO: Replace with your actual Pusher key and cluster from .env
+    const key = process.env.NEXT_PUBLIC_PUSHER_KEY || "";
+    const cluster = process.env.NEXT_PUBLIC_PUSHER_CLUSTER || "ap2";
+    if (!key) return;
+    const p = new Pusher(key, {
+      cluster,
+      forceTLS: true,
     });
-    socketRef.current = s;
-    setSocket(s);
+    pusherRef.current = p;
+    setPusher(p);
     return () => {
-      s.disconnect();
-      socketRef.current = null;
+      p.disconnect();
+      pusherRef.current = null;
     };
   }, []);
 
   return (
-    <SocketContext.Provider value={{ socket }}>
+    <PusherContext.Provider value={{ pusher }}>
       {children}
-    </SocketContext.Provider>
+    </PusherContext.Provider>
   );
 }; 

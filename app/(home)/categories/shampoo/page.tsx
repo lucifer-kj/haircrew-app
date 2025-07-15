@@ -1,3 +1,5 @@
+export const revalidate = 300;
+
 export default function ShampooCategoryPage() {
   return (
     <div className="container mx-auto py-12">

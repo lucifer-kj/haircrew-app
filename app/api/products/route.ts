@@ -1,3 +1,4 @@
+export const revalidate = 60;
 export const runtime = 'nodejs'
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
@@ -26,10 +27,16 @@ export async function GET(req: NextRequest) {
     
     // Search filter
     if (search) {
+      // Use full-text search if available, else fallback to ILIKE
       where.OR = [
         { name: { contains: search, mode: 'insensitive' } },
         { description: { contains: search, mode: 'insensitive' } },
       ];
+      // For advanced: If you want to use full-text search, you can use Prisma's $queryRaw like below (uncomment and adjust):
+      // const [products, total] = await prisma.$transaction([
+      //   prisma.$queryRaw`SELECT * FROM "Product" WHERE to_tsvector('english', name || ' ' || coalesce(description, '')) @@ plainto_tsquery('english', ${search}) LIMIT ${pageSize} OFFSET ${(page-1)*pageSize}`,
+      //   prisma.$queryRaw`SELECT COUNT(*) FROM "Product" WHERE to_tsvector('english', name || ' ' || coalesce(description, '')) @@ plainto_tsquery('english', ${search})`
+      // ])
     }
     
     // Price range filter

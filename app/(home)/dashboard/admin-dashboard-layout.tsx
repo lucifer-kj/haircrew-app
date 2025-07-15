@@ -8,7 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton-loader"
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts'
 import { BarChart, Bar, PieChart, Pie, Cell } from 'recharts'
 import Image from "next/image"
-import { useSocket } from '@/components/providers/socket-provider';
+import { usePusher } from '@/components/providers/socket-provider';
 import { useEffect } from 'react';
 import { useToast } from '@/components/ui/toast';
 
@@ -120,17 +120,19 @@ export default function AdminDashboardLayout({ children, metrics, revenueData = 
 
   const statusOptions = Array.from(new Set(recentOrders.map(o => o.status)))
 
-  const { socket } = useSocket();
+  const { pusher } = usePusher();
   const { showToast } = useToast();
   useEffect(() => {
-    if (!socket) return;
+    if (!pusher) return;
+    // Subscribe to a channel (replace 'admin-channel' with your actual channel name)
+    const channel = pusher.subscribe('admin-channel');
     const handleNewOrder = (order: { orderNumber: string; user?: { name?: string; email?: string }; total: number }) => {
       showToast(
         `New Order: #${order.orderNumber} from ${order.user?.name || order.user?.email || 'Customer'} (₹${order.total})`,
         'success'
       );
     };
-    socket.on('newOrder', handleNewOrder);
+    channel.bind('newOrder', handleNewOrder);
     // Stock update handler
     const handleStockUpdate = (product: { name: string; stock: number }) => {
       showToast(
@@ -138,12 +140,13 @@ export default function AdminDashboardLayout({ children, metrics, revenueData = 
         product.stock === 0 ? 'error' : product.stock < 10 ? 'info' : 'success'
       );
     };
-    socket.on('stockUpdate', handleStockUpdate);
+    channel.bind('stockUpdate', handleStockUpdate);
     return () => {
-      socket.off('newOrder', handleNewOrder);
-      socket.off('stockUpdate', handleStockUpdate);
+      channel.unbind('newOrder', handleNewOrder);
+      channel.unbind('stockUpdate', handleStockUpdate);
+      pusher.unsubscribe('admin-channel');
     };
-  }, [socket, showToast]);
+  }, [pusher, showToast]);
 
   // Export Orders CSV handler
   const handleExportOrders = async () => {

@@ -3,6 +3,8 @@ import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/auth"
 import { OrderStatus, PaymentStatus } from "@prisma/client"
+import { pusherServer } from '@/lib/pusher';
+import { sendOrderConfirmationEmail } from '@/lib/email';
 
 interface OrderItem {
   id: string
@@ -84,7 +86,15 @@ export async function POST(req: NextRequest) {
       },
       include: { orderItems: true },
     })
-    // Real-time notification removed for serverless compatibility
+    // Pusher: Notify admin of new order
+    await pusherServer.trigger('orders', 'new-order', {
+      orderId: order.id,
+      user: { id: user.id, name: user.name, email: user.email },
+      total: order.total,
+      createdAt: order.createdAt,
+    });
+    // Send order confirmation email
+    await sendOrderConfirmationEmail(user.email, user.name || '', order.id);
     return NextResponse.json({ id: order.id }, { status: 201 })
   } catch (e) {
     console.error(e)

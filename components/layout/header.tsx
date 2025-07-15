@@ -1,9 +1,9 @@
 "use client"
 
 import Link from "next/link"
-import { Search, Menu, X, ShoppingCart, Trash2, Home, Search as SearchIcon, User as UserIcon } from "lucide-react"
+import { Search, X, ShoppingCart, Trash2, Home, Search as SearchIcon, User as UserIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useRouter } from 'next/navigation'
 import { useCartStore } from "@/store/cart-store"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
@@ -12,6 +12,7 @@ import { useReducedMotion as useFramerReducedMotion } from "framer-motion";
 import { FocusTrap } from "@headlessui/react";
 import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
+import { signOut } from "next-auth/react";
 
 type SearchResult = { id: string; name: string; slug: string };
 function AutocompleteSearchBar() {
@@ -19,16 +20,23 @@ function AutocompleteSearchBar() {
   const [results, setResults] = useState<SearchResult[]>([]);
   const [show, setShow] = useState(false);
   const router = useRouter();
+  const debounceRef = useRef<NodeJS.Timeout | null>(null);
   useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
     if (search.length > 1) {
-      // TODO: Replace with real API call
-      fetch(`/api/products/latest?search=${encodeURIComponent(search)}`)
-        .then(res => res.json())
-        .then((data: SearchResult[]) => setResults(data.slice(0, 5)));
-      setShow(true);
+      debounceRef.current = setTimeout(() => {
+        fetch(`/api/products/latest?search=${encodeURIComponent(search)}`)
+          .then(res => res.json())
+          .then((data: SearchResult[]) => setResults(data.slice(0, 5)));
+        setShow(true);
+      }, 300);
     } else {
       setShow(false);
+      setResults([]);
     }
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
   }, [search]);
   return (
     <div className="relative w-full">
@@ -288,54 +296,40 @@ export function Header() {
               </PopoverContent>
             </Popover>
 
-            {/* User Menu - Hidden on mobile/small screens */}
+            {/* User/Account Dropdown */}
+            {session ? (
             <Popover>
               <PopoverTrigger asChild>
                 <motion.button
-                  className="p-2 text-gray-700 hover:text-secondary transition-colors hidden md:flex"
+                    className="p-2 rounded-full border border-gray-200 hover:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary"
                   whileHover={reduced ? undefined : { scale: 1.05 }}
                   whileTap={reduced ? undefined : { scale: 0.95 }}
                 >
-                  <UserIcon className="w-6 h-6" />
+                    <UserIcon className="w-6 h-6 text-gray-700" />
                 </motion.button>
               </PopoverTrigger>
               <PopoverContent align="end" className="w-48 p-0">
-                <div className="p-2">
-                  <Link href="/dashboard/profile" className="block px-3 py-2 text-sm hover:bg-gray-100 rounded">
-                    Profile
-                  </Link>
-                  <Link href="/dashboard/orders" className="block px-3 py-2 text-sm hover:bg-gray-100 rounded">
-                    Orders
-                  </Link>
-                  <Link href="/dashboard/wishlist" className="block px-3 py-2 text-sm hover:bg-gray-100 rounded">
-                    Wishlist
-                  </Link>
-                  {session?.user?.role === 'ADMIN' && (
-                    <>
-                      <hr className="my-1" />
+                  <ul className="py-2">
+                    <li>
+                      <Link href="/dashboard/profile" className="block px-4 py-2 text-gray-700 hover:bg-secondary/10 hover:text-secondary rounded transition-colors">Profile</Link>
+                    </li>
+                    <li>
+                      <Link href="/dashboard" className="block px-4 py-2 text-gray-700 hover:bg-secondary/10 hover:text-secondary rounded transition-colors">Dashboard</Link>
+                    </li>
+                    <li>
                       <button
-                        className="block w-full text-left px-3 py-2 text-sm text-secondary hover:bg-secondary/10 rounded"
-                        onClick={() => router.push('/dashboard')}
+                        onClick={() => signOut({ callbackUrl: "/" })}
+                        className="w-full text-left px-4 py-2 text-red-600 hover:bg-red-50 rounded transition-colors"
                       >
-                        Dashboard
+                        Logout
                       </button>
-                    </>
-                  )}
-                  <hr className="my-1" />
-                  <button className="block w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded">
-                    Sign Out
-                  </button>
-                </div>
+                    </li>
+                  </ul>
               </PopoverContent>
             </Popover>
-
-            {/* Mobile menu button */}
-            <button
-              onClick={() => setMobileNavOpen(!mobileNavOpen)}
-              className="lg:hidden p-2 text-gray-700 hover:text-secondary transition-colors"
-            >
-              {mobileNavOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-            </button>
+            ) : (
+              <Button onClick={() => router.push("/auth/signin")}>Sign In</Button>
+            )}
           </div>
         </div>
 

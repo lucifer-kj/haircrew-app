@@ -144,34 +144,36 @@
     - [X] Products with stock below threshold
     - [X] Quick restock actions
     - [X] Stock level indicators
-  - [ ] Top Products:
-    - [ ] Best-selling products list
-    - [ ] Revenue by product
-    - [ ] Stock status
+  - [X] Top Products:
+    - [X] Best-selling products list
+    - [X] Revenue by product
+    - [X] Stock status
   - [ ] Customer Insights:
     - [ ] New vs returning customers
     - [ ] Customer acquisition chart
     - [ ] Top customers by revenue
-  - [ ] Real-time Updates:
-    - [ ] Implement WebSocket connection
-    - [ ] Live order notifications
-    - [ ] Stock level updates
+  - [X] Real-time Updates:
+    - [X] Implement WebSocket connection
+    - [X] Live order notifications
+    - [X] Stock level updates
   - [ ] Export and Reports:
-    - [ ] CSV/PDF export functionality
+    - [X] CSV export functionality (Orders)
     - [ ] Custom date range selection
     - [ ] Report generation
-- [ ] Product management:
-  - [ ] CRUD operations
-  - [ ] Bulk actions
-  - [ ] Image upload (Uploadthing)
-- [ ] Order management:
-  - [ ] Order processing
-  - [ ] Status updates
-  - [ ] Refund handling
-- [ ] User management:
-  - [ ] Customer list
-  - [ ] Admin privileges
-  - [ ] User actions
+- [X] Product management:
+  - [X] CRUD operations
+  - [X] Bulk actions
+  - [X] Image upload (Uploadthing)
+- [X] Order management:
+  - [X] Order processing
+  - [X] Status updates
+  - [X] Refund handling
+  - [X] Real-time admin notification for 'I've Paid'
+  - [X] Email confirmation to customer on admin confirmation
+- [X] User management:
+  - [X] Customer list
+  - [X] Admin privileges
+  - [X] User actions 
 
 ### 5. Advanced Features [ ]
 

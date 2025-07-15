@@ -8,6 +8,9 @@ import { Skeleton } from "@/components/ui/skeleton-loader"
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts'
 import { BarChart, Bar, PieChart, Pie, Cell } from 'recharts'
 import Image from "next/image"
+import { useSocket } from '@/components/providers/socket-provider';
+import { useEffect } from 'react';
+import { useToast } from '@/components/ui/toast';
 
 const navItems = [
   { label: "Overview", href: "/dashboard", icon: LayoutDashboard },
@@ -53,6 +56,17 @@ interface LowStockProduct {
   image?: string
 }
 
+interface TopProduct {
+  id: string
+  name: string
+  images: string[]
+  price: number
+  stock: number
+  category?: string
+  totalSold: number
+  totalRevenue: number
+}
+
 interface AdminDashboardLayoutProps {
   children?: React.ReactNode
   metrics?: Metrics
@@ -62,13 +76,16 @@ interface AdminDashboardLayoutProps {
   orderStats?: OrderStats
   recentOrders?: RecentOrder[]
   lowStockProducts?: LowStockProduct[]
+  topProducts?: TopProduct[]
 }
 
-export default function AdminDashboardLayout({ children, metrics, revenueData = [], revenueFilter = 'monthly', onRevenueFilterChange, orderStats, recentOrders = [], lowStockProducts = [] }: AdminDashboardLayoutProps) {
+export default function AdminDashboardLayout({ children, metrics, revenueData = [], revenueFilter = 'monthly', onRevenueFilterChange, orderStats, recentOrders = [], lowStockProducts = [], topProducts = [] }: AdminDashboardLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [sortBy, setSortBy] = useState<'date'|'total'|'status'>('date')
   const [sortDir] = useState<'asc'|'desc'>('desc')
   const [statusFilter, setStatusFilter] = useState<string>('')
+  // Add state for date range
+  const [dateRange, setDateRange] = useState<{ start: string; end: string }>({ start: '', end: '' });
 
   // Format currency
   const formatCurrency = (value: number) => {
@@ -102,6 +119,51 @@ export default function AdminDashboardLayout({ children, metrics, revenueData = 
   })
 
   const statusOptions = Array.from(new Set(recentOrders.map(o => o.status)))
+
+  const { socket } = useSocket();
+  const { showToast } = useToast();
+  useEffect(() => {
+    if (!socket) return;
+    const handleNewOrder = (order: { orderNumber: string; user?: { name?: string; email?: string }; total: number }) => {
+      showToast(
+        `New Order: #${order.orderNumber} from ${order.user?.name || order.user?.email || 'Customer'} (₹${order.total})`,
+        'success'
+      );
+    };
+    socket.on('newOrder', handleNewOrder);
+    // Stock update handler
+    const handleStockUpdate = (product: { name: string; stock: number }) => {
+      showToast(
+        `${product.name} stock is now ${product.stock}`,
+        product.stock === 0 ? 'error' : product.stock < 10 ? 'info' : 'success'
+      );
+    };
+    socket.on('stockUpdate', handleStockUpdate);
+    return () => {
+      socket.off('newOrder', handleNewOrder);
+      socket.off('stockUpdate', handleStockUpdate);
+    };
+  }, [socket, showToast]);
+
+  // Export Orders CSV handler
+  const handleExportOrders = async () => {
+    const params = [];
+    if (dateRange.start) params.push(`start=${dateRange.start}`);
+    if (dateRange.end) params.push(`end=${dateRange.end}`);
+    const url = `/api/admin/export/orders${params.length ? '?' + params.join('&') : ''}`;
+    const res = await fetch(url);
+    if (!res.ok) {
+      showToast('Failed to export orders', 'error');
+      return;
+    }
+    const blob = await res.blob();
+    const link = document.createElement('a');
+    link.href = window.URL.createObjectURL(blob);
+    link.download = 'orders-export.csv';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   return (
     <div className="min-h-screen flex bg-gradient-to-br from-primary/10 to-secondary/10">
@@ -356,6 +418,92 @@ export default function AdminDashboardLayout({ children, metrics, revenueData = 
                 </table>
               </div>
             )}
+          </div>
+
+          {/* Top Products Section */}
+          <div className="bg-white dark:bg-slate-800/80 rounded-xl shadow p-6 mb-8">
+            <h2 className="text-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent mb-4">Top Products</h2>
+            {topProducts.length === 0 ? (
+              <div className="text-center py-8 text-slate-500">No top products found.</div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="min-w-full text-sm">
+                  <thead>
+                    <tr className="bg-slate-100 dark:bg-slate-900/40">
+                      <th className="p-2">Product</th>
+                      <th className="p-2">Category</th>
+                      <th className="p-2">Total Sold</th>
+                      <th className="p-2">Revenue</th>
+                      <th className="p-2">Stock</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {topProducts.map(product => (
+                      <tr key={product.id} className="border-b hover:bg-primary/5 transition">
+                        <td className="p-2 whitespace-nowrap flex items-center gap-2">
+                          {product.images && product.images[0] && (
+                            <Image
+                              src={product.images[0]}
+                              alt={product.name}
+                              width={32}
+                              height={32}
+                              className="rounded object-cover"
+                            />
+                          )}
+                          <span>{product.name}</span>
+                        </td>
+                        <td className="p-2 whitespace-nowrap">{product.category || '-'}</td>
+                        <td className="p-2 whitespace-nowrap font-semibold">{product.totalSold}</td>
+                        <td className="p-2 whitespace-nowrap font-semibold">₹{product.totalRevenue.toLocaleString()}</td>
+                        <td className="p-2 whitespace-nowrap">{product.stock}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+
+          {/* Export & Reports Section */}
+          <div className="bg-white dark:bg-slate-800/80 rounded-xl shadow p-6 mb-8">
+            <h2 className="text-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent mb-4">Export & Reports</h2>
+            <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-4">
+              {/* Date Range Picker (stub) */}
+              <div>
+                <label className="block text-sm font-medium mb-1">Date Range</label>
+                <div className="flex gap-2">
+                  <input
+                    type="date"
+                    value={dateRange.start}
+                    onChange={e => setDateRange(r => ({ ...r, start: e.target.value }))}
+                    className="border rounded px-2 py-1"
+                  />
+                  <span className="mx-1">to</span>
+                  <input
+                    type="date"
+                    value={dateRange.end}
+                    onChange={e => setDateRange(r => ({ ...r, end: e.target.value }))}
+                    className="border rounded px-2 py-1"
+                  />
+                </div>
+              </div>
+              {/* Export Buttons (stub) */}
+              <div className="flex gap-3">
+                <button
+                  className="px-4 py-2 rounded bg-primary text-white font-semibold shadow hover:bg-primary/80 transition"
+                  onClick={handleExportOrders}
+                >
+                  Export Orders (CSV)
+                </button>
+                <button className="px-4 py-2 rounded bg-secondary text-white font-semibold shadow hover:bg-secondary/80 transition" disabled>
+                  Export Products (CSV)
+                </button>
+                <button className="px-4 py-2 rounded bg-slate-500 text-white font-semibold shadow hover:bg-slate-600 transition" disabled>
+                  Export Customers (CSV)
+                </button>
+              </div>
+            </div>
+            <div className="text-xs text-slate-500">Select a date range and export data as CSV. PDF and advanced reports coming soon.</div>
           </div>
 
           <ErrorBoundary>

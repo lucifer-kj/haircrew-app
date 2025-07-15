@@ -11,6 +11,7 @@ import { AnimatePresence, motion } from "framer-motion"
 import { useReducedMotion as useFramerReducedMotion } from "framer-motion";
 import { FocusTrap } from "@headlessui/react";
 import { usePathname } from "next/navigation";
+import { useSession } from "next-auth/react";
 
 type SearchResult = { id: string; name: string; slug: string };
 function AutocompleteSearchBar() {
@@ -121,6 +122,7 @@ export function Header() {
   const router = useRouter();
   const reduced = useFramerReducedMotion();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const { data: session } = useSession();
   useEffect(() => {
     const handleScroll = (): void => setScrolled(window.scrollY > 10);
     window.addEventListener("scroll", handleScroll);
@@ -308,6 +310,17 @@ export function Header() {
                   <Link href="/dashboard/wishlist" className="block px-3 py-2 text-sm hover:bg-gray-100 rounded">
                     Wishlist
                   </Link>
+                  {session?.user?.role === 'ADMIN' && (
+                    <>
+                      <hr className="my-1" />
+                      <button
+                        className="block w-full text-left px-3 py-2 text-sm text-secondary hover:bg-secondary/10 rounded"
+                        onClick={() => router.push('/dashboard')}
+                      >
+                        Dashboard
+                      </button>
+                    </>
+                  )}
                   <hr className="my-1" />
                   <button className="block w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded">
                     Sign Out

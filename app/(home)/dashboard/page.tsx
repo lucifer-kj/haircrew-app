@@ -2,6 +2,7 @@ import { auth } from '@/auth'
 import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import AdminDashboardLayout from './admin-dashboard-layout'
+import { SocketProvider } from '@/components/providers/socket-provider';
 
 import { format } from 'date-fns'
 
@@ -82,6 +83,10 @@ export default async function DashboardPage(props: DashboardPageProps) {
       select: { id: true, name: true, stock: true, images: true }
     })
   ])
+
+  // Fetch top products from API
+  const topProductsRes = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || ''}/api/admin/top-products`, { cache: 'no-store' })
+  const { topProducts } = await topProductsRes.json()
   const revenue = Number(totalRevenue._sum.total) || 0
   const ordersCount = totalOrders || 0
   const customers = totalCustomers || 0
@@ -155,23 +160,26 @@ export default async function DashboardPage(props: DashboardPageProps) {
   }
 
   return (
-    <AdminDashboardLayout
-      metrics={{
-        totalRevenue: revenue,
-        totalOrders: ordersCount,
-        totalCustomers: customers,
-        averageOrderValue,
-      }}
-      revenueData={revenueData}
-      revenueFilter={safeFilter}
-      onRevenueFilterChange={handleRevenueFilterChange}
-      orderStats={{
-        volumeData,
-        statusData,
-        peakTimesData,
-      }}
-      recentOrders={recentOrders}
-      lowStockProducts={lowStockProducts}
-    />
+    <SocketProvider>
+      <AdminDashboardLayout
+        metrics={{
+          totalRevenue: revenue,
+          totalOrders: ordersCount,
+          totalCustomers: customers,
+          averageOrderValue,
+        }}
+        revenueData={revenueData}
+        revenueFilter={safeFilter}
+        onRevenueFilterChange={handleRevenueFilterChange}
+        orderStats={{
+          volumeData,
+          statusData,
+          peakTimesData,
+        }}
+        recentOrders={recentOrders}
+        lowStockProducts={lowStockProducts}
+        topProducts={topProducts}
+      />
+    </SocketProvider>
   )
 } 

@@ -84,6 +84,7 @@ export async function POST(req: NextRequest) {
       },
       include: { orderItems: true },
     })
+    // Real-time notification removed for serverless compatibility
     return NextResponse.json({ id: order.id }, { status: 201 })
   } catch (e) {
     console.error(e)

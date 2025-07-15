@@ -137,6 +137,15 @@ export default function OrderReviewPage() {
       credentials: "include",
     })
     const data = await res.json()
+    if (res.ok) {
+      // Immediately mark as PAID to trigger admin notification
+      await fetch("/api/order/status", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId: data.id, newStatus: "PAID" }),
+        credentials: "include",
+      })
+    }
     setIsPlacing(false)
     if (res.ok) {
       setModalOrderId(data.id)

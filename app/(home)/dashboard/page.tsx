@@ -1,3 +1,4 @@
+'use server'
 import { auth } from '@/auth'
 import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
@@ -33,7 +34,7 @@ function getDateFormat(filter: string) {
 }
 
 type DashboardPageProps = {
-  searchParams?: Promise<{ filter?: string }>
+  searchParams?: { filter?: string }
 }
 
 export default async function DashboardPage(props: DashboardPageProps) {
@@ -47,7 +48,7 @@ export default async function DashboardPage(props: DashboardPageProps) {
     redirect('/')
   }
 
-  const { filter } = (await props.searchParams) || {}
+  const { filter } = props.searchParams || {}
   const safeFilter = filter || 'monthly'
   const startDate = getStartDate(safeFilter)
   const dateFormat = getDateFormat(safeFilter)

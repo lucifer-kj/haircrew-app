@@ -16,7 +16,7 @@ export function Footer() {
       initial="hidden"
       animate={inView ? "show" : "hidden"}
       variants={reduced ? undefined : fadeIn}
-      className="bg-[#f7f6f3] text-black pt-8"
+      className="hidden bg-[#f7f6f3] text-black pt-8 lg:block"
     >
       <div className="container mx-auto px-4 py-8">
         {/* Condensed footer with minimal content */}

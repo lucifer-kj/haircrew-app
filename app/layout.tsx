@@ -25,7 +25,6 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "HairCrew - Professional Hair Care Products",
   description: "Your trusted partner for professional hair care products. Quality, innovation, and beauty in every bottle.",
-  viewport: "width=device-width, initial-scale=1, maximum-scale=5",
   // Improve SEO and sharing
   openGraph: {
     type: "website",
@@ -33,6 +32,12 @@ export const metadata: Metadata = {
     description: "Your trusted partner for professional hair care products. Quality, innovation, and beauty in every bottle.",
     siteName: "HairCrew",
   },
+};
+
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
 };
 
 export default function RootLayout({

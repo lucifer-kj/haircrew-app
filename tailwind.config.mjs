@@ -1,40 +1,12 @@
 const config = {
   content: [
-    './app/**/*.{js,ts,jsx,tsx}',
-    './components/**/*.{js,ts,jsx,tsx}',
-    './store/**/*.{js,ts,jsx,tsx}',
+    './app/**/*.{js,ts,jsx,tsx,mdx}',
+    './components/**/*.{js,ts,jsx,tsx,mdx}',
   ],
   theme: {
-    extend: {
-      colors: {
-        primary: 'var(--primary)',
-        secondary: 'var(--secondary)',
-        background: 'var(--background)',
-        accent: 'var(--accent)',
-      },
-      borderRadius: {
-        xl: '0.75rem', // from design.json
-        '2xl': '1rem',
-        full: '9999px',
-      },
-      fontFamily: {
-        sans: [
-          'Inter',
-          '-apple-system',
-          'BlinkMacSystemFont',
-          'Segoe UI',
-          'Roboto',
-          'sans-serif',
-        ],
-        headings: [
-          'Poppins',
-          'Inter',
-          'sans-serif',
-        ],
-      },
-    },
+    extend: {},
   },
   plugins: [],
-};
+}
 
-export default config; 
+export default config

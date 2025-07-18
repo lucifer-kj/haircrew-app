@@ -1,9 +1,9 @@
-"use client"
+'use client'
 
-import { useState, useEffect } from "react"
-import Image from "next/image"
-import { Button } from "@/components/ui/button"
-import { ChevronLeft, ChevronRight } from "lucide-react"
+import { useState, useEffect } from 'react'
+import Image from 'next/image'
+import { Button } from '@/components/ui/button'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 interface AutoCarouselProps {
   images: {
@@ -15,17 +15,17 @@ interface AutoCarouselProps {
   showIndicators?: boolean
 }
 
-export default function AutoCarousel({ 
-  images, 
-  interval = 4000, 
-  showControls = true, 
-  showIndicators = true 
+export default function AutoCarousel({
+  images,
+  interval = 4000,
+  showControls = true,
+  showIndicators = true,
 }: AutoCarouselProps) {
   const [currentSlide, setCurrentSlide] = useState(0)
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % images.length)
+      setCurrentSlide(prev => (prev + 1) % images.length)
     }, interval)
 
     return () => clearInterval(timer)
@@ -36,16 +36,16 @@ export default function AutoCarousel({
   }
 
   const goToPrevious = () => {
-    setCurrentSlide((prev) => (prev - 1 + images.length) % images.length)
+    setCurrentSlide(prev => (prev - 1 + images.length) % images.length)
   }
 
   const goToNext = () => {
-    setCurrentSlide((prev) => (prev + 1) % images.length)
+    setCurrentSlide(prev => (prev + 1) % images.length)
   }
 
   return (
     <div className="relative w-full overflow-hidden rounded-lg">
-      <div 
+      <div
         className="flex transition-transform duration-500 ease-in-out"
         style={{ transform: `translateX(-${currentSlide * 100}%)` }}
       >
@@ -101,4 +101,4 @@ export default function AutoCarousel({
       )}
     </div>
   )
-} 
+}

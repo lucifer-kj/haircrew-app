@@ -1,24 +1,25 @@
-import { auth } from "@/auth"
-import { redirect } from "next/navigation"
-import { prisma } from "@/lib/prisma"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Star } from "lucide-react"
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/auth'
+import { redirect } from 'next/navigation'
+import { prisma } from '@/lib/prisma'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Star } from 'lucide-react'
 
 export default async function ReviewsPage() {
-  const session = await auth()
-  
+  const session = await getServerSession(authOptions)
+
   if (!session?.user?.email) {
-    redirect("/auth/signin")
+    redirect('/auth/signin')
   }
 
   const user = await prisma.user.findUnique({
     where: { email: session.user.email },
-    select: { id: true }
+    select: { id: true },
   })
 
   if (!user) {
-    redirect("/auth/signin")
+    redirect('/auth/signin')
   }
 
   const reviews = await prisma.review.findMany({
@@ -27,11 +28,11 @@ export default async function ReviewsPage() {
       product: {
         select: {
           name: true,
-          slug: true
-        }
-      }
+          slug: true,
+        },
+      },
     },
-    orderBy: { createdAt: 'desc' }
+    orderBy: { createdAt: 'desc' },
   })
 
   const renderStars = (rating: number) => {
@@ -51,7 +52,7 @@ export default async function ReviewsPage() {
         <h1 className="text-3xl font-bold text-gray-900">My Reviews</h1>
         <p className="text-gray-600">Your product reviews and ratings</p>
       </div>
-      
+
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -75,7 +76,7 @@ export default async function ReviewsPage() {
                         <div className="flex items-center gap-2 mb-2">
                           <h3 className="font-medium">{review.product.name}</h3>
                           <Badge variant="outline">
-                            {review.isVerified ? "Verified" : "Pending"}
+                            {review.isVerified ? 'Verified' : 'Pending'}
                           </Badge>
                         </div>
                         <div className="flex items-center gap-1 mb-2">
@@ -85,10 +86,14 @@ export default async function ReviewsPage() {
                           </span>
                         </div>
                         {review.title && (
-                          <h4 className="font-semibold text-sm mb-1">{review.title}</h4>
+                          <h4 className="font-semibold text-sm mb-1">
+                            {review.title}
+                          </h4>
                         )}
                         {review.comment && (
-                          <p className="text-sm text-muted-foreground">{review.comment}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {review.comment}
+                          </p>
                         )}
                         <p className="text-xs text-muted-foreground mt-2">
                           {new Date(review.createdAt).toLocaleDateString()}
@@ -104,4 +109,4 @@ export default async function ReviewsPage() {
       </Card>
     </div>
   )
-} 
+}

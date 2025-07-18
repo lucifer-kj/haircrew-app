@@ -1,24 +1,43 @@
-"use client"
+'use client'
 
-import { useState, Suspense } from "react"
-import Link from "next/link"
-import { Menu, X, LayoutDashboard, ShoppingBag, Package, Users, BarChart2, Settings, IndianRupee } from "lucide-react"
-import { ErrorBoundary } from "@/components/ui/error-boundary"
-import { Skeleton } from "@/components/ui/skeleton-loader"
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts'
+import { useState, Suspense } from 'react'
+import Link from 'next/link'
+import {
+  Menu,
+  X,
+  LayoutDashboard,
+  ShoppingBag,
+  Package,
+  Users,
+  BarChart2,
+  Settings,
+  IndianRupee,
+} from 'lucide-react'
+import { ErrorBoundary } from '@/components/ui/error-boundary'
+import { Skeleton } from '@/components/ui/skeleton-loader'
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
+} from 'recharts'
 import { BarChart, Bar, PieChart, Pie, Cell } from 'recharts'
-import Image from "next/image"
-import { usePusher } from '@/components/providers/socket-provider';
-import { useEffect } from 'react';
-import { useToast } from '@/components/ui/toast';
+import Image from 'next/image'
+import { usePusher } from '@/components/providers/socket-provider'
+import { useEffect } from 'react'
+import { useToast } from '@/components/ui/toast'
 
 const navItems = [
-  { label: "Overview", href: "/dashboard", icon: LayoutDashboard },
-  { label: "Orders", href: "/dashboard/orders", icon: ShoppingBag },
-  { label: "Products", href: "/dashboard/products", icon: Package },
-  { label: "Customers", href: "/dashboard/customers", icon: Users },
-  { label: "Analytics", href: "/dashboard/analytics", icon: BarChart2 },
-  { label: "Settings", href: "/dashboard/settings", icon: Settings },
+  { label: 'Overview', href: '/dashboard', icon: LayoutDashboard },
+  { label: 'Orders', href: '/dashboard/orders', icon: ShoppingBag },
+  { label: 'Products', href: '/dashboard/products', icon: Package },
+  { label: 'Customers', href: '/dashboard/customers', icon: Users },
+  { label: 'Analytics', href: '/dashboard/analytics', icon: BarChart2 },
+  { label: 'Settings', href: '/dashboard/settings', icon: Settings },
 ]
 
 interface RevenueDataPoint {
@@ -34,9 +53,9 @@ interface Metrics {
 }
 
 interface OrderStats {
-  volumeData: { date: string, count: number }[]
-  statusData: { status: string, count: number }[]
-  peakTimesData: { hour: string, count: number }[]
+  volumeData: { date: string; count: number }[]
+  statusData: { status: string; count: number }[]
+  peakTimesData: { hour: string; count: number }[]
 }
 
 interface RecentOrder {
@@ -79,13 +98,26 @@ interface AdminDashboardLayoutProps {
   topProducts?: TopProduct[]
 }
 
-export default function AdminDashboardLayout({ children, metrics, revenueData = [], revenueFilter = 'monthly', onRevenueFilterChange, orderStats, recentOrders = [], lowStockProducts = [], topProducts = [] }: AdminDashboardLayoutProps) {
+export default function AdminDashboardLayout({
+  children,
+  metrics,
+  revenueData = [],
+  revenueFilter = 'monthly',
+  onRevenueFilterChange,
+  orderStats,
+  recentOrders = [],
+  lowStockProducts = [],
+  topProducts = [],
+}: AdminDashboardLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [sortBy, setSortBy] = useState<'date'|'total'|'status'>('date')
-  const [sortDir] = useState<'asc'|'desc'>('desc')
+  const [sortBy, setSortBy] = useState<'date' | 'total' | 'status'>('date')
+  const [sortDir] = useState<'asc' | 'desc'>('desc')
   const [statusFilter, setStatusFilter] = useState<string>('')
   // Add state for date range
-  const [dateRange, setDateRange] = useState<{ start: string; end: string }>({ start: '', end: '' });
+  const [dateRange, setDateRange] = useState<{ start: string; end: string }>({
+    start: '',
+    end: '',
+  })
 
   // Format currency
   const formatCurrency = (value: number) => {
@@ -120,53 +152,57 @@ export default function AdminDashboardLayout({ children, metrics, revenueData = 
 
   const statusOptions = Array.from(new Set(recentOrders.map(o => o.status)))
 
-  const { pusher } = usePusher();
-  const { showToast } = useToast();
+  const { pusher } = usePusher()
+  const { showToast } = useToast()
   useEffect(() => {
-    if (!pusher) return;
+    if (!pusher) return
     // Subscribe to a channel (replace 'admin-channel' with your actual channel name)
-    const channel = pusher.subscribe('admin-channel');
-    const handleNewOrder = (order: { orderNumber: string; user?: { name?: string; email?: string }; total: number }) => {
+    const channel = pusher.subscribe('admin-channel')
+    const handleNewOrder = (order: {
+      orderNumber: string
+      user?: { name?: string; email?: string }
+      total: number
+    }) => {
       showToast(
         `New Order: #${order.orderNumber} from ${order.user?.name || order.user?.email || 'Customer'} (₹${order.total})`,
         'success'
-      );
-    };
-    channel.bind('newOrder', handleNewOrder);
+      )
+    }
+    channel.bind('newOrder', handleNewOrder)
     // Stock update handler
     const handleStockUpdate = (product: { name: string; stock: number }) => {
       showToast(
         `${product.name} stock is now ${product.stock}`,
         product.stock === 0 ? 'error' : product.stock < 10 ? 'info' : 'success'
-      );
-    };
-    channel.bind('stockUpdate', handleStockUpdate);
+      )
+    }
+    channel.bind('stockUpdate', handleStockUpdate)
     return () => {
-      channel.unbind('newOrder', handleNewOrder);
-      channel.unbind('stockUpdate', handleStockUpdate);
-      pusher.unsubscribe('admin-channel');
-    };
-  }, [pusher, showToast]);
+      channel.unbind('newOrder', handleNewOrder)
+      channel.unbind('stockUpdate', handleStockUpdate)
+      pusher.unsubscribe('admin-channel')
+    }
+  }, [pusher, showToast])
 
   // Export Orders CSV handler
   const handleExportOrders = async () => {
-    const params = [];
-    if (dateRange.start) params.push(`start=${dateRange.start}`);
-    if (dateRange.end) params.push(`end=${dateRange.end}`);
-    const url = `/api/admin/export/orders${params.length ? '?' + params.join('&') : ''}`;
-    const res = await fetch(url);
+    const params = []
+    if (dateRange.start) params.push(`start=${dateRange.start}`)
+    if (dateRange.end) params.push(`end=${dateRange.end}`)
+    const url = `/api/admin/export/orders${params.length ? '?' + params.join('&') : ''}`
+    const res = await fetch(url)
     if (!res.ok) {
-      showToast('Failed to export orders', 'error');
-      return;
+      showToast('Failed to export orders', 'error')
+      return
     }
-    const blob = await res.blob();
-    const link = document.createElement('a');
-    link.href = window.URL.createObjectURL(blob);
-    link.download = 'orders-export.csv';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
+    const blob = await res.blob()
+    const link = document.createElement('a')
+    link.href = window.URL.createObjectURL(blob)
+    link.download = 'orders-export.csv'
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  }
 
   return (
     <div className="min-h-screen flex bg-gradient-to-br from-primary/10 to-secondary/10">
@@ -185,7 +221,9 @@ export default function AdminDashboardLayout({ children, metrics, revenueData = 
           ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 md:static md:block`}
       >
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-800">
-          <span className="font-bold text-xl bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Admin</span>
+          <span className="font-bold text-xl bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+            Admin
+          </span>
           <button
             className="md:hidden p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800"
             onClick={() => setSidebarOpen(false)}
@@ -226,30 +264,46 @@ export default function AdminDashboardLayout({ children, metrics, revenueData = 
               <div className="bg-white dark:bg-slate-800/80 rounded-xl shadow p-6 flex flex-col items-start">
                 <div className="flex items-center gap-2 mb-2">
                   <IndianRupee className="h-6 w-6 text-primary" />
-                  <span className="text-lg font-semibold text-slate-700 dark:text-white">Total Revenue</span>
+                  <span className="text-lg font-semibold text-slate-700 dark:text-white">
+                    Total Revenue
+                  </span>
                 </div>
-                <span className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">{formatCurrency(metrics.totalRevenue)}</span>
+                <span className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                  {formatCurrency(metrics.totalRevenue)}
+                </span>
               </div>
               <div className="bg-white dark:bg-slate-800/80 rounded-xl shadow p-6 flex flex-col items-start">
                 <div className="flex items-center gap-2 mb-2">
                   <ShoppingBag className="h-6 w-6 text-primary" />
-                  <span className="text-lg font-semibold text-slate-700 dark:text-white">Total Orders</span>
+                  <span className="text-lg font-semibold text-slate-700 dark:text-white">
+                    Total Orders
+                  </span>
                 </div>
-                <span className="text-2xl font-bold text-primary">{metrics.totalOrders}</span>
+                <span className="text-2xl font-bold text-primary">
+                  {metrics.totalOrders}
+                </span>
               </div>
               <div className="bg-white dark:bg-slate-800/80 rounded-xl shadow p-6 flex flex-col items-start">
                 <div className="flex items-center gap-2 mb-2">
                   <Users className="h-6 w-6 text-primary" />
-                  <span className="text-lg font-semibold text-slate-700 dark:text-white">Total Customers</span>
+                  <span className="text-lg font-semibold text-slate-700 dark:text-white">
+                    Total Customers
+                  </span>
                 </div>
-                <span className="text-2xl font-bold text-primary">{metrics.totalCustomers}</span>
+                <span className="text-2xl font-bold text-primary">
+                  {metrics.totalCustomers}
+                </span>
               </div>
               <div className="bg-white dark:bg-slate-800/80 rounded-xl shadow p-6 flex flex-col items-start">
                 <div className="flex items-center gap-2 mb-2">
                   <BarChart2 className="h-6 w-6 text-primary" />
-                  <span className="text-lg font-semibold text-slate-700 dark:text-white">Avg. Order Value</span>
+                  <span className="text-lg font-semibold text-slate-700 dark:text-white">
+                    Avg. Order Value
+                  </span>
                 </div>
-                <span className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">{formatCurrency(metrics.averageOrderValue)}</span>
+                <span className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                  {formatCurrency(metrics.averageOrderValue)}
+                </span>
               </div>
             </div>
           )}
@@ -257,13 +311,17 @@ export default function AdminDashboardLayout({ children, metrics, revenueData = 
           {/* Sales Analytics: Revenue Chart */}
           <div className="bg-white dark:bg-slate-800/80 rounded-xl shadow p-6 mb-8">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4 gap-4">
-              <h2 className="text-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Revenue Chart</h2>
+              <h2 className="text-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                Revenue Chart
+              </h2>
               <div className="flex gap-2">
                 {filterOptions.map(opt => (
                   <button
                     key={opt.value}
                     className={`px-3 py-1 rounded-full font-medium transition border border-primary/30 ${revenueFilter === opt.value ? 'bg-primary text-white' : 'bg-white dark:bg-slate-900 text-primary'}`}
-                    onClick={() => onRevenueFilterChange && onRevenueFilterChange(opt.value)}
+                    onClick={() =>
+                      onRevenueFilterChange && onRevenueFilterChange(opt.value)
+                    }
                   >
                     {opt.label}
                   </button>
@@ -271,13 +329,38 @@ export default function AdminDashboardLayout({ children, metrics, revenueData = 
               </div>
             </div>
             <ResponsiveContainer width="100%" height={320}>
-              <LineChart data={revenueData} margin={{ top: 16, right: 24, left: 0, bottom: 0 }}>
+              <LineChart
+                data={revenueData}
+                margin={{ top: 16, right: 24, left: 0, bottom: 0 }}
+              >
                 <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                <XAxis dataKey="date" tick={{ fontSize: 12, fill: '#64748b' }} />
-                <YAxis tickFormatter={formatCurrency} tick={{ fontSize: 12, fill: '#64748b' }} />
-                <Tooltip formatter={formatCurrency} labelStyle={{ color: '#334155' }} contentStyle={{ background: '#fff', borderRadius: 8, border: '1px solid #e5e7eb' }} />
+                <XAxis
+                  dataKey="date"
+                  tick={{ fontSize: 12, fill: '#64748b' }}
+                />
+                <YAxis
+                  tickFormatter={formatCurrency}
+                  tick={{ fontSize: 12, fill: '#64748b' }}
+                />
+                <Tooltip
+                  formatter={formatCurrency}
+                  labelStyle={{ color: '#334155' }}
+                  contentStyle={{
+                    background: '#fff',
+                    borderRadius: 8,
+                    border: '1px solid #e5e7eb',
+                  }}
+                />
                 <Legend />
-                <Line type="monotone" dataKey="revenue" stroke="#6366f1" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} name="Revenue" />
+                <Line
+                  type="monotone"
+                  dataKey="revenue"
+                  stroke="#6366f1"
+                  strokeWidth={3}
+                  dot={{ r: 4 }}
+                  activeDot={{ r: 6 }}
+                  name="Revenue"
+                />
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -287,25 +370,53 @@ export default function AdminDashboardLayout({ children, metrics, revenueData = 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
               {/* Order Volume Bar Chart */}
               <div className="bg-white dark:bg-slate-800/80 rounded-xl shadow p-6 flex flex-col">
-                <h3 className="text-lg font-bold mb-4 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Order Volume</h3>
+                <h3 className="text-lg font-bold mb-4 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                  Order Volume
+                </h3>
                 <ResponsiveContainer width="100%" height={220}>
-                  <BarChart data={orderStats.volumeData} margin={{ top: 8, right: 16, left: 0, bottom: 0 }}>
+                  <BarChart
+                    data={orderStats.volumeData}
+                    margin={{ top: 8, right: 16, left: 0, bottom: 0 }}
+                  >
                     <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                    <XAxis dataKey="date" tick={{ fontSize: 12, fill: '#64748b' }} />
+                    <XAxis
+                      dataKey="date"
+                      tick={{ fontSize: 12, fill: '#64748b' }}
+                    />
                     <YAxis tick={{ fontSize: 12, fill: '#64748b' }} />
-                    <Tooltip labelStyle={{ color: '#334155' }} contentStyle={{ background: '#fff', borderRadius: 8, border: '1px solid #e5e7eb' }} />
+                    <Tooltip
+                      labelStyle={{ color: '#334155' }}
+                      contentStyle={{
+                        background: '#fff',
+                        borderRadius: 8,
+                        border: '1px solid #e5e7eb',
+                      }}
+                    />
                     <Bar dataKey="count" fill="#6366f1" name="Orders" />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
               {/* Order Status Pie Chart */}
               <div className="bg-white dark:bg-slate-800/80 rounded-xl shadow p-6 flex flex-col">
-                <h3 className="text-lg font-bold mb-4 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Order Status Distribution</h3>
+                <h3 className="text-lg font-bold mb-4 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                  Order Status Distribution
+                </h3>
                 <ResponsiveContainer width="100%" height={220}>
                   <PieChart>
-                    <Pie data={orderStats.statusData} dataKey="count" nameKey="status" cx="50%" cy="50%" outerRadius={80} label>
+                    <Pie
+                      data={orderStats.statusData}
+                      dataKey="count"
+                      nameKey="status"
+                      cx="50%"
+                      cy="50%"
+                      outerRadius={80}
+                      label
+                    >
                       {orderStats.statusData.map((entry, idx) => (
-                        <Cell key={`cell-${idx}`} fill={statusColors[idx % statusColors.length]} />
+                        <Cell
+                          key={`cell-${idx}`}
+                          fill={statusColors[idx % statusColors.length]}
+                        />
                       ))}
                     </Pie>
                     <Tooltip />
@@ -314,13 +425,28 @@ export default function AdminDashboardLayout({ children, metrics, revenueData = 
               </div>
               {/* Peak Ordering Times Bar Chart */}
               <div className="bg-white dark:bg-slate-800/80 rounded-xl shadow p-6 flex flex-col">
-                <h3 className="text-lg font-bold mb-4 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Peak Ordering Times</h3>
+                <h3 className="text-lg font-bold mb-4 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                  Peak Ordering Times
+                </h3>
                 <ResponsiveContainer width="100%" height={220}>
-                  <BarChart data={orderStats.peakTimesData} margin={{ top: 8, right: 16, left: 0, bottom: 0 }}>
+                  <BarChart
+                    data={orderStats.peakTimesData}
+                    margin={{ top: 8, right: 16, left: 0, bottom: 0 }}
+                  >
                     <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                    <XAxis dataKey="hour" tick={{ fontSize: 12, fill: '#64748b' }} />
+                    <XAxis
+                      dataKey="hour"
+                      tick={{ fontSize: 12, fill: '#64748b' }}
+                    />
                     <YAxis tick={{ fontSize: 12, fill: '#64748b' }} />
-                    <Tooltip labelStyle={{ color: '#334155' }} contentStyle={{ background: '#fff', borderRadius: 8, border: '1px solid #e5e7eb' }} />
+                    <Tooltip
+                      labelStyle={{ color: '#334155' }}
+                      contentStyle={{
+                        background: '#fff',
+                        borderRadius: 8,
+                        border: '1px solid #e5e7eb',
+                      }}
+                    />
                     <Bar dataKey="count" fill="#22c55e" name="Orders" />
                   </BarChart>
                 </ResponsiveContainer>
@@ -331,13 +457,21 @@ export default function AdminDashboardLayout({ children, metrics, revenueData = 
           {/* Recent Orders Table */}
           <div className="bg-white dark:bg-slate-800/80 rounded-xl shadow p-6 mb-8 overflow-x-auto">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4 gap-4">
-              <h2 className="text-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Recent Orders</h2>
+              <h2 className="text-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                Recent Orders
+              </h2>
               <div className="flex gap-2 items-center">
                 <label className="text-sm font-medium mr-2">Status:</label>
-                <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} className="rounded border px-2 py-1">
+                <select
+                  value={statusFilter}
+                  onChange={e => setStatusFilter(e.target.value)}
+                  className="rounded border px-2 py-1"
+                >
                   <option value="">All</option>
                   {statusOptions.map(status => (
-                    <option key={status} value={status}>{status}</option>
+                    <option key={status} value={status}>
+                      {status}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -345,41 +479,93 @@ export default function AdminDashboardLayout({ children, metrics, revenueData = 
             <table className="min-w-full text-sm">
               <thead>
                 <tr className="bg-slate-100 dark:bg-slate-900/40">
-                  <th className="p-2 cursor-pointer" onClick={() => setSortBy('date')}>Date {sortBy==='date' ? (sortDir==='asc'?'↑':'↓') : ''}</th>
+                  <th
+                    className="p-2 cursor-pointer"
+                    onClick={() => setSortBy('date')}
+                  >
+                    Date{' '}
+                    {sortBy === 'date' ? (sortDir === 'asc' ? '↑' : '↓') : ''}
+                  </th>
                   <th className="p-2">Order ID</th>
                   <th className="p-2">Customer</th>
-                  <th className="p-2 cursor-pointer" onClick={() => setSortBy('total')}>Total {sortBy==='total' ? (sortDir==='asc'?'↑':'↓') : ''}</th>
-                  <th className="p-2 cursor-pointer" onClick={() => setSortBy('status')}>Status {sortBy==='status' ? (sortDir==='asc'?'↑':'↓') : ''}</th>
+                  <th
+                    className="p-2 cursor-pointer"
+                    onClick={() => setSortBy('total')}
+                  >
+                    Total{' '}
+                    {sortBy === 'total' ? (sortDir === 'asc' ? '↑' : '↓') : ''}
+                  </th>
+                  <th
+                    className="p-2 cursor-pointer"
+                    onClick={() => setSortBy('status')}
+                  >
+                    Status{' '}
+                    {sortBy === 'status' ? (sortDir === 'asc' ? '↑' : '↓') : ''}
+                  </th>
                   <th className="p-2">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {displayedOrders.map(order => (
-                  <tr key={order.id} className="border-b hover:bg-primary/5 transition">
+                  <tr
+                    key={order.id}
+                    className="border-b hover:bg-primary/5 transition"
+                  >
                     <td className="p-2 whitespace-nowrap">{order.date}</td>
-                    <td className="p-2 whitespace-nowrap font-mono">{order.orderNumber}</td>
+                    <td className="p-2 whitespace-nowrap font-mono">
+                      {order.orderNumber}
+                    </td>
                     <td className="p-2 whitespace-nowrap">{order.customer}</td>
-                    <td className="p-2 whitespace-nowrap font-semibold">₹{order.total.toFixed(2)}</td>
+                    <td className="p-2 whitespace-nowrap font-semibold">
+                      ₹{order.total.toFixed(2)}
+                    </td>
                     <td className="p-2 whitespace-nowrap">
-                      <span className={`px-2 py-1 rounded-full text-xs font-semibold ${order.status === 'DELIVERED' ? 'bg-green-100 text-green-700' : order.status === 'CANCELLED' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'}`}>{order.status}</span>
+                      <span
+                        className={`px-2 py-1 rounded-full text-xs font-semibold ${order.status === 'DELIVERED' ? 'bg-green-100 text-green-700' : order.status === 'CANCELLED' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'}`}
+                      >
+                        {order.status}
+                      </span>
                     </td>
                     <td className="p-2 whitespace-nowrap flex gap-2">
-                      <button className="px-2 py-1 rounded bg-primary text-white text-xs" title="View">View</button>
-                      <button className="px-2 py-1 rounded bg-secondary text-white text-xs" title="Process">Process</button>
-                      <button className="px-2 py-1 rounded bg-slate-500 text-white text-xs" title="Update Status">Update</button>
+                      <button
+                        className="px-2 py-1 rounded bg-primary text-white text-xs"
+                        title="View"
+                      >
+                        View
+                      </button>
+                      <button
+                        className="px-2 py-1 rounded bg-secondary text-white text-xs"
+                        title="Process"
+                      >
+                        Process
+                      </button>
+                      <button
+                        className="px-2 py-1 rounded bg-slate-500 text-white text-xs"
+                        title="Update Status"
+                      >
+                        Update
+                      </button>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
-            {displayedOrders.length === 0 && <div className="text-center py-8 text-slate-500">No orders found.</div>}
+            {displayedOrders.length === 0 && (
+              <div className="text-center py-8 text-slate-500">
+                No orders found.
+              </div>
+            )}
           </div>
 
           {/* Low Stock Alerts */}
           <div className="bg-white dark:bg-slate-800/80 rounded-xl shadow p-6 mb-8">
-            <h2 className="text-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent mb-4">Low Stock Alerts</h2>
+            <h2 className="text-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent mb-4">
+              Low Stock Alerts
+            </h2>
             {lowStockProducts.length === 0 ? (
-              <div className="text-center py-8 text-slate-500">No products are low in stock.</div>
+              <div className="text-center py-8 text-slate-500">
+                No products are low in stock.
+              </div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="min-w-full text-sm">
@@ -394,7 +580,10 @@ export default function AdminDashboardLayout({ children, metrics, revenueData = 
                   </thead>
                   <tbody>
                     {lowStockProducts.map(product => (
-                      <tr key={product.id} className="border-b hover:bg-primary/5 transition">
+                      <tr
+                        key={product.id}
+                        className="border-b hover:bg-primary/5 transition"
+                      >
                         <td className="p-2 whitespace-nowrap flex items-center gap-2">
                           {product.image && (
                             <Image
@@ -407,13 +596,28 @@ export default function AdminDashboardLayout({ children, metrics, revenueData = 
                           )}
                           <span>{product.name}</span>
                         </td>
-                        <td className="p-2 whitespace-nowrap font-semibold">{product.stock}</td>
-                        <td className="p-2 whitespace-nowrap">{product.threshold}</td>
-                        <td className="p-2 whitespace-nowrap">
-                          <span className={`px-2 py-1 rounded-full text-xs font-semibold ${product.stock < product.threshold ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'}`}>{product.stock < product.threshold ? 'Low' : 'Warning'}</span>
+                        <td className="p-2 whitespace-nowrap font-semibold">
+                          {product.stock}
                         </td>
                         <td className="p-2 whitespace-nowrap">
-                          <button className="px-2 py-1 rounded bg-primary text-white text-xs" title="Restock">Restock</button>
+                          {product.threshold}
+                        </td>
+                        <td className="p-2 whitespace-nowrap">
+                          <span
+                            className={`px-2 py-1 rounded-full text-xs font-semibold ${product.stock < product.threshold ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'}`}
+                          >
+                            {product.stock < product.threshold
+                              ? 'Low'
+                              : 'Warning'}
+                          </span>
+                        </td>
+                        <td className="p-2 whitespace-nowrap">
+                          <button
+                            className="px-2 py-1 rounded bg-primary text-white text-xs"
+                            title="Restock"
+                          >
+                            Restock
+                          </button>
                         </td>
                       </tr>
                     ))}
@@ -425,9 +629,13 @@ export default function AdminDashboardLayout({ children, metrics, revenueData = 
 
           {/* Top Products Section */}
           <div className="bg-white dark:bg-slate-800/80 rounded-xl shadow p-6 mb-8">
-            <h2 className="text-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent mb-4">Top Products</h2>
+            <h2 className="text-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent mb-4">
+              Top Products
+            </h2>
             {topProducts.length === 0 ? (
-              <div className="text-center py-8 text-slate-500">No top products found.</div>
+              <div className="text-center py-8 text-slate-500">
+                No top products found.
+              </div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="min-w-full text-sm">
@@ -442,7 +650,10 @@ export default function AdminDashboardLayout({ children, metrics, revenueData = 
                   </thead>
                   <tbody>
                     {topProducts.map(product => (
-                      <tr key={product.id} className="border-b hover:bg-primary/5 transition">
+                      <tr
+                        key={product.id}
+                        className="border-b hover:bg-primary/5 transition"
+                      >
                         <td className="p-2 whitespace-nowrap flex items-center gap-2">
                           {product.images && product.images[0] && (
                             <Image
@@ -455,10 +666,18 @@ export default function AdminDashboardLayout({ children, metrics, revenueData = 
                           )}
                           <span>{product.name}</span>
                         </td>
-                        <td className="p-2 whitespace-nowrap">{product.category || '-'}</td>
-                        <td className="p-2 whitespace-nowrap font-semibold">{product.totalSold}</td>
-                        <td className="p-2 whitespace-nowrap font-semibold">₹{product.totalRevenue.toLocaleString()}</td>
-                        <td className="p-2 whitespace-nowrap">{product.stock}</td>
+                        <td className="p-2 whitespace-nowrap">
+                          {product.category || '-'}
+                        </td>
+                        <td className="p-2 whitespace-nowrap font-semibold">
+                          {product.totalSold}
+                        </td>
+                        <td className="p-2 whitespace-nowrap font-semibold">
+                          ₹{product.totalRevenue.toLocaleString()}
+                        </td>
+                        <td className="p-2 whitespace-nowrap">
+                          {product.stock}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -469,23 +688,31 @@ export default function AdminDashboardLayout({ children, metrics, revenueData = 
 
           {/* Export & Reports Section */}
           <div className="bg-white dark:bg-slate-800/80 rounded-xl shadow p-6 mb-8">
-            <h2 className="text-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent mb-4">Export & Reports</h2>
+            <h2 className="text-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent mb-4">
+              Export & Reports
+            </h2>
             <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-4">
               {/* Date Range Picker (stub) */}
               <div>
-                <label className="block text-sm font-medium mb-1">Date Range</label>
+                <label className="block text-sm font-medium mb-1">
+                  Date Range
+                </label>
                 <div className="flex gap-2">
                   <input
                     type="date"
                     value={dateRange.start}
-                    onChange={e => setDateRange(r => ({ ...r, start: e.target.value }))}
+                    onChange={e =>
+                      setDateRange(r => ({ ...r, start: e.target.value }))
+                    }
                     className="border rounded px-2 py-1"
                   />
                   <span className="mx-1">to</span>
                   <input
                     type="date"
                     value={dateRange.end}
-                    onChange={e => setDateRange(r => ({ ...r, end: e.target.value }))}
+                    onChange={e =>
+                      setDateRange(r => ({ ...r, end: e.target.value }))
+                    }
                     className="border rounded px-2 py-1"
                   />
                 </div>
@@ -498,23 +725,37 @@ export default function AdminDashboardLayout({ children, metrics, revenueData = 
                 >
                   Export Orders (CSV)
                 </button>
-                <button className="px-4 py-2 rounded bg-secondary text-white font-semibold shadow hover:bg-secondary/80 transition" disabled>
+                <button
+                  className="px-4 py-2 rounded bg-secondary text-white font-semibold shadow hover:bg-secondary/80 transition"
+                  disabled
+                >
                   Export Products (CSV)
                 </button>
-                <button className="px-4 py-2 rounded bg-slate-500 text-white font-semibold shadow hover:bg-slate-600 transition" disabled>
+                <button
+                  className="px-4 py-2 rounded bg-slate-500 text-white font-semibold shadow hover:bg-slate-600 transition"
+                  disabled
+                >
                   Export Customers (CSV)
                 </button>
               </div>
             </div>
-            <div className="text-xs text-slate-500">Select a date range and export data as CSV. PDF and advanced reports coming soon.</div>
+            <div className="text-xs text-slate-500">
+              Select a date range and export data as CSV. PDF and advanced
+              reports coming soon.
+            </div>
           </div>
 
           <ErrorBoundary>
             <Suspense fallback={<Skeleton className="h-40 w-full mb-6" />}>
               {children || (
                 <div className="text-center py-24">
-                  <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent mb-4">Welcome, Admin!</h1>
-                  <p className="text-lg text-slate-600 dark:text-slate-300">This is your dashboard overview. Use the sidebar to navigate.</p>
+                  <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent mb-4">
+                    Welcome, Admin!
+                  </h1>
+                  <p className="text-lg text-slate-600 dark:text-slate-300">
+                    This is your dashboard overview. Use the sidebar to
+                    navigate.
+                  </p>
                 </div>
               )}
             </Suspense>
@@ -523,4 +764,4 @@ export default function AdminDashboardLayout({ children, metrics, revenueData = 
       </main>
     </div>
   )
-} 
+}

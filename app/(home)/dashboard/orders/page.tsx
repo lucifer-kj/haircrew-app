@@ -1,22 +1,23 @@
-import { auth } from "@/auth"
-import { redirect } from "next/navigation"
-import { prisma } from "@/lib/prisma"
-import OrdersClient from "./orders-client"
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/auth'
+import { redirect } from 'next/navigation'
+import { prisma } from '@/lib/prisma'
+import OrdersClient from './orders-client'
 
 export default async function OrdersPage() {
-  const session = await auth()
-  
+  const session = await getServerSession(authOptions)
+
   if (!session?.user?.email) {
-    redirect("/auth/signin")
+    redirect('/auth/signin')
   }
 
   const user = await prisma.user.findUnique({
     where: { email: session.user.email },
-    select: { id: true }
+    select: { id: true },
   })
 
   if (!user) {
-    redirect("/auth/signin")
+    redirect('/auth/signin')
   }
 
   const orders = await prisma.order.findMany({
@@ -28,13 +29,13 @@ export default async function OrdersPage() {
             select: {
               name: true,
               images: true,
-              slug: true
-            }
-          }
-        }
-      }
+              slug: true,
+            },
+          },
+        },
+      },
     },
-    orderBy: { createdAt: 'desc' }
+    orderBy: { createdAt: 'desc' },
   })
 
   // Convert dates to strings for client component
@@ -49,15 +50,15 @@ export default async function OrdersPage() {
       quantity: item.quantity,
       price: item.price.toString(),
       createdAt: item.createdAt.toISOString(),
-      product: item.product ? {
-        name: item.product.name,
-        images: item.product.images,
-        slug: item.product.slug
-      } : undefined
-    }))
+      product: item.product
+        ? {
+            name: item.product.name,
+            images: item.product.images,
+            slug: item.product.slug,
+          }
+        : undefined,
+    })),
   }))
 
-  return (
-    <OrdersClient orders={serializedOrders} />
-  )
-} 
+  return <OrdersClient orders={serializedOrders} />
+}

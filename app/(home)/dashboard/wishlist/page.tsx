@@ -1,26 +1,27 @@
-import { auth } from "@/auth"
-import { redirect } from "next/navigation"
-import { prisma } from "@/lib/prisma"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Heart } from "lucide-react"
-import Image from "next/image"
-import Link from "next/link"
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/auth'
+import { redirect } from 'next/navigation'
+import { prisma } from '@/lib/prisma'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Heart } from 'lucide-react'
+import Image from 'next/image'
+import Link from 'next/link'
 
 export default async function WishlistPage() {
-  const session = await auth()
-  
+  const session = await getServerSession(authOptions)
+
   if (!session?.user?.email) {
-    redirect("/auth/signin")
+    redirect('/auth/signin')
   }
 
   const user = await prisma.user.findUnique({
     where: { email: session.user.email },
-    select: { id: true }
+    select: { id: true },
   })
 
   if (!user) {
-    redirect("/auth/signin")
+    redirect('/auth/signin')
   }
 
   const wishlist = await prisma.wishlist.findMany({
@@ -32,11 +33,11 @@ export default async function WishlistPage() {
           name: true,
           price: true,
           images: true,
-          slug: true
-        }
-      }
+          slug: true,
+        },
+      },
     },
-    orderBy: { createdAt: 'desc' }
+    orderBy: { createdAt: 'desc' },
   })
 
   return (
@@ -45,7 +46,7 @@ export default async function WishlistPage() {
         <h1 className="text-3xl font-bold text-gray-900">Wishlist</h1>
         <p className="text-gray-600">Your saved items</p>
       </div>
-      
+
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -64,23 +65,26 @@ export default async function WishlistPage() {
               {wishlist.map(item => (
                 <Card key={item.id} className="overflow-hidden">
                   <div className="relative">
-                    <Image 
-                      src={item.product.images[0] || '/placeholder.jpg'} 
-                      alt={item.product.name} 
-                      width={300} 
-                      height={200} 
-                      className="w-full h-48 object-cover" 
+                    <Image
+                      src={item.product.images[0] || '/placeholder.jpg'}
+                      alt={item.product.name}
+                      width={300}
+                      height={200}
+                      className="w-full h-48 object-cover"
                     />
                   </div>
                   <CardContent className="p-4">
-                    <h3 className="font-semibold mb-2 line-clamp-2">{item.product.name}</h3>
+                    <h3 className="font-semibold mb-2 line-clamp-2">
+                      {item.product.name}
+                    </h3>
                     <p className="text-lg font-bold text-primary mb-3">
                       ₹{parseFloat(item.product.price.toString()).toFixed(2)}
                     </p>
-                    <Link href={`/products/${item.product.slug}`} className="w-full inline-block">
-                      <Button className="w-full">
-                        View Product
-                      </Button>
+                    <Link
+                      href={`/products/${item.product.slug}`}
+                      className="w-full inline-block"
+                    >
+                      <Button className="w-full">View Product</Button>
                     </Link>
                   </CardContent>
                 </Card>
@@ -91,4 +95,4 @@ export default async function WishlistPage() {
       </Card>
     </div>
   )
-} 
+}

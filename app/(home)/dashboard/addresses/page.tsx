@@ -1,27 +1,28 @@
-import { auth } from "@/auth"
-import { redirect } from "next/navigation"
-import { prisma } from "@/lib/prisma"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { MapPin } from "lucide-react"
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/auth'
+import { redirect } from 'next/navigation'
+import { prisma } from '@/lib/prisma'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { MapPin } from 'lucide-react'
 
 export default async function AddressesPage() {
-  const session = await auth()
-  
+  const session = await getServerSession(authOptions)
+
   if (!session?.user?.email) {
-    redirect("/auth/signin")
+    redirect('/auth/signin')
   }
 
   const user = await prisma.user.findUnique({
     where: { email: session.user.email },
-    select: { id: true }
+    select: { id: true },
   })
 
   if (!user) {
-    redirect("/auth/signin")
+    redirect('/auth/signin')
   }
 
   const addresses = await prisma.address.findMany({
-    where: { userId: user.id }
+    where: { userId: user.id },
   })
 
   return (
@@ -30,7 +31,7 @@ export default async function AddressesPage() {
         <h1 className="text-3xl font-bold text-gray-900">Saved Addresses</h1>
         <p className="text-gray-600">Manage your shipping addresses</p>
       </div>
-      
+
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -55,7 +56,9 @@ export default async function AddressesPage() {
                         <p className="text-sm text-muted-foreground">
                           {addr.city}, {addr.state} {addr.pincode}
                         </p>
-                        <p className="text-sm text-muted-foreground">{addr.country}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {addr.country}
+                        </p>
                       </div>
                     </div>
                   </CardContent>
@@ -67,4 +70,4 @@ export default async function AddressesPage() {
       </Card>
     </div>
   )
-} 
+}

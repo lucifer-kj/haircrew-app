@@ -4,7 +4,10 @@ import { getToken } from 'next-auth/jwt'
 
 // This middleware protects all /dashboard routes for ADMINs only
 export async function middleware(request: NextRequest) {
-  const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET })
+  const token = await getToken({
+    req: request,
+    secret: process.env.NEXTAUTH_SECRET,
+  })
 
   // Not signed in
   if (!token) {
@@ -22,4 +25,4 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: ['/dashboard/:path*'],
-} 
+}

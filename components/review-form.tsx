@@ -1,43 +1,47 @@
-"use client"
+'use client'
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Card, CardContent, CardTitle } from "@/components/ui/card"
-import StarRating from "./star-rating"
+import { useState } from 'react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
+import { Card, CardContent, CardTitle } from '@/components/ui/card'
+import StarRating from './star-rating'
+import { toast } from 'sonner'
 
 interface ReviewFormProps {
   onSubmit: (review: { rating: number; title: string; comment: string }) => void
   isSubmitting?: boolean
 }
 
-export default function ReviewForm({ onSubmit, isSubmitting = false }: ReviewFormProps) {
+export default function ReviewForm({
+  onSubmit,
+  isSubmitting = false,
+}: ReviewFormProps) {
   const [rating, setRating] = useState(0)
-  const [title, setTitle] = useState("")
-  const [comment, setComment] = useState("")
+  const [title, setTitle] = useState('')
+  const [comment, setComment] = useState('')
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (rating === 0) {
-      alert("Please select a rating")
+      toast.error('Please select a rating')
       return
     }
     if (!title.trim()) {
-      alert("Please enter a review title")
+      toast.error('Please enter a review title')
       return
     }
     if (!comment.trim()) {
-      alert("Please enter a review comment")
+      toast.error('Please enter a review comment')
       return
     }
-    
+
     onSubmit({ rating, title: title.trim(), comment: comment.trim() })
-    
+
     // Reset form
     setRating(0)
-    setTitle("")
-    setComment("")
+    setTitle('')
+    setComment('')
   }
 
   return (
@@ -66,7 +70,7 @@ export default function ReviewForm({ onSubmit, isSubmitting = false }: ReviewFor
               id="title"
               type="text"
               value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              onChange={e => setTitle(e.target.value)}
               placeholder="Summarize your experience"
               maxLength={100}
               required
@@ -81,7 +85,7 @@ export default function ReviewForm({ onSubmit, isSubmitting = false }: ReviewFor
             <Textarea
               id="comment"
               value={comment}
-              onChange={(e) => setComment(e.target.value)}
+              onChange={e => setComment(e.target.value)}
               placeholder="Share your detailed thoughts about this product..."
               rows={4}
               maxLength={500}
@@ -95,13 +99,15 @@ export default function ReviewForm({ onSubmit, isSubmitting = false }: ReviewFor
           {/* Submit Button */}
           <Button
             type="submit"
-            disabled={isSubmitting || rating === 0 || !title.trim() || !comment.trim()}
+            disabled={
+              isSubmitting || rating === 0 || !title.trim() || !comment.trim()
+            }
             className="w-full"
           >
-            {isSubmitting ? "Submitting..." : "Submit Review"}
+            {isSubmitting ? 'Submitting...' : 'Submit Review'}
           </Button>
         </form>
       </CardContent>
     </Card>
   )
-} 
+}

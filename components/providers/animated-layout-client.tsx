@@ -1,14 +1,18 @@
-"use client";
+'use client'
 
-import { ReactNode } from "react";
-import { AnimatePresence, motion } from "framer-motion";
-import { fadeSlidePageTransition } from "@/lib/motion.config";
-import { useReducedMotion } from "@/lib/useReducedMotion";
-import { usePathname } from "next/navigation";
+import { ReactNode } from 'react'
+import { AnimatePresence, motion } from 'framer-motion'
+import { fadeSlidePageTransition } from '@/lib/motion.config'
+import { useReducedMotion } from '@/lib/useReducedMotion'
+import { usePathname } from 'next/navigation'
 
-export default function AnimatedLayoutClient({ children }: { children: ReactNode }) {
-  const reduced = useReducedMotion();
-  const pathname = usePathname();
+export default function AnimatedLayoutClient({
+  children,
+}: {
+  children: ReactNode
+}) {
+  const reduced = useReducedMotion()
+  const pathname = usePathname()
   return (
     <AnimatePresence mode="wait">
       <motion.div
@@ -21,5 +25,5 @@ export default function AnimatedLayoutClient({ children }: { children: ReactNode
         {children}
       </motion.div>
     </AnimatePresence>
-  );
-} 
+  )
+}

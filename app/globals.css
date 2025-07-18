@@ -1,5 +1,4 @@
-@import "tailwindcss";
-@import "tw-animate-css";
+@import 'tailwindcss';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -50,32 +49,37 @@
 @layer base {
   :root {
     /* Brand Colors from design.json */
-    --primary: #9929EA;
+    --primary: #9929ea;
     --primary-dark: #7e20c6;
     --secondary: #891997;
-    --background: #EAE4D5;
-    --accent: #B6B09F;
+    --background: #eae4d5;
+    --accent: #b6b09f;
 
     /* Neutral Colors */
-    --white: #FFFFFF;
-    --light-gray: #F8F9FA;
-    --medium-gray: #E9ECEF;
-    --dark-gray: #6C757D;
+    --white: #ffffff;
+    --light-gray: #f8f9fa;
+    --medium-gray: #e9ecef;
+    --dark-gray: #6c757d;
     --charcoal: #484e53;
     --black: #000000;
 
     /* Semantic Colors */
-    --success: #28A745;
-    --warning: #FFC107;
-    --error: #DC3545;
-    --info: #17A2B8;
+    --success: #28a745;
+    --warning: #ffc107;
+    --error: #dc3545;
+    --info: #17a2b8;
 
     /* Gradients */
-    --hero-gradient: linear-gradient(135deg, #FFE5F0 0%, #F0F8FF 100%);
-    --card-overlay: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.3) 100%);
+    --hero-gradient: linear-gradient(135deg, #ffe5f0 0%, #f0f8ff 100%);
+    --card-overlay: linear-gradient(
+      180deg,
+      rgba(0, 0, 0, 0) 0%,
+      rgba(0, 0, 0, 0.3) 100%
+    );
 
     /* Typography */
-    --font-primary: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-primary:
+      Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     --font-headings: Poppins, Inter, sans-serif;
     --font-xs: 12px;
     --font-sm: 14px;
@@ -114,7 +118,7 @@
     --breakpoint-large: 1200px;
 
     --radius: 0.75rem;
-    
+
     /* Theme colors */
     --foreground: #020817;
     --card: #ffffff;
@@ -130,8 +134,8 @@
     --destructive-foreground: #ffffff;
     --border: #e4e4e7;
     --input: #e4e4e7;
-    --ring: #9929EA;
-    
+    --ring: #9929ea;
+
     /* Glass UI effect variables */
     --glass-bg: rgba(255, 255, 255, 0.7);
     --glass-border: rgba(255, 255, 255, 0.2);
@@ -142,18 +146,18 @@
 
   .dark {
     --background: #000000;
-    --foreground: #EAE4D5;
+    --foreground: #eae4d5;
     --card: #1a1a1a;
-    --card-foreground: #EAE4D5;
+    --card-foreground: #eae4d5;
     --popover: #1a1a1a;
-    --popover-foreground: #EAE4D5;
-    --primary: #EAE4D5;
+    --popover-foreground: #eae4d5;
+    --primary: #eae4d5;
     --primary-foreground: #000000;
-    --secondary: #CC66DA;
-    --secondary-foreground: #EAE4D5;
-    --accent: #B13BFF;
-    --accent-dark1: #CC66DA;
-    --accent-dark2: #B13BFF;
+    --secondary: #cc66da;
+    --secondary-foreground: #eae4d5;
+    --accent: #b13bff;
+    --accent-dark1: #cc66da;
+    --accent-dark2: #b13bff;
     --muted: oklch(0.269 0 0);
     --muted-foreground: oklch(0.708 0 0);
     --destructive: oklch(0.704 0.191 22.216);
@@ -173,7 +177,7 @@
     --sidebar-accent-foreground: oklch(0.985 0 0);
     --sidebar-border: oklch(1 0 0 / 10%);
     --sidebar-ring: oklch(0.556 0 0);
-    
+
     /* Dark mode glass UI effect variables */
     --glass-bg: rgba(15, 15, 20, 0.7);
     --glass-border: rgba(255, 255, 255, 0.1);

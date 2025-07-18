@@ -1,7 +1,7 @@
-import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { NextResponse } from 'next/server'
+import { prisma } from '@/lib/prisma'
 
-export const revalidate = 60;
+export const revalidate = 60
 
 export const runtime = 'nodejs'
 
@@ -19,9 +19,12 @@ export async function GET() {
         slug: true,
         categoryId: true,
       },
-    });
-    return NextResponse.json(products);
+    })
+    return NextResponse.json(products)
   } catch {
-    return NextResponse.json({ error: 'Failed to fetch latest products' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Failed to fetch latest products' },
+      { status: 500 }
+    )
   }
-} 
+}

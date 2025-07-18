@@ -1,29 +1,31 @@
-export const revalidate = 300;
-import { prisma } from "@/lib/prisma"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Package, ShoppingBag } from "lucide-react"
-import Image from "next/image"
-import Link from "next/link"
+export const revalidate = 300
+import { prisma } from '@/lib/prisma'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Package, ShoppingBag } from 'lucide-react'
+import Image from 'next/image'
+import Link from 'next/link'
 
 export default async function CategoriesPage() {
   const categories = await prisma.category.findMany({
     where: { isActive: true },
     include: {
       _count: {
-        select: { products: true }
-      }
+        select: { products: true },
+      },
     },
-    orderBy: { name: 'asc' }
+    orderBy: { name: 'asc' },
   })
 
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900">Product Categories</h1>
-        <p className="text-gray-600">Browse our wide range of hair care products</p>
+        <p className="text-gray-600">
+          Browse our wide range of hair care products
+        </p>
       </div>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {categories.map(category => (
           <Link key={category.id} href={`/products?category=${category.slug}`}>
@@ -49,8 +51,8 @@ export default async function CategoriesPage() {
                 )}
                 {category.image && (
                   <div className="mt-4 relative h-32 rounded-lg overflow-hidden">
-                    <Image 
-                      src={category.image} 
+                    <Image
+                      src={category.image}
                       alt={category.name}
                       fill
                       className="object-cover"
@@ -71,4 +73,4 @@ export default async function CategoriesPage() {
       )}
     </div>
   )
-} 
+}

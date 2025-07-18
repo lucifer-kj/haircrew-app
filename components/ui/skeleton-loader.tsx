@@ -1,15 +1,11 @@
-"use client";
-
-
+'use client'
 
 interface SkeletonProps {
-  className?: string;
+  className?: string
 }
 
 export function Skeleton({ className }: SkeletonProps) {
-  return (
-    <div className={`animate-pulse bg-gray-200 rounded ${className}`} />
-  );
+  return <div className={`animate-pulse bg-gray-200 rounded ${className}`} />
 }
 
 export function HeroSkeleton() {
@@ -32,12 +28,15 @@ export function HeroSkeleton() {
               <div className="h-12 bg-gray-100/30 rounded-full w-40 animate-pulse"></div>
             </div>
           </div>
-          
+
           {/* Right Side 2x2 Grid Skeletons */}
           <div className="hidden lg:grid col-span-2 row-span-2 grid-cols-2 grid-rows-2 gap-6 h-full">
             {/* Each card with content placeholder */}
-            {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="bg-white rounded-xl shadow-md relative overflow-hidden">
+            {[1, 2, 3, 4].map(i => (
+              <div
+                key={i}
+                className="bg-white rounded-xl shadow-md relative overflow-hidden"
+              >
                 <div className="absolute inset-0 bg-gray-200 animate-pulse"></div>
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                 <div className="absolute bottom-0 left-0 right-0 p-4 z-10">
@@ -50,7 +49,7 @@ export function HeroSkeleton() {
         </div>
       </div>
     </div>
-  );
+  )
 }
 
 export function ProductCardSkeleton() {
@@ -63,5 +62,5 @@ export function ProductCardSkeleton() {
         <div className="h-4 bg-gray-200 rounded w-1/4 animate-pulse"></div>
       </div>
     </div>
-  );
-} 
+  )
+}

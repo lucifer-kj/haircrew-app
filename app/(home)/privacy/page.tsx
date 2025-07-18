@@ -5,4 +5,4 @@ export default function PrivacyPage() {
       <p>This is the privacy policy page. Your privacy is important to us.</p>
     </div>
   )
-} 
+}

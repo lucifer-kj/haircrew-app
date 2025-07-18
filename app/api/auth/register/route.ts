@@ -1,29 +1,68 @@
 export const runtime = 'nodejs'
-import { NextRequest, NextResponse } from "next/server"
-import { prisma } from "@/lib/prisma"
-import { hash } from "bcryptjs"
+import { NextRequest, NextResponse } from 'next/server'
+import { prisma } from '@/lib/prisma'
+import { hash } from 'bcryptjs'
+
+import { validateInput, registerSchema, sanitizeInput } from '@/lib/validation'
+import Logger from '@/lib/logger'
 
 export async function POST(req: NextRequest) {
   try {
-    const { name, email, password } = await req.json()
-    if (!name || !email || !password) {
-      return NextResponse.json({ error: "All fields are required." }, { status: 400 })
+    const body = await req.json()
+
+    // Validate input using schema
+    const validation = validateInput(registerSchema, body)
+    if (!validation.success) {
+      Logger.validation('registration', body, undefined, {
+        ip: req.headers.get('x-forwarded-for') || 'unknown',
+      })
+      return NextResponse.json(
+        {
+          error: 'Validation failed',
+          details: validation.errors,
+        },
+        { status: 400 }
+      )
     }
-    const existing = await prisma.user.findUnique({ where: { email } })
+
+    const { name, email, password } = validation.data
+
+    // Sanitize inputs
+    const sanitizedName = sanitizeInput(name)
+    const sanitizedEmail = sanitizeInput(email).toLowerCase()
+    const existing = await prisma.user.findUnique({
+      where: { email: sanitizedEmail },
+    })
     if (existing) {
-      return NextResponse.json({ error: "Email already in use." }, { status: 400 })
+      Logger.auth('register', false, undefined, {
+        ip: req.headers.get('x-forwarded-for') || 'unknown',
+      })
+      return NextResponse.json(
+        { error: 'Email already in use.' },
+        { status: 400 }
+      )
     }
+
     const hashed = await hash(password, 10)
-    await prisma.user.create({
+    const user = await prisma.user.create({
       data: {
-        name,
-        email,
+        name: sanitizedName,
+        email: sanitizedEmail,
         password: hashed,
       },
     })
+
+    Logger.auth('register', true, user.id, {
+      ip: req.headers.get('x-forwarded-for') || 'unknown',
+    })
     return NextResponse.json({ success: true })
   } catch (e) {
-    console.error(e)
-    return NextResponse.json({ error: "Failed to create account." }, { status: 500 })
+    Logger.error('Registration failed', e as Error, {
+      ip: req.headers.get('x-forwarded-for') || 'unknown',
+    })
+    return NextResponse.json(
+      { error: 'Failed to create account.' },
+      { status: 500 }
+    )
   }
-} 
+}

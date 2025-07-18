@@ -1,4 +1,4 @@
-import { MarqueeAnimation } from "@/components/ui/marquee-effect";
+import { MarqueeAnimation } from '@/components/ui/marquee-effect'
 
 function MarqueeEffectDoubleExample() {
   return (
@@ -18,7 +18,7 @@ function MarqueeEffectDoubleExample() {
         HAIRCREW PROFESSIONALS
       </MarqueeAnimation>
     </div>
-  );
+  )
 }
 
-export { MarqueeEffectDoubleExample }; 
+export { MarqueeEffectDoubleExample }

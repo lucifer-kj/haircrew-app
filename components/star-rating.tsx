@@ -1,7 +1,7 @@
-"use client"
+'use client'
 
-import { Star } from "lucide-react"
-import { cn } from "@/lib/utils"
+import { Star } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
 interface StarRatingProps {
   rating: number
@@ -20,12 +20,12 @@ export default function StarRating({
   showValue = false,
   interactive = false,
   onRatingChange,
-  className
+  className,
 }: StarRatingProps) {
   const sizeClasses = {
     sm: 'w-4 h-4',
     md: 'w-5 h-5',
-    lg: 'w-6 h-6'
+    lg: 'w-6 h-6',
   }
 
   const handleStarClick = (starRating: number) => {
@@ -35,17 +35,17 @@ export default function StarRating({
   }
 
   return (
-    <div className={cn("flex items-center gap-1", className)}>
+    <div className={cn('flex items-center gap-1', className)}>
       {[...Array(maxRating)].map((_, i) => (
         <button
           key={i}
-          type={interactive ? "button" : undefined}
+          type={interactive ? 'button' : undefined}
           onClick={() => handleStarClick(i + 1)}
           disabled={!interactive}
           className={cn(
-            "focus:outline-none transition-colors",
-            interactive && "hover:scale-110",
-            !interactive && "cursor-default"
+            'focus:outline-none transition-colors',
+            interactive && 'hover:scale-110',
+            !interactive && 'cursor-default'
           )}
         >
           <Star
@@ -65,4 +65,4 @@ export default function StarRating({
       )}
     </div>
   )
-} 
+}

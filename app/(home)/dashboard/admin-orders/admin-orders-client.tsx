@@ -1,46 +1,53 @@
-"use client";
-import React, { useEffect, useState } from "react";
-import { usePusher } from '@/components/providers/socket-provider';
+'use client'
+import React, { useEffect, useState } from 'react'
+import { usePusher } from '@/components/providers/socket-provider'
 
 interface OrderItem {
-  id: string;
-  productId: string;
-  orderId: string;
-  quantity: number;
-  price: string;
-  createdAt: string;
+  id: string
+  productId: string
+  orderId: string
+  quantity: number
+  price: string
+  createdAt: string
   product?: {
-    name: string;
-    images: string[];
-    slug: string;
-  };
+    name: string
+    images: string[]
+    slug: string
+  }
 }
 
 interface Order {
-  id: string;
-  orderNumber: string;
-  total: string;
-  status: string;
-  createdAt: string;
-  user: { name: string; email: string };
-  orderItems: OrderItem[];
+  id: string
+  orderNumber: string
+  total: string
+  status: string
+  createdAt: string
+  user: { name: string; email: string }
+  orderItems: OrderItem[]
 }
 
 interface AdminOrdersClientProps {
-  orders: Order[];
+  orders: Order[]
 }
 
-export default function AdminOrdersClient({ orders: initialOrders }: AdminOrdersClientProps) {
-  const [orders, setOrders] = useState<Order[]>(initialOrders);
-  const { pusher } = usePusher();
+export default function AdminOrdersClient({
+  orders: initialOrders,
+}: AdminOrdersClientProps) {
+  const [orders, setOrders] = useState<Order[]>(initialOrders)
+  const { pusher } = usePusher()
 
   // Real-time updates
   useEffect(() => {
-    if (!pusher) return;
-    const channel = pusher.subscribe('orders');
-    const handleNewOrder = (data: { orderId: string; user: { name: string; email: string }; total: number; createdAt: string }) => {
+    if (!pusher) return
+    const channel = pusher.subscribe('orders')
+    const handleNewOrder = (data: {
+      orderId: string
+      user: { name: string; email: string }
+      total: number
+      createdAt: string
+    }) => {
       // Optionally refetch or optimistically add new order
-      setOrders((prev) => [
+      setOrders(prev => [
         {
           id: data.orderId,
           orderNumber: 'NEW', // You may want to refetch for full details
@@ -51,29 +58,44 @@ export default function AdminOrdersClient({ orders: initialOrders }: AdminOrders
           orderItems: [],
         },
         ...prev,
-      ]);
-    };
-    const handleOrderStatusUpdated = (data: { orderId: string; status: string }) => {
-      setOrders((prev) => prev.map(o => o.id === data.orderId ? { ...o, status: data.status } : o));
-    };
+      ])
+    }
+    const handleOrderStatusUpdated = (data: {
+      orderId: string
+      status: string
+    }) => {
+      setOrders(prev =>
+        prev.map(o =>
+          o.id === data.orderId ? { ...o, status: data.status } : o
+        )
+      )
+    }
     const handleOrderConfirmed = (data: { orderId: string }) => {
-      setOrders((prev) => prev.map(o => o.id === data.orderId ? { ...o, status: 'CONFIRMED' } : o));
-    };
+      setOrders(prev =>
+        prev.map(o =>
+          o.id === data.orderId ? { ...o, status: 'CONFIRMED' } : o
+        )
+      )
+    }
     const handleOrderRefunded = (data: { orderId: string }) => {
-      setOrders((prev) => prev.map(o => o.id === data.orderId ? { ...o, status: 'REFUNDED' } : o));
-    };
-    channel.bind('new-order', handleNewOrder);
-    channel.bind('order-status-updated', handleOrderStatusUpdated);
-    channel.bind('order-confirmed', handleOrderConfirmed);
-    channel.bind('order-refunded', handleOrderRefunded);
+      setOrders(prev =>
+        prev.map(o =>
+          o.id === data.orderId ? { ...o, status: 'REFUNDED' } : o
+        )
+      )
+    }
+    channel.bind('new-order', handleNewOrder)
+    channel.bind('order-status-updated', handleOrderStatusUpdated)
+    channel.bind('order-confirmed', handleOrderConfirmed)
+    channel.bind('order-refunded', handleOrderRefunded)
     return () => {
-      channel.unbind('new-order', handleNewOrder);
-      channel.unbind('order-status-updated', handleOrderStatusUpdated);
-      channel.unbind('order-confirmed', handleOrderConfirmed);
-      channel.unbind('order-refunded', handleOrderRefunded);
-      pusher.unsubscribe('orders');
-    };
-  }, [pusher]);
+      channel.unbind('new-order', handleNewOrder)
+      channel.unbind('order-status-updated', handleOrderStatusUpdated)
+      channel.unbind('order-confirmed', handleOrderConfirmed)
+      channel.unbind('order-refunded', handleOrderRefunded)
+      pusher.unsubscribe('orders')
+    }
+  }, [pusher])
 
   // Admin actions
   const updateOrderStatus = async (orderId: string, newStatus: string) => {
@@ -82,9 +104,11 @@ export default function AdminOrdersClient({ orders: initialOrders }: AdminOrders
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ orderId, newStatus }),
       credentials: 'include',
-    });
-    setOrders((prev) => prev.map(o => o.id === orderId ? { ...o, status: newStatus } : o));
-  };
+    })
+    setOrders(prev =>
+      prev.map(o => (o.id === orderId ? { ...o, status: newStatus } : o))
+    )
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -103,20 +127,48 @@ export default function AdminOrdersClient({ orders: initialOrders }: AdminOrders
           </thead>
           <tbody>
             {orders.map(order => (
-              <tr key={order.id} className="border-b hover:bg-primary/5 transition">
-                <td className="p-2 whitespace-nowrap font-mono">{order.orderNumber}</td>
-                <td className="p-2 whitespace-nowrap">{order.user?.name || order.user?.email}</td>
-                <td className="p-2 whitespace-nowrap font-semibold">₹{order.total}</td>
+              <tr
+                key={order.id}
+                className="border-b hover:bg-primary/5 transition"
+              >
+                <td className="p-2 whitespace-nowrap font-mono">
+                  {order.orderNumber}
+                </td>
+                <td className="p-2 whitespace-nowrap">
+                  {order.user?.name || order.user?.email}
+                </td>
+                <td className="p-2 whitespace-nowrap font-semibold">
+                  ₹{order.total}
+                </td>
                 <td className="p-2 whitespace-nowrap">{order.status}</td>
-                <td className="p-2 whitespace-nowrap">{new Date(order.createdAt).toLocaleDateString()}</td>
+                <td className="p-2 whitespace-nowrap">
+                  {new Date(order.createdAt).toLocaleDateString()}
+                </td>
                 <td className="p-2 whitespace-nowrap flex gap-2">
                   {order.status === 'PROCESSING' && (
-                    <button className="px-2 py-1 rounded bg-green-600 text-white text-xs" onClick={() => updateOrderStatus(order.id, 'CONFIRMED')}>Confirm</button>
+                    <button
+                      className="px-2 py-1 rounded bg-green-600 text-white text-xs"
+                      onClick={() => updateOrderStatus(order.id, 'CONFIRMED')}
+                    >
+                      Confirm
+                    </button>
                   )}
                   {order.status !== 'REFUNDED' && (
-                    <button className="px-2 py-1 rounded bg-blue-500 text-white text-xs" onClick={() => updateOrderStatus(order.id, 'REFUNDED')}>Refund</button>
+                    <button
+                      className="px-2 py-1 rounded bg-blue-500 text-white text-xs"
+                      onClick={() => updateOrderStatus(order.id, 'REFUNDED')}
+                    >
+                      Refund
+                    </button>
                   )}
-                  <button className="px-2 py-1 rounded bg-slate-500 text-white text-xs" onClick={() => window.open(`/order-received/${order.id}`, '_blank')}>View</button>
+                  <button
+                    className="px-2 py-1 rounded bg-slate-500 text-white text-xs"
+                    onClick={() =>
+                      window.open(`/order-received/${order.id}`, '_blank')
+                    }
+                  >
+                    View
+                  </button>
                 </td>
               </tr>
             ))}
@@ -124,5 +176,5 @@ export default function AdminOrdersClient({ orders: initialOrders }: AdminOrders
         </table>
       </div>
     </div>
-  );
-} 
+  )
+}

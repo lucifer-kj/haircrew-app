@@ -1,24 +1,32 @@
-"use client";
+'use client'
 
-import type { Product as ProductType } from '@/types/product';
-import ProductCard from "./product-card";
-import { motion } from "framer-motion";
+import type { Product as ProductType } from '@/types/product'
+import ProductCard from './product-card'
+import { motion } from 'framer-motion'
 
-const skeletonArray = Array.from({ length: 4 });
+const skeletonArray = Array.from({ length: 4 })
 
 interface LatestProductsSectionProps {
-  products: ProductType[];
-  loading: boolean;
-  onViewAll?: () => void;
+  products: ProductType[]
+  loading: boolean
+  onViewAll?: () => void
 }
 
-export default function LatestProductsSection({ products, loading, onViewAll }: LatestProductsSectionProps) {
+export default function LatestProductsSection({
+  products,
+  loading,
+  onViewAll,
+}: LatestProductsSectionProps) {
   return (
     <section className="py-16 bg-[#EAE4D5]">
       <div className="max-w-7xl mx-auto px-4">
         <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold text-[#000] mb-4">Latest Products</h2>
-          <p className="text-[#9929EA] font-bold max-w-2xl mx-auto">Check out our newest arrivals and best sellers.</p>
+          <h2 className="text-3xl font-bold text-[#000] mb-4">
+            Latest Products
+          </h2>
+          <p className="text-[#9929EA] font-bold max-w-2xl mx-auto">
+            Check out our newest arrivals and best sellers.
+          </p>
         </div>
         <div className="relative">
           {/* Grid for desktop/tablet, horizontal scroll for mobile */}
@@ -28,8 +36,11 @@ export default function LatestProductsSection({ products, loading, onViewAll }: 
               : products.map((product: ProductType) => (
                   <motion.div
                     key={product.id}
-                    whileHover={{ scale: 1.04, boxShadow: "0 8px 32px 0 rgba(153,41,234,0.12)" }}
-                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                    whileHover={{
+                      scale: 1.04,
+                      boxShadow: '0 8px 32px 0 rgba(153,41,234,0.12)',
+                    }}
+                    transition={{ type: 'spring', stiffness: 300, damping: 20 }}
                   >
                     <ProductCard product={product} showWishlist={false} />
                   </motion.div>
@@ -42,18 +53,24 @@ export default function LatestProductsSection({ products, loading, onViewAll }: 
                   <motion.div
                     key={i}
                     className="min-w-[80vw] max-w-xs snap-center flex-shrink-0"
-                    whileHover={{ scale: 1.04, boxShadow: "0 8px 32px 0 rgba(153,41,234,0.12)" }}
-                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                    whileHover={{
+                      scale: 1.04,
+                      boxShadow: '0 8px 32px 0 rgba(153,41,234,0.12)',
+                    }}
+                    transition={{ type: 'spring', stiffness: 300, damping: 20 }}
                   >
                     <ProductSkeleton />
                   </motion.div>
                 ))
-              : products.map((item) => (
+              : products.map(item => (
                   <motion.div
                     key={item.id}
                     className="min-w-[80vw] max-w-xs snap-center flex-shrink-0"
-                    whileHover={{ scale: 1.04, boxShadow: "0 8px 32px 0 rgba(153,41,234,0.12)" }}
-                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                    whileHover={{
+                      scale: 1.04,
+                      boxShadow: '0 8px 32px 0 rgba(153,41,234,0.12)',
+                    }}
+                    transition={{ type: 'spring', stiffness: 300, damping: 20 }}
                   >
                     <ProductCard product={item} showWishlist={false} />
                   </motion.div>
@@ -73,7 +90,7 @@ export default function LatestProductsSection({ products, loading, onViewAll }: 
         </div>
       </div>
     </section>
-  );
+  )
 }
 
 function ProductSkeleton() {
@@ -86,5 +103,5 @@ function ProductSkeleton() {
         <div className="h-10 bg-[#9929EA] rounded w-full" />
       </div>
     </div>
-  );
-} 
+  )
+}

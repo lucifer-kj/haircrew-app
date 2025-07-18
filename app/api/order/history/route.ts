@@ -1,14 +1,15 @@
 export const runtime = 'nodejs'
-import { NextResponse } from "next/server"
-import { prisma } from "@/lib/prisma"
-import { auth } from "@/auth"
-import { NextRequest } from "next/server"
+import { NextResponse } from 'next/server'
+import { prisma } from '@/lib/prisma'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/auth'
+import { NextRequest } from 'next/server'
 
 export async function GET(req: NextRequest) {
   try {
-    const session = await auth()
+    const session = await getServerSession(authOptions)
     if (!session?.user?.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
     const { searchParams } = new URL(req.url)
     const page = parseInt(searchParams.get('page') || '1', 10)
@@ -17,7 +18,7 @@ export async function GET(req: NextRequest) {
     const [orders, total] = await Promise.all([
       prisma.order.findMany({
         where: { userId },
-        orderBy: { createdAt: "desc" },
+        orderBy: { createdAt: 'desc' },
         select: {
           id: true,
           orderNumber: true,
@@ -28,11 +29,14 @@ export async function GET(req: NextRequest) {
         skip: (page - 1) * pageSize,
         take: pageSize,
       }),
-      prisma.order.count({ where: { userId } })
+      prisma.order.count({ where: { userId } }),
     ])
     return NextResponse.json({ orders, total })
   } catch (e) {
     console.error(e)
-    return NextResponse.json({ error: "Failed to fetch orders." }, { status: 500 })
+    return NextResponse.json(
+      { error: 'Failed to fetch orders.' },
+      { status: 500 }
+    )
   }
-} 
+}

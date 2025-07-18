@@ -8,7 +8,7 @@ async function main() {
 
   // Create sample users
   console.log('Creating users...')
-  const adminUser = await prisma.user.upsert({
+  await prisma.user.upsert({
     where: { email: 'admin@haircrew.com' },
     update: {},
     create: {
@@ -53,7 +53,8 @@ async function main() {
     update: {},
     create: {
       name: 'Conditioner',
-      description: 'Nourishing conditioners to keep your hair healthy and smooth',
+      description:
+        'Nourishing conditioners to keep your hair healthy and smooth',
       slug: 'conditioner',
       image: '/Images/c-conditioner.jpg',
       isActive: true,
@@ -65,7 +66,8 @@ async function main() {
     update: {},
     create: {
       name: 'Treatment',
-      description: 'Specialized hair treatments for deep conditioning and repair',
+      description:
+        'Specialized hair treatments for deep conditioning and repair',
       slug: 'treatment',
       image: '/Images/c-treatment.jpg',
       isActive: true,
@@ -82,13 +84,14 @@ async function main() {
       update: {},
       create: {
         name: 'Hydrating Shampoo',
-        description: 'Deeply hydrating shampoo for dry and damaged hair. Enriched with natural oils and vitamins.',
+        description:
+          'Deeply hydrating shampoo for dry and damaged hair. Enriched with natural oils and vitamins.',
         price: 24.99,
         comparePrice: 29.99,
         images: ['/Images/p1.jpg', '/Images/p2.jpg'],
         sku: 'SHAMPOO-001',
         barcode: '1234567890123',
-        weight: 250.00,
+        weight: 250.0,
         dimensions: '8x4x2 cm',
         stock: 50,
         isActive: true,
@@ -102,13 +105,14 @@ async function main() {
       update: {},
       create: {
         name: 'Volumizing Shampoo',
-        description: 'Adds volume and body to fine, limp hair. Lightweight formula that won\'t weigh hair down.',
+        description:
+          "Adds volume and body to fine, limp hair. Lightweight formula that won't weigh hair down.",
         price: 22.99,
         comparePrice: 27.99,
         images: ['/Images/p2.jpg', '/Images/p3.jpg'],
         sku: 'SHAMPOO-002',
         barcode: '1234567890124',
-        weight: 250.00,
+        weight: 250.0,
         dimensions: '8x4x2 cm',
         stock: 35,
         isActive: true,
@@ -122,13 +126,14 @@ async function main() {
       update: {},
       create: {
         name: 'Color-Protecting Shampoo',
-        description: 'Sulfate-free shampoo that preserves hair color and prevents fading.',
+        description:
+          'Sulfate-free shampoo that preserves hair color and prevents fading.',
         price: 26.99,
         comparePrice: 31.99,
         images: ['/Images/p3.jpg', '/Images/p1.jpg'],
         sku: 'SHAMPOO-003',
         barcode: '1234567890125',
-        weight: 250.00,
+        weight: 250.0,
         dimensions: '8x4x2 cm',
         stock: 40,
         isActive: true,
@@ -147,13 +152,14 @@ async function main() {
       update: {},
       create: {
         name: 'Moisturizing Conditioner',
-        description: 'Intensive moisture conditioner for dry and damaged hair. Leaves hair soft and manageable.',
+        description:
+          'Intensive moisture conditioner for dry and damaged hair. Leaves hair soft and manageable.',
         price: 26.99,
         comparePrice: 31.99,
         images: ['/Images/p1.jpg', '/Images/p2.jpg'],
         sku: 'COND-001',
         barcode: '1234567890126',
-        weight: 250.00,
+        weight: 250.0,
         dimensions: '8x4x2 cm',
         stock: 45,
         isActive: true,
@@ -167,13 +173,14 @@ async function main() {
       update: {},
       create: {
         name: 'Smoothing Conditioner',
-        description: 'Anti-frizz conditioner that smooths hair cuticles and reduces frizz.',
+        description:
+          'Anti-frizz conditioner that smooths hair cuticles and reduces frizz.',
         price: 24.99,
         comparePrice: 29.99,
         images: ['/Images/p2.jpg', '/Images/p3.jpg'],
         sku: 'COND-002',
         barcode: '1234567890127',
-        weight: 250.00,
+        weight: 250.0,
         dimensions: '8x4x2 cm',
         stock: 30,
         isActive: true,
@@ -187,13 +194,14 @@ async function main() {
       update: {},
       create: {
         name: 'Strengthening Conditioner',
-        description: 'Protein-rich conditioner that strengthens hair and reduces breakage.',
+        description:
+          'Protein-rich conditioner that strengthens hair and reduces breakage.',
         price: 28.99,
         comparePrice: 33.99,
         images: ['/Images/p3.jpg', '/Images/p1.jpg'],
         sku: 'COND-003',
         barcode: '1234567890128',
-        weight: 250.00,
+        weight: 250.0,
         dimensions: '8x4x2 cm',
         stock: 25,
         isActive: true,
@@ -212,13 +220,14 @@ async function main() {
       update: {},
       create: {
         name: 'Deep Conditioning Mask',
-        description: 'Intensive deep conditioning treatment for severely damaged hair.',
+        description:
+          'Intensive deep conditioning treatment for severely damaged hair.',
         price: 34.99,
         comparePrice: 39.99,
         images: ['/Images/p1.jpg', '/Images/p2.jpg'],
         sku: 'TREAT-001',
         barcode: '1234567890129',
-        weight: 200.00,
+        weight: 200.0,
         dimensions: '8x4x2 cm',
         stock: 20,
         isActive: true,
@@ -232,13 +241,14 @@ async function main() {
       update: {},
       create: {
         name: 'Hair Repair Serum',
-        description: 'Lightweight serum that repairs split ends and prevents further damage.',
+        description:
+          'Lightweight serum that repairs split ends and prevents further damage.',
         price: 29.99,
         comparePrice: 34.99,
         images: ['/Images/p2.jpg', '/Images/p3.jpg'],
         sku: 'TREAT-002',
         barcode: '1234567890130',
-        weight: 100.00,
+        weight: 100.0,
         dimensions: '6x3x2 cm',
         stock: 30,
         isActive: true,
@@ -252,13 +262,14 @@ async function main() {
       update: {},
       create: {
         name: 'Scalp Treatment',
-        description: 'Soothing scalp treatment that reduces dandruff and promotes healthy hair growth.',
+        description:
+          'Soothing scalp treatment that reduces dandruff and promotes healthy hair growth.',
         price: 32.99,
         comparePrice: 37.99,
         images: ['/Images/p3.jpg', '/Images/p1.jpg'],
         sku: 'TREAT-003',
         barcode: '1234567890131',
-        weight: 150.00,
+        weight: 150.0,
         dimensions: '7x4x2 cm',
         stock: 15,
         isActive: true,
@@ -273,8 +284,12 @@ async function main() {
 
   // Create sample reviews
   console.log('Creating sample reviews...')
-  const allProducts = [...shampooProducts, ...conditionerProducts, ...treatmentProducts]
-  
+  const allProducts = [
+    ...shampooProducts,
+    ...conditionerProducts,
+    ...treatmentProducts,
+  ]
+
   for (const product of allProducts) {
     await prisma.review.upsert({
       where: {
@@ -306,10 +321,10 @@ async function main() {
 }
 
 main()
-  .catch((e) => {
+  .catch(e => {
     console.error('❌ Error during seeding:', e)
     process.exit(1)
   })
   .finally(async () => {
     await prisma.$disconnect()
-  }) 
+  })

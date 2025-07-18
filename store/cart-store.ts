@@ -40,33 +40,38 @@ const saveCart = (items: CartItem[]) => {
 export const useCartStore = create<CartState>((set, get) => ({
   items: loadCart(),
   addItem: (item, quantity = 1) => {
-    set((state) => {
-      const existing = state.items.find((i) => i.id === item.id)
+    set(state => {
+      const existing = state.items.find(i => i.id === item.id)
       let newItems
       if (existing) {
-        newItems = state.items.map((i) =>
+        newItems = state.items.map(i =>
           i.id === item.id
             ? { ...i, quantity: Math.min(i.quantity + quantity, i.stock) }
             : i
         )
       } else {
-        newItems = [...state.items, { ...item, quantity: Math.min(quantity, item.stock) }]
+        newItems = [
+          ...state.items,
+          { ...item, quantity: Math.min(quantity, item.stock) },
+        ]
       }
       saveCart(newItems)
       return { items: newItems }
     })
   },
-  removeItem: (id) => {
-    set((state) => {
-      const newItems = state.items.filter((i) => i.id !== id)
+  removeItem: id => {
+    set(state => {
+      const newItems = state.items.filter(i => i.id !== id)
       saveCart(newItems)
       return { items: newItems }
     })
   },
   updateQuantity: (id, quantity) => {
-    set((state) => {
-      const newItems = state.items.map((i) =>
-        i.id === id ? { ...i, quantity: Math.max(1, Math.min(quantity, i.stock)) } : i
+    set(state => {
+      const newItems = state.items.map(i =>
+        i.id === id
+          ? { ...i, quantity: Math.max(1, Math.min(quantity, i.stock)) }
+          : i
       )
       saveCart(newItems)
       return { items: newItems }
@@ -86,9 +91,9 @@ export const useCartStore = create<CartState>((set, get) => ({
 
 // Listen for storage events to sync cart across tabs
 if (typeof window !== 'undefined') {
-  window.addEventListener('storage', (e) => {
+  window.addEventListener('storage', e => {
     if (e.key === CART_KEY) {
       useCartStore.setState({ items: loadCart() })
     }
   })
-} 
+}

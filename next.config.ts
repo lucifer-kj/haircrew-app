@@ -1,11 +1,16 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
   experimental: {
-    optimizePackageImports: ['lucide-react'],
-    // Enable React Server Components optimizations
-    serverActions: {
-      bodySizeLimit: '2mb',
+    serverActions: { bodySizeLimit: '2mb' },
+    optimizePackageImports: ['lucide-react', 'framer-motion', 'recharts'],
+  },
+  turbopack: {
+    rules: {
+      '*.svg': {
+        loaders: ['@svgr/webpack'],
+        as: '*.js',
+      },
     },
   },
   images: {
@@ -15,10 +20,55 @@ const nextConfig: NextConfig = {
         hostname: '**',
       },
     ],
-    // Optimize image loading
     formats: ['image/avif', 'image/webp'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+    minimumCacheTTL: 60 * 60 * 24 * 30, // 30 days
+    dangerouslyAllowSVG: true,
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
+  },
+  compress: true,
+  poweredByHeader: false,
+  generateEtags: false,
+  webpack: (config, { dev, isServer }) => {
+    if (!dev && !isServer) {
+      config.optimization.splitChunks = {
+        chunks: 'all',
+        cacheGroups: {
+          vendor: {
+            test: /[\\/]node_modules[\\/]/,
+            name: 'vendors',
+            chunks: 'all',
+            priority: 10,
+          },
+          common: {
+            name: 'common',
+            minChunks: 2,
+            chunks: 'all',
+            priority: 5,
+          },
+          framer: {
+            test: /[\\/]node_modules[\\/]framer-motion[\\/]/,
+            name: 'framer-motion',
+            chunks: 'all',
+            priority: 20,
+          },
+          recharts: {
+            test: /[\\/]node_modules[\\/]recharts[\\/]/,
+            name: 'recharts',
+            chunks: 'all',
+            priority: 20,
+          },
+        },
+      }
+    }
+    if (process.env.ANALYZE === 'true') {
+      const { BundleAnalyzerPlugin } = require('@next/bundle-analyzer')({
+        enabled: true,
+      })
+      config.plugins.push(new BundleAnalyzerPlugin())
+    }
+    return config
   },
   typescript: {
     ignoreBuildErrors: false,
@@ -26,17 +76,12 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: false,
   },
-  // Improve routing and page loading
   reactStrictMode: true,
-  poweredByHeader: false,
-  compress: true,
-  // Improved page loading with better caching
   onDemandEntries: {
-    // period (in ms) where the server will keep pages in the buffer
     maxInactiveAge: 25 * 1000,
-    // number of pages that should be kept simultaneously without being disposed
     pagesBufferLength: 4,
   },
-};
+  output: 'standalone',
+}
 
-export default nextConfig;
+export default nextConfig

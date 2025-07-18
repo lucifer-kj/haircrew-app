@@ -1,20 +1,26 @@
 export const runtime = 'nodejs'
-import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
-import { auth } from '@/auth';
+import { NextRequest, NextResponse } from 'next/server'
+import { prisma } from '@/lib/prisma'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/auth'
+import { validateInput, reviewSchema, sanitizeInput } from '@/lib/validation'
+import Logger from '@/lib/logger'
 
-export async function GET(req: NextRequest, { params }: { params: Promise<{ slug: string }> }) {
+export async function GET(
+  req: NextRequest,
+  { params }: { params: Promise<{ slug: string }> }
+) {
   try {
-    const { slug } = await params;
-    const { searchParams } = new URL(req.url);
-    const page = parseInt(searchParams.get('page') || '1', 10);
-    const pageSize = parseInt(searchParams.get('pageSize') || '10', 10);
+    const { slug } = await params
+    const { searchParams } = new URL(req.url)
+    const page = parseInt(searchParams.get('page') || '1', 10)
+    const pageSize = parseInt(searchParams.get('pageSize') || '10', 10)
     const product = await prisma.product.findUnique({
       where: { slug },
       select: { id: true },
-    });
+    })
     if (!product) {
-      return NextResponse.json({ error: 'Product not found' }, { status: 404 });
+      return NextResponse.json({ error: 'Product not found' }, { status: 404 })
     }
     const [reviews, total] = await Promise.all([
       prisma.review.findMany({
@@ -30,11 +36,14 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ slug
         skip: (page - 1) * pageSize,
         take: pageSize,
       }),
-      prisma.review.count({ where: { productId: product.id } })
-    ]);
-    return NextResponse.json({ reviews, total });
+      prisma.review.count({ where: { productId: product.id } }),
+    ])
+    return NextResponse.json({ reviews, total })
   } catch {
-    return NextResponse.json({ error: 'Failed to fetch reviews' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Failed to fetch reviews' },
+      { status: 500 }
+    )
   }
 }
 
@@ -42,33 +51,42 @@ export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ slug: string }> }
 ) {
+  const session = await getServerSession(authOptions)
+  if (!session?.user?.id) {
+    return NextResponse.json(
+      { error: 'Authentication required' },
+      { status: 401 }
+    )
+  }
+
   try {
-    const session = await auth();
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
+    const { slug } = await params
+    const body = await req.json()
+
+    // Validate input using schema
+    const validation = validateInput(reviewSchema, body)
+    if (!validation.success) {
+      Logger.validation('review_creation', body, session.user.id, {
+        ip: req.headers.get('x-forwarded-for') || 'unknown',
+      })
+      return NextResponse.json(
+        {
+          error: 'Validation failed',
+          details: validation.errors,
+        },
+        { status: 400 }
+      )
     }
 
-    const { slug } = await params;
-    const { rating, title, comment } = await req.json();
-
-    // Validate input
-    if (!rating || rating < 1 || rating > 5) {
-      return NextResponse.json({ error: 'Invalid rating' }, { status: 400 });
-    }
-    if (!title?.trim() || title.length > 100) {
-      return NextResponse.json({ error: 'Invalid title' }, { status: 400 });
-    }
-    if (!comment?.trim() || comment.length > 500) {
-      return NextResponse.json({ error: 'Invalid comment' }, { status: 400 });
-    }
+    const { rating, title, comment } = validation.data
 
     const product = await prisma.product.findUnique({
       where: { slug },
       select: { id: true },
-    });
+    })
 
     if (!product) {
-      return NextResponse.json({ error: 'Product not found' }, { status: 404 });
+      return NextResponse.json({ error: 'Product not found' }, { status: 404 })
     }
 
     // Check if user already reviewed this product
@@ -79,11 +97,23 @@ export async function POST(
           productId: product.id,
         },
       },
-    });
+    })
 
     if (existingReview) {
-      return NextResponse.json({ error: 'You have already reviewed this product' }, { status: 400 });
+      Logger.warn('Duplicate review attempt', {
+        userId: session.user.id,
+        resource: product.id,
+        ip: req.headers.get('x-forwarded-for') || 'unknown',
+      })
+      return NextResponse.json(
+        { error: 'You have already reviewed this product' },
+        { status: 400 }
+      )
     }
+
+    // Sanitize inputs
+    const sanitizedTitle = sanitizeInput(title)
+    const sanitizedComment = sanitizeInput(comment)
 
     // Create the review
     const review = await prisma.review.create({
@@ -91,8 +121,8 @@ export async function POST(
         userId: session.user.id,
         productId: product.id,
         rating,
-        title: title.trim(),
-        comment: comment.trim(),
+        title: sanitizedTitle,
+        comment: sanitizedComment,
       },
       include: {
         user: {
@@ -101,11 +131,26 @@ export async function POST(
           },
         },
       },
-    });
+    })
 
-    return NextResponse.json(review, { status: 201 });
+    Logger.info(
+      'Review created',
+      {
+        userId: session.user.id,
+        resource: product.id,
+        ip: req.headers.get('x-forwarded-for') || 'unknown',
+      },
+      { reviewId: review.id }
+    )
+    return NextResponse.json(review, { status: 201 })
   } catch (error) {
-    console.error('Error creating review:', error);
-    return NextResponse.json({ error: 'Failed to create review' }, { status: 500 });
+    Logger.error('Review creation failed', error as Error, {
+      userId: session.user.id,
+      ip: req.headers.get('x-forwarded-for') || 'unknown',
+    })
+    return NextResponse.json(
+      { error: 'Failed to create review' },
+      { status: 500 }
+    )
   }
-} 
+}

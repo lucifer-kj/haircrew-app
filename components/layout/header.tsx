@@ -1,43 +1,82 @@
-"use client"
+'use client'
 
-import Link from "next/link"
-import { Search, X, ShoppingCart, Trash2, Home, Search as SearchIcon, User as UserIcon } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { useState, useEffect, useRef } from "react"
+import Link from 'next/link'
+import {
+  Search,
+  X,
+  ShoppingCart,
+  Trash2,
+  Home,
+  Search as SearchIcon,
+  User as UserIcon,
+} from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { useCartStore } from "@/store/cart-store"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { AnimatePresence, motion } from "framer-motion"
-import { useReducedMotion as useFramerReducedMotion } from "framer-motion";
-import { FocusTrap } from "@headlessui/react";
-import { usePathname } from "next/navigation";
-import { useSession } from "next-auth/react";
-import { signOut } from "next-auth/react";
+import { useCartStore } from '@/store/cart-store'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover'
+import { AnimatePresence, motion } from 'framer-motion'
+import { useReducedMotion as useFramerReducedMotion } from 'framer-motion'
+import { FocusTrap } from '@headlessui/react'
+import { usePathname } from 'next/navigation'
+import { useSession } from 'next-auth/react'
+import { signOut } from 'next-auth/react'
 
-type SearchResult = { id: string; name: string; slug: string };
+type SearchResult = { id: string; name: string; slug: string }
 function AutocompleteSearchBar() {
-  const [search, setSearch] = useState("");
-  const [results, setResults] = useState<SearchResult[]>([]);
-  const [show, setShow] = useState(false);
-  const router = useRouter();
-  const debounceRef = useRef<NodeJS.Timeout | null>(null);
+  const [search, setSearch] = useState('')
+  const [results, setResults] = useState<SearchResult[]>([])
+  const [show, setShow] = useState(false)
+  const router = useRouter()
+  const debounceRef = useRef<NodeJS.Timeout | null>(null)
+  const abortControllerRef = useRef<AbortController | null>(null)
+
   useEffect(() => {
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    if (search.length > 1) {
-      debounceRef.current = setTimeout(() => {
-        fetch(`/api/products/latest?search=${encodeURIComponent(search)}`)
-          .then(res => res.json())
-          .then((data: SearchResult[]) => setResults(data.slice(0, 5)));
-        setShow(true);
-      }, 300);
-    } else {
-      setShow(false);
-      setResults([]);
+    if (debounceRef.current) clearTimeout(debounceRef.current)
+
+    // Cancel previous request
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort()
     }
+
+    if (search.length > 1) {
+      debounceRef.current = setTimeout(async () => {
+        abortControllerRef.current = new AbortController()
+
+        try {
+          const res = await fetch(
+            `/api/products/latest?search=${encodeURIComponent(search)}`,
+            {
+              signal: abortControllerRef.current.signal,
+            }
+          )
+          if (res.ok) {
+            const data: SearchResult[] = await res.json()
+            setResults(data.slice(0, 5))
+            setShow(true)
+          }
+        } catch (error) {
+          if (error instanceof Error && error.name !== 'AbortError') {
+            console.error('Search error:', error)
+          }
+        }
+      }, 300)
+    } else {
+      setShow(false)
+      setResults([])
+    }
+
     return () => {
-      if (debounceRef.current) clearTimeout(debounceRef.current);
-    };
-  }, [search]);
+      if (debounceRef.current) clearTimeout(debounceRef.current)
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort()
+      }
+    }
+  }, [search])
   return (
     <div className="relative w-full">
       <input
@@ -61,37 +100,45 @@ function AutocompleteSearchBar() {
             {results.length === 0 && (
               <li className="px-4 py-2 text-gray-500">No results</li>
             )}
-            {results.map((item) => (
+            {results.map(item => (
               <li
                 key={item.id}
                 className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
                 onMouseDown={() => router.push(`/products/${item.slug}`)}
-        >
+              >
                 {item.name}
               </li>
             ))}
           </motion.ul>
-      )}
+        )}
       </AnimatePresence>
     </div>
-  );
+  )
 }
 
 function MobileTabBar() {
-  const pathname = usePathname();
-  const { getCount } = useCartStore();
-  const cartCount = getCount();
+  const pathname = usePathname()
+  const { getCount } = useCartStore()
+  const cartCount = getCount()
   const tabs = [
-    { href: "/", icon: Home, label: "Home" },
-    { href: "/search", icon: SearchIcon, label: "Search" },
-    { href: "/cart", icon: ShoppingCart, label: "Cart", badge: cartCount > 0 ? cartCount : null },
-    { href: "/dashboard/profile", icon: UserIcon, label: "Account" },
-  ];
+    { href: '/', icon: Home, label: 'Home' },
+    { href: '/search', icon: SearchIcon, label: 'Search' },
+    {
+      href: '/cart',
+      icon: ShoppingCart,
+      label: 'Cart',
+      badge: cartCount > 0 ? cartCount : null,
+    },
+    { href: '/dashboard/profile', icon: UserIcon, label: 'Account' },
+  ]
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t flex justify-around items-center h-16 lg:hidden">
       {tabs.map(tab => {
-        const active = pathname === tab.href || (tab.href === "/" && pathname === "/home") || 
-                      (tab.href === "/dashboard/profile" && pathname.startsWith("/dashboard"));
+        const active =
+          pathname === tab.href ||
+          (tab.href === '/' && pathname === '/home') ||
+          (tab.href === '/dashboard/profile' &&
+            pathname.startsWith('/dashboard'))
         return (
           <Link
             key={tab.href}
@@ -102,12 +149,16 @@ function MobileTabBar() {
             <motion.div
               className="flex flex-col items-center justify-center h-full text-xs font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary transition"
               initial={false}
-              animate={active ? { scale: 1.1, color: "#9929EA" } : { scale: 1, color: "#6B7280" }}
+              animate={
+                active
+                  ? { scale: 1.1, color: '#9929EA' }
+                  : { scale: 1, color: '#6B7280' }
+              }
               whileTap={{ scale: 0.92 }}
-              transition={{ type: "spring", stiffness: 300, damping: 22 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 22 }}
             >
               <div className="relative">
-              <tab.icon className="w-6 h-6 mb-1" />
+                <tab.icon className="w-6 h-6 mb-1" />
                 {tab.badge && (
                   <span className="absolute -top-1 -right-1 bg-secondary text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
                     {tab.badge}
@@ -117,44 +168,63 @@ function MobileTabBar() {
               {tab.label}
             </motion.div>
           </Link>
-        );
+        )
       })}
     </nav>
-  );
+  )
 }
 
 export function Header() {
-  const [scrolled, setScrolled] = useState(false);
-  const { items, removeItem, updateQuantity, getTotal, getCount } = useCartStore();
-  const cartCount = getCount();
-  const router = useRouter();
-  const reduced = useFramerReducedMotion();
-  const [mobileNavOpen, setMobileNavOpen] = useState(false);
-  const { data: session } = useSession();
+  const [scrolled, setScrolled] = useState(false)
+  const { items, removeItem, updateQuantity, getTotal, getCount } =
+    useCartStore()
+  const cartCount = getCount()
+  const router = useRouter()
+  const reduced = useFramerReducedMotion()
+  const [mobileNavOpen, setMobileNavOpen] = useState(false)
+  const { data: session } = useSession()
   useEffect(() => {
-    const handleScroll = (): void => setScrolled(window.scrollY > 10);
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+    const handleScroll = (): void => setScrolled(window.scrollY > 10)
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
 
   // Category nav structure
   const categories = [
-    { name: "Shampoo", slug: "shampoo", sub: ["Anti-Dandruff", "Volumizing", "Color Protect"] },
-    { name: "Conditioners", slug: "conditioners", sub: ["Moisturizing", "Leave-In", "Repair"] },
-    { name: "Treatments", slug: "treatments", sub: ["Hair Masks", "Serums", "Oils"] },
-    { name: "Styling", slug: "styling", sub: ["Gels", "Sprays", "Creams"] },
-    { name: "Accessories", slug: "accessories", sub: ["Combs", "Brushes", "Clips"] },
-  ];
+    {
+      name: 'Shampoo',
+      slug: 'shampoo',
+      sub: ['Anti-Dandruff', 'Volumizing', 'Color Protect'],
+    },
+    {
+      name: 'Conditioners',
+      slug: 'conditioners',
+      sub: ['Moisturizing', 'Leave-In', 'Repair'],
+    },
+    {
+      name: 'Treatments',
+      slug: 'treatments',
+      sub: ['Hair Masks', 'Serums', 'Oils'],
+    },
+    { name: 'Styling', slug: 'styling', sub: ['Gels', 'Sprays', 'Creams'] },
+    {
+      name: 'Accessories',
+      slug: 'accessories',
+      sub: ['Combs', 'Brushes', 'Clips'],
+    },
+  ]
 
   // Lock body scroll when mobile nav is open
   useEffect(() => {
     if (mobileNavOpen) {
-      document.body.style.overflow = "hidden";
+      document.body.style.overflow = 'hidden'
     } else {
-      document.body.style.overflow = "";
+      document.body.style.overflow = ''
     }
-    return () => { document.body.style.overflow = ""; };
-  }, [mobileNavOpen]);
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [mobileNavOpen])
 
   return (
     <>
@@ -167,9 +237,13 @@ export function Header() {
         </div>
       </div>
       <motion.header
-        className={`bg-white sticky top-0 z-50 transition-shadow ${scrolled ? "shadow-lg" : "shadow-none"}`}
+        className={`bg-white sticky top-0 z-50 transition-shadow ${scrolled ? 'shadow-lg' : 'shadow-none'}`}
         initial={false}
-        animate={{ boxShadow: scrolled ? "0 2px 16px 0 rgba(0,0,0,0.08)" : "0 0px 0px 0 rgba(0,0,0,0)" }}
+        animate={{
+          boxShadow: scrolled
+            ? '0 2px 16px 0 rgba(0,0,0,0.08)'
+            : '0 0px 0px 0 rgba(0,0,0,0)',
+        }}
         transition={{ duration: 0.2 }}
       >
         <div className="container mx-auto px-4 flex items-center h-20 justify-between">
@@ -180,7 +254,9 @@ export function Header() {
             whileHover={reduced ? undefined : { scale: 1.03 }}
             whileTap={reduced ? undefined : { scale: 0.98 }}
           >
-            <span className="text-2xl font-bold bg-gradient-to-r from-black via-secondary to-secondary bg-clip-text text-transparent">HairCrew</span>
+            <span className="text-2xl font-bold bg-gradient-to-r from-black via-secondary to-secondary bg-clip-text text-transparent">
+              HairCrew
+            </span>
           </motion.a>
 
           {/* Spacer for desktop nav */}
@@ -199,13 +275,19 @@ export function Header() {
                     {cat.name}
                   </motion.button>
                 </PopoverTrigger>
-                <PopoverContent align="start" className="mt-2 p-0 w-48 bg-white border border-gray-200 rounded-xl shadow-lg">
+                <PopoverContent
+                  align="start"
+                  className="mt-2 p-0 w-48 bg-white border border-gray-200 rounded-xl shadow-lg"
+                >
                   <ul className="py-2">
                     {cat.sub.map(sub => (
                       <li key={sub}>
-                        <Link href={`/categories/${cat.slug}?type=${encodeURIComponent(sub)}`} className="block px-4 py-2 text-gray-700 hover:bg-secondary/10 hover:text-secondary rounded transition-colors">
+                        <Link
+                          href={`/categories/${cat.slug}?type=${encodeURIComponent(sub)}`}
+                          className="block px-4 py-2 text-gray-700 hover:bg-secondary/10 hover:text-secondary rounded transition-colors"
+                        >
                           {sub}
-            </Link>
+                        </Link>
                       </li>
                     ))}
                   </ul>
@@ -241,27 +323,45 @@ export function Header() {
                 <div className="p-4">
                   <h3 className="font-semibold mb-4">Shopping Cart</h3>
                   {items.length === 0 ? (
-                    <p className="text-gray-500 text-center py-8">Your cart is empty</p>
+                    <p className="text-gray-500 text-center py-8">
+                      Your cart is empty
+                    </p>
                   ) : (
                     <>
                       <div className="max-h-64 overflow-y-auto space-y-3">
-                        {items.map((item) => (
-                          <div key={item.id} className="flex items-center space-x-3">
+                        {items.map(item => (
+                          <div
+                            key={item.id}
+                            className="flex items-center space-x-3"
+                          >
                             <div className="w-12 h-12 bg-gray-200 rounded-lg flex-shrink-0" />
                             <div className="flex-1 min-w-0">
-                              <p className="text-sm font-medium truncate">{item.name}</p>
-                              <p className="text-xs text-gray-500">₹{item.price}</p>
+                              <p className="text-sm font-medium truncate">
+                                {item.name}
+                              </p>
+                              <p className="text-xs text-gray-500">
+                                ₹{item.price}
+                              </p>
                             </div>
                             <div className="flex items-center space-x-1">
                               <button
-                                onClick={() => updateQuantity(item.id, Math.max(0, item.quantity - 1))}
+                                onClick={() =>
+                                  updateQuantity(
+                                    item.id,
+                                    Math.max(0, item.quantity - 1)
+                                  )
+                                }
                                 className="w-6 h-6 rounded-full border border-gray-300 flex items-center justify-center text-xs hover:bg-gray-100"
                               >
                                 -
                               </button>
-                              <span className="text-sm w-8 text-center">{item.quantity}</span>
+                              <span className="text-sm w-8 text-center">
+                                {item.quantity}
+                              </span>
                               <button
-                                onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                                onClick={() =>
+                                  updateQuantity(item.id, item.quantity + 1)
+                                }
                                 className="w-6 h-6 rounded-full border border-gray-300 flex items-center justify-center text-xs hover:bg-gray-100"
                               >
                                 +
@@ -282,10 +382,16 @@ export function Header() {
                           <span className="font-semibold">₹{getTotal()}</span>
                         </div>
                         <div className="space-y-2">
-                          <Button onClick={() => router.push('/cart')} className="w-full bg-secondary hover:bg-secondary/90">
+                          <Button
+                            onClick={() => router.push('/cart')}
+                            className="w-full bg-secondary hover:bg-secondary/90"
+                          >
                             View Cart
                           </Button>
-                          <Button onClick={() => router.push('/checkout')} className="w-full bg-black hover:bg-gray-800">
+                          <Button
+                            onClick={() => router.push('/checkout')}
+                            className="w-full bg-black hover:bg-gray-800"
+                          >
                             Checkout
                           </Button>
                         </div>
@@ -298,37 +404,49 @@ export function Header() {
 
             {/* User/Account Dropdown */}
             {session ? (
-            <Popover>
-              <PopoverTrigger asChild>
-                <motion.button
+              <Popover>
+                <PopoverTrigger asChild>
+                  <motion.button
                     className="p-2 rounded-full border border-gray-200 hover:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary"
-                  whileHover={reduced ? undefined : { scale: 1.05 }}
-                  whileTap={reduced ? undefined : { scale: 0.95 }}
-                >
+                    whileHover={reduced ? undefined : { scale: 1.05 }}
+                    whileTap={reduced ? undefined : { scale: 0.95 }}
+                  >
                     <UserIcon className="w-6 h-6 text-gray-700" />
-                </motion.button>
-              </PopoverTrigger>
-              <PopoverContent align="end" className="w-48 p-0">
+                  </motion.button>
+                </PopoverTrigger>
+                <PopoverContent align="end" className="w-48 p-0">
                   <ul className="py-2">
                     <li>
-                      <Link href="/dashboard/profile" className="block px-4 py-2 text-gray-700 hover:bg-secondary/10 hover:text-secondary rounded transition-colors">Profile</Link>
+                      <Link
+                        href="/dashboard/profile"
+                        className="block px-4 py-2 text-gray-700 hover:bg-secondary/10 hover:text-secondary rounded transition-colors"
+                      >
+                        Profile
+                      </Link>
                     </li>
                     <li>
-                      <Link href="/dashboard" className="block px-4 py-2 text-gray-700 hover:bg-secondary/10 hover:text-secondary rounded transition-colors">Dashboard</Link>
+                      <Link
+                        href="/dashboard"
+                        className="block px-4 py-2 text-gray-700 hover:bg-secondary/10 hover:text-secondary rounded transition-colors"
+                      >
+                        Dashboard
+                      </Link>
                     </li>
                     <li>
                       <button
-                        onClick={() => signOut({ callbackUrl: "/" })}
+                        onClick={() => signOut({ callbackUrl: '/' })}
                         className="w-full text-left px-4 py-2 text-red-600 hover:bg-red-50 rounded transition-colors"
                       >
                         Logout
                       </button>
                     </li>
                   </ul>
-              </PopoverContent>
-            </Popover>
+                </PopoverContent>
+              </Popover>
             ) : (
-              <Button onClick={() => router.push("/auth/signin")}>Sign In</Button>
+              <Button onClick={() => router.push('/auth/signin')}>
+                Sign In
+              </Button>
             )}
           </div>
         </div>
@@ -337,10 +455,10 @@ export function Header() {
         <AnimatePresence>
           {mobileNavOpen && (
             <motion.div
-              initial={{ opacity: 0, x: "100%" }}
+              initial={{ opacity: 0, x: '100%' }}
               animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: "100%" }}
-              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              exit={{ opacity: 0, x: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
               className="lg:hidden fixed inset-y-0 right-0 w-[80%] max-w-sm bg-white shadow-xl z-50 overflow-y-auto"
             >
               <FocusTrap>
@@ -355,64 +473,106 @@ export function Header() {
                       <X className="w-5 h-5" />
                     </button>
                   </div>
-                  
+
                   {/* Content */}
                   <div className="flex-1 overflow-y-auto">
                     {/* Mobile Search */}
                     <div className="p-4 border-b">
                       <AutocompleteSearchBar />
                     </div>
-                  
-                  {/* Mobile Categories */}
+
+                    {/* Mobile Categories */}
                     <div className="p-4 border-b">
-                      <h3 className="font-semibold text-gray-900 mb-3">Categories</h3>
-                    {categories.map(cat => (
+                      <h3 className="font-semibold text-gray-900 mb-3">
+                        Categories
+                      </h3>
+                      {categories.map(cat => (
                         <details key={cat.slug} className="group mb-2">
                           <summary className="flex items-center justify-between cursor-pointer py-2 font-medium">
-                          {cat.name}
-                            <svg className="w-4 h-4 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                            {cat.name}
+                            <svg
+                              className="w-4 h-4 transition-transform group-open:rotate-180"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M19 9l-7 7-7-7"
+                              />
                             </svg>
                           </summary>
                           <div className="pl-4 mt-1 space-y-1">
-                          {cat.sub.map(sub => (
-                            <Link
-                              key={sub}
-                              href={`/categories/${cat.slug}?type=${encodeURIComponent(sub)}`}
+                            {cat.sub.map(sub => (
+                              <Link
+                                key={sub}
+                                href={`/categories/${cat.slug}?type=${encodeURIComponent(sub)}`}
                                 className="block py-1.5 text-gray-600 hover:text-secondary transition-colors"
-                              onClick={() => setMobileNavOpen(false)}
-                            >
-                              {sub}
-                            </Link>
-                          ))}
-                        </div>
+                                onClick={() => setMobileNavOpen(false)}
+                              >
+                                {sub}
+                              </Link>
+                            ))}
+                          </div>
                         </details>
                       ))}
                     </div>
-                    
+
                     {/* Footer Links - Moved from footer */}
                     <div className="p-4 border-b">
-                      <h3 className="font-semibold text-gray-900 mb-3">Information</h3>
+                      <h3 className="font-semibold text-gray-900 mb-3">
+                        Information
+                      </h3>
                       <div className="grid grid-cols-2 gap-2">
-                        <Link href="/help" className="py-1.5 text-gray-600 hover:text-secondary transition-colors" onClick={() => setMobileNavOpen(false)}>
+                        <Link
+                          href="/help"
+                          className="py-1.5 text-gray-600 hover:text-secondary transition-colors"
+                          onClick={() => setMobileNavOpen(false)}
+                        >
                           Help Center
                         </Link>
-                        <Link href="/shipping" className="py-1.5 text-gray-600 hover:text-secondary transition-colors" onClick={() => setMobileNavOpen(false)}>
+                        <Link
+                          href="/shipping"
+                          className="py-1.5 text-gray-600 hover:text-secondary transition-colors"
+                          onClick={() => setMobileNavOpen(false)}
+                        >
                           Shipping Info
                         </Link>
-                        <Link href="/returns" className="py-1.5 text-gray-600 hover:text-secondary transition-colors" onClick={() => setMobileNavOpen(false)}>
+                        <Link
+                          href="/returns"
+                          className="py-1.5 text-gray-600 hover:text-secondary transition-colors"
+                          onClick={() => setMobileNavOpen(false)}
+                        >
                           Returns Policy
                         </Link>
-                        <Link href="/about" className="py-1.5 text-gray-600 hover:text-secondary transition-colors" onClick={() => setMobileNavOpen(false)}>
+                        <Link
+                          href="/about"
+                          className="py-1.5 text-gray-600 hover:text-secondary transition-colors"
+                          onClick={() => setMobileNavOpen(false)}
+                        >
                           About Us
                         </Link>
-                        <Link href="/contact" className="py-1.5 text-gray-600 hover:text-secondary transition-colors" onClick={() => setMobileNavOpen(false)}>
+                        <Link
+                          href="/contact"
+                          className="py-1.5 text-gray-600 hover:text-secondary transition-colors"
+                          onClick={() => setMobileNavOpen(false)}
+                        >
                           Contact Us
                         </Link>
-                        <Link href="/privacy" className="py-1.5 text-gray-600 hover:text-secondary transition-colors" onClick={() => setMobileNavOpen(false)}>
+                        <Link
+                          href="/privacy"
+                          className="py-1.5 text-gray-600 hover:text-secondary transition-colors"
+                          onClick={() => setMobileNavOpen(false)}
+                        >
                           Privacy Policy
                         </Link>
-                        <Link href="/terms" className="py-1.5 text-gray-600 hover:text-secondary transition-colors" onClick={() => setMobileNavOpen(false)}>
+                        <Link
+                          href="/terms"
+                          className="py-1.5 text-gray-600 hover:text-secondary transition-colors"
+                          onClick={() => setMobileNavOpen(false)}
+                        >
                           Terms of Service
                         </Link>
                       </div>
@@ -421,13 +581,20 @@ export function Header() {
 
                   {/* Mobile User Actions */}
                   <div className="p-4 border-t mt-auto">
-                  <div className="space-y-2">
-                    <Link href="/dashboard/profile" className="block w-full text-center py-3 rounded bg-secondary text-white font-bold hover:bg-secondary/90 transition" onClick={() => setMobileNavOpen(false)}>
+                    <div className="space-y-2">
+                      <Link
+                        href="/dashboard/profile"
+                        className="block w-full text-center py-3 rounded bg-secondary text-white font-bold hover:bg-secondary/90 transition"
+                        onClick={() => setMobileNavOpen(false)}
+                      >
                         My Account
-                    </Link>
-                      <button className="block w-full text-center py-3 rounded bg-gray-100 text-gray-800 font-bold hover:bg-gray-200 transition" onClick={() => setMobileNavOpen(false)}>
-                      Sign Out
-                    </button>
+                      </Link>
+                      <button
+                        className="block w-full text-center py-3 rounded bg-gray-100 text-gray-800 font-bold hover:bg-gray-200 transition"
+                        onClick={() => setMobileNavOpen(false)}
+                      >
+                        Sign Out
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -439,5 +606,5 @@ export function Header() {
         <MobileTabBar />
       </motion.header>
     </>
-  );
-} 
+  )
+}

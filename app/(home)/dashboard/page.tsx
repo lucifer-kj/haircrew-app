@@ -10,6 +10,7 @@ import { format } from 'date-fns'
 import React from 'react'
 import { ErrorBoundary } from '@/components/ui/error-boundary'
 import Logger from '@/lib/logger'
+import { headers } from 'next/headers'
 
 function getStartDate(filter: string) {
   const now = new Date()
@@ -107,8 +108,12 @@ export default async function DashboardPage(props: DashboardPageProps) {
       }),
     ])
 
-    // Fetch top products from API (use relative path)
-    const topProductsRes = await fetch('/api/admin/top-products', {
+    // Fetch top products from API (use absolute URL for server-side fetch)
+    const headersList = headers();
+    const host = (await headersList).get('host');
+    const protocol = process.env.NODE_ENV === 'production' ? 'https' : 'http';
+    const baseUrl = `${protocol}://${host}`;
+    const topProductsRes = await fetch(`${baseUrl}/api/admin/top-products`, {
       cache: 'no-store',
     })
     if (!topProductsRes.ok) {

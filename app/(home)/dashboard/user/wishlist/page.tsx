@@ -7,12 +7,13 @@ import { Button } from '@/components/ui/button'
 import { Heart } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { WishlistItem } from '@/types/dashboard'
 
 export default async function WishlistPage() {
   const session = await getServerSession(authOptions)
 
   if (!session?.user?.email) {
-    redirect('/auth/signin')
+    redirect('/dashboard/user')
   }
 
   const user = await prisma.user.findUnique({
@@ -62,7 +63,7 @@ export default async function WishlistPage() {
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-              {wishlist.map(item => (
+              {wishlist.map((item: WishlistItem) => (
                 <Card key={item.id} className="overflow-hidden">
                   <div className="relative">
                     <Image

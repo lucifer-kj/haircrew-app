@@ -32,12 +32,12 @@ import { useEffect } from 'react'
 import { useToast } from '@/components/ui/toast'
 
 const navItems = [
-  { label: 'Overview', href: '/dashboard', icon: LayoutDashboard },
-  { label: 'Orders', href: '/dashboard/orders', icon: ShoppingBag },
-  { label: 'Products', href: '/dashboard/products', icon: Package },
-  { label: 'Customers', href: '/dashboard/customers', icon: Users },
-  { label: 'Analytics', href: '/dashboard/analytics', icon: BarChart2 },
-  { label: 'Settings', href: '/dashboard/settings', icon: Settings },
+  { label: 'Overview', href: '/dashboard/admin', icon: LayoutDashboard },
+  { label: 'Orders', href: '/dashboard/admin/orders', icon: ShoppingBag },
+  { label: 'Products', href: '/dashboard/admin/products', icon: Package },
+  { label: 'Customers', href: '/dashboard/admin/users', icon: Users },
+  { label: 'Analytics', href: '/dashboard/admin/analytics', icon: BarChart2 },
+  { label: 'Settings', href: '/dashboard/admin/settings', icon: Settings },
 ]
 
 interface RevenueDataPoint {

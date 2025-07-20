@@ -5,12 +5,13 @@ import { prisma } from '@/lib/prisma'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Star } from 'lucide-react'
+import { Review, serializeReview } from '@/types/dashboard'
 
 export default async function ReviewsPage() {
   const session = await getServerSession(authOptions)
 
   if (!session?.user?.email) {
-    redirect('/auth/signin')
+    redirect('/dashboard/user')
   }
 
   const user = await prisma.user.findUnique({
@@ -34,6 +35,9 @@ export default async function ReviewsPage() {
     },
     orderBy: { createdAt: 'desc' },
   })
+
+  // Serialize reviews for client-side use
+  const serializedReviews = reviews.map(serializeReview)
 
   const renderStars = (rating: number) => {
     return Array.from({ length: 5 }, (_, i) => (
@@ -61,14 +65,14 @@ export default async function ReviewsPage() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {reviews.length === 0 ? (
+          {serializedReviews.length === 0 ? (
             <div className="text-center py-8">
               <Star className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
               <p className="text-muted-foreground">No reviews found.</p>
             </div>
           ) : (
             <div className="space-y-4">
-              {reviews.map(review => (
+              {serializedReviews.map((review: Review) => (
                 <Card key={review.id} className="border">
                   <CardContent className="p-4">
                     <div className="flex items-start justify-between">

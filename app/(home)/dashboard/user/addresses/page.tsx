@@ -4,12 +4,13 @@ import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { MapPin } from 'lucide-react'
+import { Address } from '@/types/dashboard'
 
 export default async function AddressesPage() {
   const session = await getServerSession(authOptions)
 
   if (!session?.user?.email) {
-    redirect('/auth/signin')
+    redirect('/dashboard/user')
   }
 
   const user = await prisma.user.findUnique({
@@ -47,7 +48,7 @@ export default async function AddressesPage() {
             </div>
           ) : (
             <div className="space-y-4">
-              {addresses.map(addr => (
+              {addresses.map((addr: Address) => (
                 <Card key={addr.id} className="border">
                   <CardContent className="p-4">
                     <div className="flex items-start justify-between">

@@ -5,12 +5,13 @@ import { Badge } from '@/components/ui/badge'
 import { CreditCard, Wallet } from 'lucide-react'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/auth'
+import { PaymentOrder, serializePaymentOrder } from '@/types/dashboard'
 
 export default async function PaymentsPage() {
   const session = await getServerSession(authOptions)
 
   if (!session?.user?.email) {
-    redirect('/auth/signin')
+    redirect('/dashboard/user')
   }
 
   const user = await prisma.user.findUnique({
@@ -31,9 +32,15 @@ export default async function PaymentsPage() {
       paymentStatus: true,
       paymentMethod: true,
       createdAt: true,
+      userId: true,
+      status: true,
+      updatedAt: true,
     },
     orderBy: { createdAt: 'desc' },
   })
+
+  // Serialize orders for client-side use
+  const serializedOrders = orders.map(serializePaymentOrder)
 
   const getPaymentStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
@@ -67,7 +74,7 @@ export default async function PaymentsPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            {orders.length === 0 ? (
+            {serializedOrders.length === 0 ? (
               <div className="text-center py-8">
                 <CreditCard className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                 <p className="text-muted-foreground">
@@ -76,7 +83,7 @@ export default async function PaymentsPage() {
               </div>
             ) : (
               <div className="space-y-4">
-                {orders.map(order => (
+                {serializedOrders.map((order: PaymentOrder) => (
                   <Card key={order.id} className="border">
                     <CardContent className="p-4">
                       <div className="flex items-center justify-between">
@@ -95,7 +102,7 @@ export default async function PaymentsPage() {
                         </div>
                         <div className="text-right">
                           <p className="font-medium">
-                            ₹{parseFloat(order.total.toString()).toFixed(2)}
+                            ₹{parseFloat(order.total).toFixed(2)}
                           </p>
                           <Badge
                             className={getPaymentStatusColor(

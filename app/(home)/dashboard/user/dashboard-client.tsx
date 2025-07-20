@@ -14,6 +14,7 @@ import {
 import { Decimal } from '@prisma/client/runtime/library'
 import { GlassCard, GlassButton, GlassBadge } from '@/components/ui/glass-card'
 import { ErrorBoundary } from '@/components/ui/error-boundary'
+import { useAuthGuard } from '@/store/use-auth-guard'
 
 // Define interfaces
 interface Order {
@@ -69,6 +70,7 @@ export default function DashboardClient({
   initialAddresses = [],
   initialWishlist = [],
 }: DashboardClientProps) {
+  useAuthGuard(undefined, '/dashboard/user')
   const [orders] = useState<Order[]>(initialOrders || [])
   const [addresses] = useState<Address[]>(initialAddresses || [])
   const [wishlist] = useState<WishlistItem[]>(initialWishlist || [])
@@ -80,7 +82,7 @@ export default function DashboardClient({
       title: 'Overview',
       description: 'Dashboard summary',
       icon: User,
-      href: '/dashboard',
+      href: '/dashboard/user',
       stats: null,
     },
     {
@@ -88,7 +90,7 @@ export default function DashboardClient({
       title: 'Orders',
       description: 'View your order history',
       icon: ShoppingBag,
-      href: '/dashboard/orders',
+      href: '/dashboard/user/orders',
       stats: orders.length,
     },
     {
@@ -96,7 +98,7 @@ export default function DashboardClient({
       title: 'Wishlist',
       description: 'Your saved items',
       icon: Heart,
-      href: '/dashboard/wishlist',
+      href: '/dashboard/user/wishlist',
       stats: wishlist.length,
     },
     {
@@ -104,7 +106,7 @@ export default function DashboardClient({
       title: 'Addresses',
       description: 'Manage shipping addresses',
       icon: MapPin,
-      href: '/dashboard/addresses',
+      href: '/dashboard/user/addresses',
       stats: addresses.length,
     },
     {
@@ -112,7 +114,7 @@ export default function DashboardClient({
       title: 'Reviews',
       description: 'Your product reviews',
       icon: Star,
-      href: '/dashboard/reviews',
+      href: '/dashboard/user/reviews',
       stats: null,
     },
     {
@@ -120,7 +122,7 @@ export default function DashboardClient({
       title: 'Payments',
       description: 'Payment methods & history',
       icon: CreditCard,
-      href: '/dashboard/payments',
+      href: '/dashboard/user/payments',
       stats: null,
     },
   ]
@@ -207,7 +209,7 @@ export default function DashboardClient({
                     Recent Orders
                   </h2>
                   <GlassButton
-                    onClick={() => handleNavigate('/dashboard/orders')}
+                    onClick={() => handleNavigate('/dashboard/user/orders')}
                   >
                     View all
                   </GlassButton>
@@ -282,7 +284,7 @@ export default function DashboardClient({
                     Wishlist
                   </h2>
                   <GlassButton
-                    onClick={() => handleNavigate('/dashboard/wishlist')}
+                    onClick={() => handleNavigate('/dashboard/user/wishlist')}
                   >
                     View all
                   </GlassButton>
@@ -332,7 +334,7 @@ export default function DashboardClient({
                     Saved Addresses
                   </h2>
                   <GlassButton
-                    onClick={() => handleNavigate('/dashboard/addresses')}
+                    onClick={() => handleNavigate('/dashboard/user/addresses')}
                   >
                     Manage
                   </GlassButton>

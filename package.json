@@ -39,6 +39,8 @@
     "@types/bcryptjs": "^2.4.6",
     "@types/qrcode": "^1.5.5",
     "@uploadthing/react": "^7.3.2",
+    "@upstash/ratelimit": "^2.0.5",
+    "@upstash/redis": "^1.35.1",
     "bcryptjs": "^3.0.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

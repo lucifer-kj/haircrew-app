@@ -52,6 +52,16 @@ export async function middleware(request: NextRequest) {
     return response
   }
 
+  // Handle user dashboard routes - redirect to profile
+  if (isUserDashboard && path !== '/dashboard/user/profile') {
+    console.warn('User dashboard access attempt - redirecting to profile:', path)
+    const response = NextResponse.redirect(new URL('/dashboard/user/profile', request.url))
+    Object.entries(securityHeaders).forEach(([key, value]) => {
+      response.headers.set(key, value)
+    })
+    return response
+  }
+
   // Allow
   const response = NextResponse.next()
   Object.entries(securityHeaders).forEach(([key, value]) => {

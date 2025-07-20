@@ -120,6 +120,8 @@ function MobileTabBar() {
   const pathname = usePathname()
   const { getCount } = useCartStore()
   const cartCount = getCount()
+  const { data: session } = useSession()
+  
   const tabs = [
     { href: '/', icon: Home, label: 'Home' },
     { href: '/search', icon: SearchIcon, label: 'Search' },
@@ -129,7 +131,11 @@ function MobileTabBar() {
       label: 'Cart',
       badge: cartCount > 0 ? cartCount : null,
     },
-    { href: '/dashboard/profile', icon: UserIcon, label: 'Account' },
+    { 
+      href: session?.user?.role === 'ADMIN' ? '/dashboard/admin' : '/dashboard/user/profile', 
+      icon: UserIcon, 
+      label: session?.user?.role === 'ADMIN' ? 'Dashboard' : 'Account' 
+    },
   ]
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t flex justify-around items-center h-16 lg:hidden">
@@ -137,7 +143,7 @@ function MobileTabBar() {
         const active =
           pathname === tab.href ||
           (tab.href === '/' && pathname === '/home') ||
-          (tab.href === '/dashboard/profile' &&
+          ((tab.href === '/dashboard/admin' || tab.href === '/dashboard/user/profile') &&
             pathname.startsWith('/dashboard'))
         return (
           <Link
@@ -424,14 +430,16 @@ export function Header() {
                         Profile
                       </Link>
                     </li>
-                    <li>
-                      <Link
-                        href="/dashboard"
-                        className="block px-4 py-2 text-gray-700 hover:bg-secondary/10 hover:text-secondary rounded transition-colors"
-                      >
-                        Dashboard
-                      </Link>
-                    </li>
+                    {session?.user?.role === 'ADMIN' && (
+                      <li>
+                        <Link
+                          href="/dashboard/admin"
+                          className="block px-4 py-2 text-gray-700 hover:bg-secondary/10 hover:text-secondary rounded transition-colors"
+                        >
+                          Dashboard
+                        </Link>
+                      </li>
+                    )}
                     <li>
                       <button
                         onClick={() => signOut({ callbackUrl: '/' })}
@@ -583,11 +591,11 @@ export function Header() {
                   <div className="p-4 border-t mt-auto">
                     <div className="space-y-2">
                       <Link
-                        href="/dashboard/profile"
+                        href={session?.user?.role === 'ADMIN' ? '/dashboard/admin' : '/dashboard/user/profile'}
                         className="block w-full text-center py-3 rounded bg-secondary text-white font-bold hover:bg-secondary/90 transition"
                         onClick={() => setMobileNavOpen(false)}
                       >
-                        My Account
+                        {session?.user?.role === 'ADMIN' ? 'Admin Dashboard' : 'My Account'}
                       </Link>
                       <button
                         className="block w-full text-center py-3 rounded bg-gray-100 text-gray-800 font-bold hover:bg-gray-200 transition"

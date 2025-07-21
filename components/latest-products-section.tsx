@@ -3,6 +3,7 @@
 import type { Product as ProductType } from '@/types/product'
 import ProductCard from './product-card'
 import { motion } from 'framer-motion'
+import { useState } from 'react'
 
 const skeletonArray = Array.from({ length: 4 })
 
@@ -17,6 +18,9 @@ export default function LatestProductsSection({
   loading,
   onViewAll,
 }: LatestProductsSectionProps) {
+  const [visibleCount, setVisibleCount] = useState(4)
+  const canLoadMore = products.length > visibleCount
+  const visibleProducts = products.slice(0, visibleCount)
   return (
     <section className="py-16 bg-[#EAE4D5]">
       <div className="max-w-7xl mx-auto px-4">
@@ -33,7 +37,7 @@ export default function LatestProductsSection({
           <div className="hidden sm:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {loading
               ? skeletonArray.map((_, i) => <ProductSkeleton key={i} />)
-              : products.map((product: ProductType) => (
+              : visibleProducts.map((product: ProductType) => (
                   <motion.div
                     key={product.id}
                     whileHover={{
@@ -62,7 +66,7 @@ export default function LatestProductsSection({
                     <ProductSkeleton />
                   </motion.div>
                 ))
-              : products.map(item => (
+              : visibleProducts.map(item => (
                   <motion.div
                     key={item.id}
                     className="min-w-[80vw] max-w-xs snap-center flex-shrink-0"
@@ -76,15 +80,23 @@ export default function LatestProductsSection({
                   </motion.div>
                 ))}
           </div>
-          {/* View All Button */}
-          {onViewAll && !loading && products.length > 4 && (
-            <div className="flex justify-center mt-8">
+          {/* Load More Button */}
+          {!loading && canLoadMore && (
+            <div className="flex justify-center mt-8 gap-4">
               <button
-                onClick={onViewAll}
+                onClick={() => setVisibleCount(c => Math.min(c + 4, products.length))}
                 className="px-6 py-2 bg-[#9929EA] hover:bg-[#9929EA]/90 text-white rounded-full font-semibold shadow transition"
               >
-                View All
+                Load More
               </button>
+              {onViewAll && (
+                <button
+                  onClick={onViewAll}
+                  className="px-6 py-2 bg-[#000] hover:bg-[#333] text-white rounded-full font-semibold shadow transition"
+                >
+                  View All
+                </button>
+              )}
             </div>
           )}
         </div>

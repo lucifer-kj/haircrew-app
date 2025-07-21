@@ -3,6 +3,7 @@ import { authOptions } from '@/auth'
 import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import AdminOrdersClient from './admin-orders-client'
+import { serializeOrder } from '@/types/dashboard'
 
 export default async function AdminOrdersPage() {
   const session = await getServerSession(authOptions)
@@ -20,30 +21,15 @@ export default async function AdminOrdersPage() {
     },
     orderBy: { createdAt: 'desc' },
   })
-  // Serialize for client
+  
+  // Serialize for client with user data
   const serializedOrders = orders.map(order => ({
-    ...order,
-    createdAt: order.createdAt.toISOString(),
-    total: order.total.toString(),
-    orderItems: order.orderItems.map(item => ({
-      id: item.id,
-      productId: item.productId,
-      orderId: item.orderId,
-      quantity: item.quantity,
-      price: item.price.toString(),
-      createdAt: item.createdAt.toISOString(),
-      product: item.product
-        ? {
-            name: item.product.name,
-            images: item.product.images,
-            slug: item.product.slug,
-          }
-        : undefined,
-    })),
+    ...serializeOrder(order),
     user: {
       name: order.user.name || '',
       email: order.user.email || '',
     },
   }))
+  
   return <AdminOrdersClient orders={serializedOrders} />
 }

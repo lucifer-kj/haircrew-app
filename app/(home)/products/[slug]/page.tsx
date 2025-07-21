@@ -18,7 +18,6 @@ import {
 } from '@/components/ui/carousel'
 import { useCartStore } from '@/store/cart-store'
 import { useSession } from 'next-auth/react'
-import { ErrorBoundary } from '@/components/ui/error-boundary'
 import { toast } from 'sonner'
 import { LoadingSpinner } from '@/components/ui/loading-spinner'
 
@@ -191,12 +190,6 @@ export default function ProductPage({ params }: PageProps) {
     }
   }
 
-  const getStockStatus = (stock: number) => {
-    if (stock === 0) return { status: 'Out of Stock', color: 'destructive' }
-    if (stock <= 5) return { status: 'Low Stock', color: 'secondary' }
-    return { status: 'In Stock', color: 'default' }
-  }
-
   // Use safe array methods
   const averageRating =
     reviews && reviews.length > 0
@@ -275,38 +268,32 @@ export default function ProductPage({ params }: PageProps) {
     }).format(price)
   }
 
-  if (loading)
-    return (
-      <div className="py-12 text-center">
-        <LoadingSpinner size="lg" className="mx-auto mb-4" />
-        <p className="text-gray-600">Loading product...</p>
+  // Remove early returns, use conditional rendering
+  let content = null
+  if (loading) {
+    content = (
+      <div className="flex justify-center items-center min-h-[60vh]">
+        <LoadingSpinner size="lg" />
       </div>
     )
-  if (error)
-    return (
-      <div className="py-12 text-center">
-        <div className="text-red-600 mb-4">{error}</div>
-        <button
-          onClick={() => window.location.reload()}
-          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-        >
-          Try Again
-        </button>
+  } else if (error) {
+    content = (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
+        <div className="text-red-600 text-lg mb-4">{error}</div>
+        <Button onClick={() => window.location.reload()}>Try Again</Button>
       </div>
     )
-
-  if (!product) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="text-center">Product not found</div>
+  } else if (!product) {
+    content = (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
+        <div className="text-gray-600 text-lg mb-4">Product not found.</div>
+        <Button asChild>
+          <Link href="/products">Back to Products</Link>
+        </Button>
       </div>
     )
-  }
-
-  const stockInfo = getStockStatus(product.stock)
-
-  return (
-    <ErrorBoundary>
+  } else {
+    content = (
       <div className="container mx-auto px-4 py-8">
         {/* Breadcrumb */}
         <nav className="mb-8">
@@ -399,10 +386,10 @@ export default function ProductPage({ params }: PageProps) {
                 <StarRating rating={averageRating} size="md" showValue={true} />
                 <Badge
                   variant={
-                    stockInfo.color as 'default' | 'secondary' | 'destructive'
+                    product.stock > 10 ? 'default' : product.stock > 0 ? 'secondary' : 'destructive'
                   }
                 >
-                  {stockInfo.status}
+                  {product.stock > 10 ? 'In Stock' : product.stock > 0 ? 'Low Stock' : 'Out of Stock'}
                 </Badge>
               </div>
             </div>
@@ -650,7 +637,7 @@ export default function ProductPage({ params }: PageProps) {
                             className="rounded-md object-cover mb-4"
                           />
                         </Link>
-                        <CardTitle className="text-lg font-semibold mb-2 text-center">
+                        <CardTitle className="text-lg font-semibold mb-2 text-center"> 
                           {relatedProduct.name}
                         </CardTitle>
                         <div className="text-[var(--primary)] font-bold text-xl mb-2">
@@ -673,6 +660,10 @@ export default function ProductPage({ params }: PageProps) {
           </div>
         )}
       </div>
-    </ErrorBoundary>
+    )
+  }
+
+  return (
+    {content}
   )
 }

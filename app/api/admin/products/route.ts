@@ -6,6 +6,90 @@ import { validateInput, productSchema, sanitizeInput } from '@/lib/validation'
 import Logger from '@/lib/logger'
 import { z } from 'zod'
 
+// Get all products for admin
+export async function GET(req: NextRequest) {
+  const session = await getServerSession(authOptions)
+  if (!session?.user || session.user.role !== 'ADMIN') {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  try {
+    const { searchParams } = new URL(req.url)
+    const page = parseInt(searchParams.get('page') || '1', 10)
+    const pageSize = parseInt(searchParams.get('pageSize') || '50', 10)
+    const search = searchParams.get('search') || ''
+    const categoryId = searchParams.get('categoryId') || ''
+    const status = searchParams.get('status') || ''
+    const stockStatus = searchParams.get('stockStatus') || ''
+
+    const where: Record<string, unknown> = {}
+
+    // Search filter
+    if (search) {
+      where.OR = [
+        { name: { contains: search, mode: 'insensitive' } },
+        { description: { contains: search, mode: 'insensitive' } },
+        { sku: { contains: search, mode: 'insensitive' } }
+      ]
+    }
+
+    // Category filter
+    if (categoryId) {
+      where.categoryId = categoryId
+    }
+
+    // Status filter
+    if (status) {
+      if (status === 'active') where.isActive = true
+      else if (status === 'inactive') where.isActive = false
+      else if (status === 'featured') where.isFeatured = true
+    }
+
+    // Stock filter
+    if (stockStatus) {
+      if (stockStatus === 'in-stock') where.stock = { gt: 10 }
+      else if (stockStatus === 'low-stock') where.stock = { gt: 0, lte: 10 }
+      else if (stockStatus === 'out-of-stock') where.stock = { lte: 0 }
+    }
+
+    const [products, total] = await Promise.all([
+      prisma.product.findMany({
+        where,
+        include: {
+          category: {
+            select: {
+              id: true,
+              name: true,
+              slug: true
+            }
+          }
+        },
+        orderBy: { createdAt: 'desc' },
+        skip: (page - 1) * pageSize,
+        take: pageSize
+      }),
+      prisma.product.count({ where })
+    ])
+
+    return NextResponse.json({
+      products,
+      total,
+      page,
+      pageSize,
+      totalPages: Math.ceil(total / pageSize)
+    })
+  } catch (e) {
+    Logger.error('Admin products fetch failed', e as Error, {
+      userId: session?.user?.id,
+      ip: req.headers.get('x-forwarded-for') || 'unknown',
+    })
+    return NextResponse.json(
+      { error: 'Failed to fetch products' },
+      { status: 500 }
+    )
+  }
+}
+
 // Admin product update schema (extends product schema)
 const adminProductUpdateSchema = productSchema.extend({
   id: z.string().min(1),

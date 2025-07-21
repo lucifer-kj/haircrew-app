@@ -1,17 +1,11 @@
 'use client'
 
-import { useState, Suspense } from 'react'
-import Link from 'next/link'
+import { useState, Suspense, useMemo, useCallback } from 'react'
 import {
-  Menu,
-  X,
-  LayoutDashboard,
+  IndianRupee,
   ShoppingBag,
-  Package,
   Users,
   BarChart2,
-  Settings,
-  IndianRupee,
 } from 'lucide-react'
 import { ErrorBoundary } from '@/components/ui/error-boundary'
 import { Skeleton } from '@/components/ui/skeleton-loader'
@@ -30,69 +24,23 @@ import Image from 'next/image'
 import { usePusher } from '@/components/providers/socket-provider'
 import { useEffect } from 'react'
 import { useToast } from '@/components/ui/toast'
-
-const navItems = [
-  { label: 'Overview', href: '/dashboard/admin', icon: LayoutDashboard },
-  { label: 'Orders', href: '/dashboard/admin/orders', icon: ShoppingBag },
-  { label: 'Products', href: '/dashboard/admin/products', icon: Package },
-  { label: 'Customers', href: '/dashboard/admin/users', icon: Users },
-  { label: 'Analytics', href: '/dashboard/admin/analytics', icon: BarChart2 },
-  { label: 'Settings', href: '/dashboard/admin/settings', icon: Settings },
-]
-
-interface RevenueDataPoint {
-  date: string
-  revenue: number
-}
-
-interface Metrics {
-  totalRevenue: number
-  totalOrders: number
-  totalCustomers: number
-  averageOrderValue: number
-}
-
-interface OrderStats {
-  volumeData: { date: string; count: number }[]
-  statusData: { status: string; count: number }[]
-  peakTimesData: { hour: string; count: number }[]
-}
-
-interface RecentOrder {
-  id: string
-  orderNumber: string
-  customer: string
-  total: number
-  status: string
-  date: string
-}
-
-interface LowStockProduct {
-  id: string
-  name: string
-  stock: number
-  threshold: number
-  image?: string
-}
-
-interface TopProduct {
-  id: string
-  name: string
-  images: string[]
-  price: number
-  stock: number
-  category?: string
-  totalSold: number
-  totalRevenue: number
-}
+import MetricCard from '@/components/dashboard/MetricCard'
+import DataTable from '@/components/dashboard/DataTable'
+import { 
+  DashboardResponse,
+  RecentOrder, 
+  LowStockProduct, 
+  TopProduct,
+  ColumnDef 
+} from '@/types/dashboard'
 
 interface AdminDashboardLayoutProps {
   children?: React.ReactNode
-  metrics?: Metrics
-  revenueData?: RevenueDataPoint[]
+  metrics?: DashboardResponse['metrics']
+  revenueData?: DashboardResponse['revenueData']
   revenueFilter?: string
   onRevenueFilterChange?: (filter: string) => void
-  orderStats?: OrderStats
+  orderStats?: DashboardResponse['orderStats']
   recentOrders?: RecentOrder[]
   lowStockProducts?: LowStockProduct[]
   topProducts?: TopProduct[]
@@ -109,54 +57,135 @@ export default function AdminDashboardLayout({
   lowStockProducts = [],
   topProducts = [],
 }: AdminDashboardLayoutProps) {
-  const [sidebarOpen, setSidebarOpen] = useState(false)
   const [sortBy, setSortBy] = useState<'date' | 'total' | 'status'>('date')
   const [sortDir] = useState<'asc' | 'desc'>('desc')
   const [statusFilter, setStatusFilter] = useState<string>('')
-  // Add state for date range
+  const [displayLimit, setDisplayLimit] = useState(5)
   const [dateRange, setDateRange] = useState<{ start: string; end: string }>({
     start: '',
     end: '',
   })
 
-  // Format currency
-  const formatCurrency = (value: number) => {
+  // Format currency with useCallback for performance
+  const formatCurrency = useCallback((value: number) => {
     return new Intl.NumberFormat('en-IN', {
       style: 'currency',
       currency: 'INR',
       maximumFractionDigits: 2,
     }).format(Number(value))
-  }
+  }, [])
 
-  const filterOptions = [
+  const filterOptions = useMemo(() => [
     { label: 'Daily', value: 'daily' },
     { label: 'Weekly', value: 'weekly' },
     { label: 'Monthly', value: 'monthly' },
     { label: 'Yearly', value: 'yearly' },
-  ]
+  ], [])
 
-  const statusColors = ['#6366f1', '#22c55e', '#f59e42', '#ef4444', '#a3a3a3']
+  const statusColors = useMemo(() => ['#6366f1', '#22c55e', '#f59e42', '#ef4444', '#a3a3a3'], [])
 
-  // Sort and filter orders
-  let displayedOrders = [...recentOrders]
+  // Sort and filter orders with useMemo for performance
+  const displayedOrders = useMemo(() => {
+    let filtered = [...recentOrders]
   if (statusFilter) {
-    displayedOrders = displayedOrders.filter(o => o.status === statusFilter)
+      filtered = filtered.filter(o => o.status === statusFilter)
   }
-  displayedOrders.sort((a, b) => {
+    filtered.sort((a, b) => {
     let cmp = 0
     if (sortBy === 'date') cmp = a.date.localeCompare(b.date)
     if (sortBy === 'total') cmp = a.total - b.total
     if (sortBy === 'status') cmp = a.status.localeCompare(b.status)
     return sortDir === 'asc' ? cmp : -cmp
   })
+    return filtered
+  }, [recentOrders, statusFilter, sortBy, sortDir])
+  
+  // Limit displayed orders for dashboard
+  const limitedOrders = useMemo(() => 
+    displayedOrders.slice(0, displayLimit), 
+    [displayedOrders, displayLimit]
+  )
 
-  const statusOptions = Array.from(new Set(recentOrders.map(o => o.status)))
+  const statusOptions = useMemo(() => 
+    Array.from(new Set(recentOrders.map(o => o.status))), 
+    [recentOrders]
+  )
+
+  // Define table columns with useMemo
+  const orderColumns = useMemo<ColumnDef<RecentOrder>[]>(() => [
+    {
+      header: 'Date',
+      accessorKey: 'date',
+      sortable: true,
+    },
+    {
+      header: 'Order ID',
+      accessorKey: 'orderNumber',
+    },
+    {
+      header: 'Customer',
+      accessorKey: 'customer',
+    },
+    {
+      header: 'Total',
+      accessorKey: 'total',
+      sortable: true,
+      cell: ({ getValue }) => formatCurrency(getValue() as number),
+    },
+    {
+      header: 'Status',
+      accessorKey: 'status',
+      sortable: true,
+      cell: ({ getValue }) => {
+        const status = getValue() as string
+        return (
+          <span
+            className={`px-2 py-1 rounded-full text-xs font-semibold ${
+              status === 'DELIVERED' 
+                ? 'bg-green-100 text-green-700' 
+                : status === 'CANCELLED' 
+                ? 'bg-red-100 text-red-700' 
+                : 'bg-yellow-100 text-yellow-700'
+            }`}
+          >
+            {status}
+          </span>
+        )
+      },
+    },
+    {
+      header: 'Actions',
+      accessorKey: 'id',
+      cell: () => (
+        <div className="flex gap-2">
+          <button
+            className="px-2 py-1 rounded bg-primary text-white text-xs"
+            title="View"
+          >
+            View
+          </button>
+          <button
+            className="px-2 py-1 rounded bg-secondary text-white text-xs"
+            title="Process"
+          >
+            Process
+          </button>
+          <button
+            className="px-2 py-1 rounded bg-slate-500 text-white text-xs"
+            title="Update Status"
+          >
+            Update
+          </button>
+        </div>
+      ),
+    },
+  ], [formatCurrency])
 
   const { pusher } = usePusher()
   const { showToast } = useToast()
+  
   useEffect(() => {
     if (!pusher) return
-    // Subscribe to a channel (replace 'admin-channel' with your actual channel name)
     const channel = pusher.subscribe('admin-channel')
     const handleNewOrder = (order: {
       orderNumber: string
@@ -168,14 +197,13 @@ export default function AdminDashboardLayout({
         'success'
       )
     }
-    channel.bind('newOrder', handleNewOrder)
-    // Stock update handler
     const handleStockUpdate = (product: { name: string; stock: number }) => {
       showToast(
         `${product.name} stock is now ${product.stock}`,
         product.stock === 0 ? 'error' : product.stock < 10 ? 'info' : 'success'
       )
     }
+    channel.bind('newOrder', handleNewOrder)
     channel.bind('stockUpdate', handleStockUpdate)
     return () => {
       channel.unbind('newOrder', handleNewOrder)
@@ -184,8 +212,8 @@ export default function AdminDashboardLayout({
     }
   }, [pusher, showToast])
 
-  // Export Orders CSV handler
-  const handleExportOrders = async () => {
+  // Export Orders CSV handler with useCallback
+  const handleExportOrders = useCallback(async () => {
     const params = []
     if (dateRange.start) params.push(`start=${dateRange.start}`)
     if (dateRange.end) params.push(`end=${dateRange.end}`)
@@ -202,109 +230,54 @@ export default function AdminDashboardLayout({
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
-  }
+  }, [dateRange, showToast])
+
+  // Handle sort changes with useCallback
+  const handleSort = useCallback((key: keyof RecentOrder) => {
+    setSortBy(key as 'date' | 'total' | 'status')
+  }, [])
 
   return (
-    <div className="min-h-screen flex bg-gradient-to-br from-primary/10 to-secondary/10">
-      {/* Mobile sidebar toggle */}
-      <button
-        className="fixed top-4 left-4 z-30 md:hidden p-2 rounded-md bg-white/80 shadow-lg backdrop-blur-md"
-        onClick={() => setSidebarOpen(true)}
-        aria-label="Open sidebar"
-      >
-        <Menu className="h-6 w-6 text-primary" />
-      </button>
-
-      {/* Sidebar */}
-      <aside
-        className={`fixed inset-y-0 left-0 z-40 w-64 bg-white dark:bg-slate-900/95 shadow-lg border-r border-slate-200 dark:border-slate-800 transform transition-transform duration-200 ease-in-out
-          ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 md:static md:block`}
-      >
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-800">
-          <span className="font-bold text-xl bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-            Admin
-          </span>
-          <button
-            className="md:hidden p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800"
-            onClick={() => setSidebarOpen(false)}
-            aria-label="Close sidebar"
-          >
-            <X className="h-5 w-5 text-slate-500" />
-          </button>
+    <>
+      {/* Welcome Section - Only show when no children */}
+      {!children && (
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent mb-2">
+            Welcome, Admin!
+          </h1>
+          <p className="text-lg text-slate-600 dark:text-slate-300">
+            This is your dashboard overview. Use the sidebar to navigate.
+          </p>
         </div>
-        <nav className="mt-6 flex flex-col gap-1 px-4">
-          {navItems.map(({ label, href, icon: Icon }) => (
-            <Link
-              key={href}
-              href={href}
-              className="flex items-center gap-3 px-4 py-2 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-primary/10 dark:hover:bg-primary/20 font-medium transition"
-              onClick={() => setSidebarOpen(false)}
-            >
-              <Icon className="h-5 w-5 text-primary" />
-              {label}
-            </Link>
-          ))}
-        </nav>
-      </aside>
-
-      {/* Overlay for mobile */}
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 z-30 bg-black/30 md:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
       )}
 
-      {/* Main content with error boundary and loading state */}
-      <main className="flex-1 ml-0 md:ml-64 p-6 transition-all duration-200">
-        <div className="max-w-7xl mx-auto">
           {/* Key Metrics Cards */}
           {metrics && (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-              <div className="bg-white dark:bg-slate-800/80 rounded-xl shadow p-6 flex flex-col items-start">
-                <div className="flex items-center gap-2 mb-2">
-                  <IndianRupee className="h-6 w-6 text-primary" />
-                  <span className="text-lg font-semibold text-slate-700 dark:text-white">
-                    Total Revenue
-                  </span>
-                </div>
-                <span className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                  {formatCurrency(metrics.totalRevenue)}
-                </span>
-              </div>
-              <div className="bg-white dark:bg-slate-800/80 rounded-xl shadow p-6 flex flex-col items-start">
-                <div className="flex items-center gap-2 mb-2">
-                  <ShoppingBag className="h-6 w-6 text-primary" />
-                  <span className="text-lg font-semibold text-slate-700 dark:text-white">
-                    Total Orders
-                  </span>
-                </div>
-                <span className="text-2xl font-bold text-primary">
-                  {metrics.totalOrders}
-                </span>
-              </div>
-              <div className="bg-white dark:bg-slate-800/80 rounded-xl shadow p-6 flex flex-col items-start">
-                <div className="flex items-center gap-2 mb-2">
-                  <Users className="h-6 w-6 text-primary" />
-                  <span className="text-lg font-semibold text-slate-700 dark:text-white">
-                    Total Customers
-                  </span>
-                </div>
-                <span className="text-2xl font-bold text-primary">
-                  {metrics.totalCustomers}
-                </span>
-              </div>
-              <div className="bg-white dark:bg-slate-800/80 rounded-xl shadow p-6 flex flex-col items-start">
-                <div className="flex items-center gap-2 mb-2">
-                  <BarChart2 className="h-6 w-6 text-primary" />
-                  <span className="text-lg font-semibold text-slate-700 dark:text-white">
-                    Avg. Order Value
-                  </span>
-                </div>
-                <span className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                  {formatCurrency(metrics.averageOrderValue)}
-                </span>
-              </div>
+              <MetricCard
+                icon={<IndianRupee className="h-6 w-6" />}
+                title="Total Revenue"
+                value={metrics.totalRevenue}
+                format="currency"
+              />
+              <MetricCard
+                icon={<ShoppingBag className="h-6 w-6" />}
+                title="Total Orders"
+                value={metrics.totalOrders}
+                format="number"
+              />
+              <MetricCard
+                icon={<Users className="h-6 w-6" />}
+                title="Total Customers"
+                value={metrics.totalCustomers}
+                format="number"
+              />
+              <MetricCard
+                icon={<BarChart2 className="h-6 w-6" />}
+                title="Avg. Order Value"
+                value={metrics.averageOrderValue}
+                format="currency"
+              />
             </div>
           )}
 
@@ -455,107 +428,33 @@ export default function AdminDashboardLayout({
           )}
 
           {/* Recent Orders Table */}
-          <div className="bg-white dark:bg-slate-800/80 rounded-xl shadow p-6 mb-8 overflow-x-auto">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4 gap-4">
-              <h2 className="text-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                Recent Orders
-              </h2>
-              <div className="flex gap-2 items-center">
-                <label className="text-sm font-medium mr-2">Status:</label>
-                <select
-                  value={statusFilter}
-                  onChange={e => setStatusFilter(e.target.value)}
-                  className="rounded border px-2 py-1"
-                >
-                  <option value="">All</option>
-                  {statusOptions.map(status => (
-                    <option key={status} value={status}>
-                      {status}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-            <table className="min-w-full text-sm">
-              <thead>
-                <tr className="bg-slate-100 dark:bg-slate-900/40">
-                  <th
-                    className="p-2 cursor-pointer"
-                    onClick={() => setSortBy('date')}
-                  >
-                    Date{' '}
-                    {sortBy === 'date' ? (sortDir === 'asc' ? '↑' : '↓') : ''}
-                  </th>
-                  <th className="p-2">Order ID</th>
-                  <th className="p-2">Customer</th>
-                  <th
-                    className="p-2 cursor-pointer"
-                    onClick={() => setSortBy('total')}
-                  >
-                    Total{' '}
-                    {sortBy === 'total' ? (sortDir === 'asc' ? '↑' : '↓') : ''}
-                  </th>
-                  <th
-                    className="p-2 cursor-pointer"
-                    onClick={() => setSortBy('status')}
-                  >
-                    Status{' '}
-                    {sortBy === 'status' ? (sortDir === 'asc' ? '↑' : '↓') : ''}
-                  </th>
-                  <th className="p-2">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {displayedOrders.map(order => (
-                  <tr
-                    key={order.id}
-                    className="border-b hover:bg-primary/5 transition"
-                  >
-                    <td className="p-2 whitespace-nowrap">{order.date}</td>
-                    <td className="p-2 whitespace-nowrap font-mono">
-                      {order.orderNumber}
-                    </td>
-                    <td className="p-2 whitespace-nowrap">{order.customer}</td>
-                    <td className="p-2 whitespace-nowrap font-semibold">
-                      ₹{order.total.toFixed(2)}
-                    </td>
-                    <td className="p-2 whitespace-nowrap">
-                      <span
-                        className={`px-2 py-1 rounded-full text-xs font-semibold ${order.status === 'DELIVERED' ? 'bg-green-100 text-green-700' : order.status === 'CANCELLED' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'}`}
-                      >
-                        {order.status}
-                      </span>
-                    </td>
-                    <td className="p-2 whitespace-nowrap flex gap-2">
-                      <button
-                        className="px-2 py-1 rounded bg-primary text-white text-xs"
-                        title="View"
-                      >
-                        View
-                      </button>
-                      <button
-                        className="px-2 py-1 rounded bg-secondary text-white text-xs"
-                        title="Process"
-                      >
-                        Process
-                      </button>
-                      <button
-                        className="px-2 py-1 rounded bg-slate-500 text-white text-xs"
-                        title="Update Status"
-                      >
-                        Update
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <DataTable
+            columns={orderColumns}
+            data={limitedOrders}
+            sortBy={sortBy}
+            sortDir={sortDir}
+            onSort={handleSort}
+            filters={{
+              status: statusFilter,
+              onStatusChange: setStatusFilter,
+              statusOptions,
+            }}
+          />
             {displayedOrders.length === 0 && (
               <div className="text-center py-8 text-slate-500">
                 No orders found.
               </div>
             )}
+          {displayLimit < recentOrders.length && (
+            <div className="text-center mt-4">
+              <button
+                className="px-4 py-2 rounded bg-primary text-white font-semibold shadow hover:bg-primary/80 transition"
+                onClick={() => setDisplayLimit(prev => prev + 5)}
+              >
+                Load More Orders
+              </button>
           </div>
+          )}
 
           {/* Low Stock Alerts */}
           <div className="bg-white dark:bg-slate-800/80 rounded-xl shadow p-6 mb-8">
@@ -655,9 +554,9 @@ export default function AdminDashboardLayout({
                         className="border-b hover:bg-primary/5 transition"
                       >
                         <td className="p-2 whitespace-nowrap flex items-center gap-2">
-                          {product.images && product.images[0] && (
+                          {product.image && product.image[0] && (
                             <Image
-                              src={product.images[0]}
+                              src={product.image[0]}
                               alt={product.name}
                               width={32}
                               height={32}
@@ -747,21 +646,9 @@ export default function AdminDashboardLayout({
 
           <ErrorBoundary>
             <Suspense fallback={<Skeleton className="h-40 w-full mb-6" />}>
-              {children || (
-                <div className="text-center py-24">
-                  <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent mb-4">
-                    Welcome, Admin!
-                  </h1>
-                  <p className="text-lg text-slate-600 dark:text-slate-300">
-                    This is your dashboard overview. Use the sidebar to
-                    navigate.
-                  </p>
-                </div>
-              )}
+              {children}
             </Suspense>
           </ErrorBoundary>
-        </div>
-      </main>
-    </div>
+    </>
   )
 }

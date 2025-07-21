@@ -11,6 +11,8 @@ import AnimatedLayoutClient from '@/components/providers/animated-layout-client'
 import RoutePrefetcher from '@/components/providers/route-prefetch'
 import { Toaster } from 'sonner'
 import { SkipToContent } from '@/components/ui/accessibility'
+import { StagewiseToolbar } from '@stagewise/toolbar-next'
+import ReactPlugin from '@stagewise-plugins/react'
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -80,6 +82,11 @@ export default function RootLayout({
               <RoutePrefetcher />
             </div>
             <Toaster position="top-center" richColors />
+            <StagewiseToolbar
+              config={{
+                plugins: [ReactPlugin],
+              }}
+            />
           </ClientRoot>
         </AuthProvider>
       </body>

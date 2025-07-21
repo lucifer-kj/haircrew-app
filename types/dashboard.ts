@@ -1,5 +1,6 @@
 import { Decimal } from "@prisma/client/runtime/library"
 import { format } from 'date-fns'
+import { ReactNode } from "react"
 
 export type TimeFilter = 'daily' | 'weekly' | 'monthly' | 'yearly'
 
@@ -268,6 +269,10 @@ export function serializeLowStockProduct(product: PrismaLowStockProduct): LowSto
 }
 
 export type TopProduct = {
+  category: string
+  totalSold: ReactNode
+  totalRevenue: any
+  stock: ReactNode
   id: string
   name: string
   image: string
@@ -314,4 +319,42 @@ export type WishlistItem = {
 export type ErrorResponse = {
   error: string
   details?: string
+}
+
+// Additional component props for better type safety
+export interface MetricCardProps {
+  icon: React.ReactNode;
+  title: string;
+  value: number | string;
+  format?: 'currency' | 'number' | 'percentage';
+  trend?: {
+    value: number;
+    isPositive: boolean;
+  };
+}
+
+export interface ColumnDef<T> {
+  header: string;
+  accessorKey: keyof T;
+  cell?: (info: { getValue: () => any; row: { original: T } }) => React.ReactNode;
+  sortable?: boolean;
+  width?: string;
+}
+
+export interface DataTableProps<T> {
+  columns: ColumnDef<T>[];
+  data: T[];
+  sortBy?: keyof T;
+  sortDir?: 'asc' | 'desc';
+  onSort?: (key: keyof T) => void;
+  pagination?: {
+    currentPage: number;
+    totalPages: number;
+    onPageChange: (page: number) => void;
+  };
+  filters?: {
+    status?: string;
+    onStatusChange?: (status: string) => void;
+    statusOptions?: string[];
+  };
 } 

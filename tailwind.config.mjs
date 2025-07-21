@@ -4,7 +4,11 @@ const config = {
     './components/**/*.{js,ts,jsx,tsx,mdx}',
   ],
   theme: {
-    extend: {},
+    extend: {
+      spacing: {
+        'touch': '44px', // Minimum recommended touch target size
+      },
+    },
   },
   plugins: [],
 }

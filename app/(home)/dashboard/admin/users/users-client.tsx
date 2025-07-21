@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useToast } from '@/components/ui/toast'
+import { SwipeableCard } from '@/components/admin/SwipeableCard'
 
 interface User {
   id: string
@@ -101,7 +102,7 @@ export default function UsersClient() {
         />
       </div>
       <div className="overflow-x-auto rounded-lg shadow">
-        <table className="min-w-full divide-y divide-gray-200">
+        <table className="min-w-[800px] md:min-w-0 divide-y divide-gray-200 w-full">
           <thead className="bg-gray-50">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -136,7 +137,8 @@ export default function UsersClient() {
               </tr>
             ) : (
               users.map(user => (
-                <tr key={user.id}>
+                <SwipeableCard key={user.id}>
+                  <tr>
                   <td className="px-6 py-4 whitespace-nowrap">
                     {user.name || '-'}
                   </td>
@@ -159,6 +161,7 @@ export default function UsersClient() {
                     <Button
                       size="sm"
                       variant="outline"
+                      className="min-h-touch min-w-touch"
                       disabled={
                         actionLoading === user.id || user.role === 'ADMIN'
                       }
@@ -169,6 +172,7 @@ export default function UsersClient() {
                     <Button
                       size="sm"
                       variant="outline"
+                      className="min-h-touch min-w-touch"
                       disabled={
                         actionLoading === user.id || user.role === 'USER'
                       }
@@ -179,6 +183,7 @@ export default function UsersClient() {
                     <Button
                       size="sm"
                       variant="destructive"
+                      className="min-h-touch min-w-touch"
                       disabled={actionLoading === user.id}
                       onClick={() => handleDelete(user.id)}
                     >
@@ -186,6 +191,7 @@ export default function UsersClient() {
                     </Button>
                   </td>
                 </tr>
+                </SwipeableCard>
               ))
             )}
           </tbody>

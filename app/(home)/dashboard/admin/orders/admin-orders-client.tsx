@@ -459,7 +459,7 @@ export default function AdminOrdersClient({
   return (
     <>
       {/* Header with Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-1 gap-4 mb-6 md:grid-cols-4">
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
@@ -632,7 +632,7 @@ export default function AdminOrdersClient({
       <Card>
         <CardContent className="p-0">
           <div className="overflow-x-auto">
-            <table className="w-full">
+            <table className="min-w-[800px] md:min-w-0 w-full">
               <thead>
                 <tr className="bg-gray-50 border-b">
                   <th className="p-4 text-left">

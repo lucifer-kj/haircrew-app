@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button'
 import { Download, Calendar, TrendingUp, Users, ShoppingBag, DollarSign, RefreshCw, AlertTriangle } from 'lucide-react'
 import { toast } from 'sonner'
 import Image from 'next/image'
+import { SwipeableCard } from '@/components/admin/SwipeableCard'
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis } from 'recharts'
 
 interface AnalyticsData {
   metrics: {
@@ -124,7 +126,7 @@ export default function AdminAnalyticsPage() {
       <div className="container mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-bold">Analytics Dashboard</h1>
-          <Button variant="outline" className="flex items-center gap-2">
+          <Button variant="outline" className="flex items-center gap-2 min-h-touch min-w-touch">
             <Download className="w-4 h-4" />
             Export
           </Button>
@@ -147,7 +149,7 @@ export default function AdminAnalyticsPage() {
               <option value="custom">Custom Range</option>
             </select>
           </div>
-          <Button variant="ghost" size="sm" onClick={fetchAnalyticsData} disabled={loading}>
+          <Button variant="ghost" size="sm" onClick={fetchAnalyticsData} disabled={loading} className="min-h-touch min-w-touch">
             <RefreshCw className={`w-4 h-4 mr-1 ${loading ? 'animate-spin' : ''}`} /> 
             {loading ? 'Loading...' : 'Refresh'}
           </Button>
@@ -223,7 +225,11 @@ export default function AdminAnalyticsPage() {
               <CardTitle>Sales Over Time</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="h-64 flex items-center justify-center text-gray-400">[Line Chart Placeholder]</div>
+              {data && data.charts.salesOverTime && data.charts.salesOverTime.length > 0 ? (
+                <SalesChart data={data.charts.salesOverTime} />
+              ) : (
+                <div className="h-64 flex items-center justify-center text-gray-400">No sales data</div>
+              )}
             </CardContent>
           </Card>
           <Card>
@@ -268,23 +274,25 @@ export default function AdminAnalyticsPage() {
               {data ? (
                 <div className="space-y-3">
                   {data.charts.topProducts.slice(0, 5).map((product, index) => (
-                    <div key={index} className="flex items-center gap-3">
-                      {product.image && (
-                        <Image
-                          src={product.image}
-                          alt={product.name}
-                          width={32}
-                          height={32}
-                          className="w-8 h-8 object-cover rounded"
-                        />
-                      )}
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium truncate">{product.name}</p>
-                        <p className="text-xs text-gray-500">
-                          {product.totalQuantity} sold • {formatCurrency(product.totalRevenue)}
-                        </p>
+                    <SwipeableCard key={index}>
+                      <div className="flex items-center gap-3">
+                        {product.image && (
+                          <Image
+                            src={product.image}
+                            alt={product.name}
+                            width={32}
+                            height={32}
+                            className="w-8 h-8 object-cover rounded"
+                          />
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium truncate">{product.name}</p>
+                          <p className="text-xs text-gray-500">
+                            {product.totalQuantity} sold 2 {formatCurrency(product.totalRevenue)}
+                          </p>
+                        </div>
                       </div>
-                    </div>
+                    </SwipeableCard>
                   ))}
                 </div>
               ) : (
@@ -299,24 +307,28 @@ export default function AdminAnalyticsPage() {
             <CardContent>
               {data ? (
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 rounded-full bg-green-500" />
-                      <span className="text-sm font-medium">New Customers</span>
+                  <SwipeableCard>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 rounded-full bg-green-500" />
+                        <span className="text-sm font-medium">New Customers</span>
+                      </div>
+                      <span className="text-lg font-bold text-green-600">
+                        {data.charts.customerAcquisition.newCustomers}
+                      </span>
                     </div>
-                    <span className="text-lg font-bold text-green-600">
-                      {data.charts.customerAcquisition.newCustomers}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 rounded-full bg-blue-500" />
-                      <span className="text-sm font-medium">Returning Customers</span>
+                  </SwipeableCard>
+                  <SwipeableCard>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 rounded-full bg-blue-500" />
+                        <span className="text-sm font-medium">Returning Customers</span>
+                      </div>
+                      <span className="text-lg font-bold text-blue-600">
+                        {data.charts.customerAcquisition.returningCustomers}
+                      </span>
                     </div>
-                    <span className="text-lg font-bold text-blue-600">
-                      {data.charts.customerAcquisition.returningCustomers}
-                    </span>
-                  </div>
+                  </SwipeableCard>
                   <div className="pt-2 border-t">
                     <p className="text-xs text-gray-500">
                       Total: {data.charts.customerAcquisition.newCustomers + data.charts.customerAcquisition.returningCustomers} customers
@@ -334,4 +346,18 @@ export default function AdminAnalyticsPage() {
   }
 
   return content
+} 
+
+function SalesChart({ data }: { data: { date: string; revenue: number }[] }) {
+  return (
+    <div className="h-[300px] w-full">
+      <ResponsiveContainer width="100%" height="100%">
+        <BarChart data={data}>
+          <XAxis dataKey="date" tick={{ fontSize: 12 }} />
+          <YAxis width={40} tick={{ fontSize: 12 }} />
+          <Bar dataKey="revenue" fill="#8884d8" radius={[4, 4, 0, 0]} />
+        </BarChart>
+      </ResponsiveContainer>
+    </div>
+  )
 } 

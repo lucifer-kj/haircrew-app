@@ -25,6 +25,7 @@ import ProductForm from './product-form'
 import CategoryForm from './category-form'
 import Image from 'next/image'
 import { Product } from '@/types/product'
+import { SwipeableCard } from '@/components/admin/SwipeableCard'
 
 interface Category {
   id: string
@@ -664,7 +665,7 @@ export default function AdminProductsPage() {
         <Card>
           <CardContent className="p-0">
             <div className="overflow-x-auto">
-              <table className="w-full">
+              <table className="min-w-[800px] md:min-w-0 w-full">
                 <thead>
                   <tr className="bg-gray-50 border-b">
                     <th className="p-4 text-left">
@@ -729,14 +730,12 @@ export default function AdminProductsPage() {
                 </thead>
                 <tbody>
                   {filteredProducts.map(product => (
-                    <tr
-                      key={product.id}
-                      className="border-b hover:bg-gray-50 transition-colors"
-                    >
+                    <SwipeableCard key={product.id}>
+                      <tr className="border-b hover:bg-gray-50 transition-colors">
                       <td className="p-4">
                         <button
                           onClick={() => toggleProductSelection(product.id)}
-                          className="flex items-center"
+                          className="flex items-center min-h-touch min-w-touch"
                         >
                           {selectedProducts.has(product.id) ? (
                             <Check className="w-4 h-4 text-blue-600" />
@@ -794,6 +793,7 @@ export default function AdminProductsPage() {
                           <Button
                             size="sm"
                             variant="outline"
+                            className="min-h-touch min-w-touch"
                             onClick={() => {
                               setEditingProduct(product)
                               setShowProductForm(true)
@@ -804,6 +804,7 @@ export default function AdminProductsPage() {
                           <Button
                             size="sm"
                             variant="destructive"
+                            className="min-h-touch min-w-touch"
                             onClick={() => deleteProduct(product.id)}
                             disabled={isUpdating === product.id}
                           >
@@ -816,6 +817,7 @@ export default function AdminProductsPage() {
                         </div>
                       </td>
                     </tr>
+                    </SwipeableCard>
                   ))}
                 </tbody>
               </table>
@@ -843,7 +845,7 @@ export default function AdminProductsPage() {
         <Card>
           <CardContent className="p-0">
             <div className="overflow-x-auto">
-              <table className="w-full">
+              <table className="min-w-[800px] md:min-w-0 w-full">
                 <thead>
                   <tr className="bg-gray-50 border-b">
                     <th className="p-4 text-left">
@@ -867,14 +869,12 @@ export default function AdminProductsPage() {
                 </thead>
                 <tbody>
                   {filteredCategories.map(category => (
-                    <tr
-                      key={category.id}
-                      className="border-b hover:bg-gray-50 transition-colors"
-                    >
+                    <SwipeableCard key={category.id}>
+                      <tr className="border-b hover:bg-gray-50 transition-colors">
                       <td className="p-4">
                         <button
                           onClick={() => toggleCategorySelection(category.id)}
-                          className="flex items-center"
+                          className="flex items-center min-h-touch min-w-touch"
                         >
                           {selectedCategories.has(category.id) ? (
                             <Check className="w-4 h-4 text-blue-600" />
@@ -916,6 +916,7 @@ export default function AdminProductsPage() {
                           <Button
                             size="sm"
                             variant="outline"
+                            className="min-h-touch min-w-touch"
                             onClick={() => {
                               setEditingCategory(category)
                               setShowCategoryForm(true)
@@ -926,6 +927,7 @@ export default function AdminProductsPage() {
                           <Button
                             size="sm"
                             variant="destructive"
+                            className="min-h-touch min-w-touch"
                             onClick={() => deleteCategory(category.id)}
                             disabled={isUpdating === category.id}
                           >
@@ -938,6 +940,7 @@ export default function AdminProductsPage() {
                         </div>
                       </td>
                     </tr>
+                    </SwipeableCard>
                   ))}
                 </tbody>
               </table>

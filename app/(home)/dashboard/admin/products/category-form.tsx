@@ -182,7 +182,7 @@ export default function CategoryForm({ onClose, onSuccess, initialData }: Catego
               <button
                 type="button"
                 onClick={removeImage}
-                className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+                className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 min-h-touch min-w-touch"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -226,14 +226,14 @@ export default function CategoryForm({ onClose, onSuccess, initialData }: Catego
           variant="outline"
           onClick={onClose}
           disabled={loading}
-          className="flex-1"
+          className="flex-1 min-h-touch min-w-touch"
         >
           Cancel
         </Button>
         <Button
           type="submit"
           disabled={loading || !form.name.trim()}
-          className="flex-1"
+          className="flex-1 min-h-touch min-w-touch"
         >
           {loading ? (
             <>

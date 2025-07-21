@@ -233,3 +233,9 @@
 .glass-card-highlight:hover::after {
   left: 100%;
 }
+
+@media (pointer: coarse) {
+  .hover-effect {
+    @apply active:scale-95 transition-transform;
+  }
+}

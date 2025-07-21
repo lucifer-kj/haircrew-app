@@ -1,7 +1,6 @@
 'use client'
 
 import React from 'react'
-import { DataTableProps } from '@/types/dashboard'
 
 /**
  * Reusable data table component with sorting, filtering, and pagination
@@ -135,6 +134,31 @@ function DataTable<T>({
       )}
     </div>
   )
+}
+
+// Reimplement DataTableProps locally
+export interface DataTableProps<T> {
+  columns: Array<{
+    header: string
+    accessorKey: keyof T
+    cell?: (info: { getValue: () => unknown; row: { original: T } }) => React.ReactNode
+    sortable?: boolean
+    width?: string
+  }>
+  data: T[]
+  sortBy?: keyof T
+  sortDir?: 'asc' | 'desc'
+  onSort?: (key: keyof T) => void
+  pagination?: {
+    currentPage: number
+    totalPages: number
+    onPageChange: (page: number) => void
+  }
+  filters?: {
+    status?: string
+    onStatusChange?: (status: string) => void
+    statusOptions?: string[]
+  }
 }
 
 export default DataTable 

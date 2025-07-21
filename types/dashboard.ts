@@ -333,28 +333,10 @@ export interface MetricCardProps {
   };
 }
 
-export interface ColumnDef<T> {
-  header: string;
-  accessorKey: keyof T;
-  cell?: (info: { getValue: () => any; row: { original: T } }) => React.ReactNode;
-  sortable?: boolean;
-  width?: string;
-}
-
-export interface DataTableProps<T> {
-  columns: ColumnDef<T>[];
-  data: T[];
-  sortBy?: keyof T;
-  sortDir?: 'asc' | 'desc';
-  onSort?: (key: keyof T) => void;
-  pagination?: {
-    currentPage: number;
-    totalPages: number;
-    onPageChange: (page: number) => void;
-  };
-  filters?: {
-    status?: string;
-    onStatusChange?: (status: string) => void;
-    statusOptions?: string[];
-  };
+// Mobile-optimized Order type for admin data tables
+export type AdminOrderTableRow = {
+  id: string
+  customer: string
+  status: 'pending' | 'processing' | 'completed'
+  amount: number
 } 

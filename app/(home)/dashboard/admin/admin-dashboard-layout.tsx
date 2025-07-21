@@ -30,8 +30,7 @@ import {
   DashboardResponse,
   RecentOrder, 
   LowStockProduct, 
-  TopProduct,
-  ColumnDef 
+  TopProduct
 } from '@/types/dashboard'
 
 interface AdminDashboardLayoutProps {
@@ -112,7 +111,13 @@ export default function AdminDashboardLayout({
   )
 
   // Define table columns with useMemo
-  const orderColumns = useMemo<ColumnDef<RecentOrder>[]>(() => [
+  const orderColumns: Array<{
+    header: string;
+    accessorKey: keyof RecentOrder;
+    cell?: (info: { getValue: () => unknown; row: { original: RecentOrder } }) => React.ReactNode;
+    sortable?: boolean;
+    width?: string;
+  }> = [
     {
       header: 'Date',
       accessorKey: 'date',
@@ -130,13 +135,13 @@ export default function AdminDashboardLayout({
       header: 'Total',
       accessorKey: 'total',
       sortable: true,
-      cell: ({ getValue }) => formatCurrency(getValue() as number),
+      cell: ({ getValue }: { getValue: () => unknown }) => formatCurrency(getValue() as number),
     },
     {
       header: 'Status',
       accessorKey: 'status',
       sortable: true,
-      cell: ({ getValue }) => {
+      cell: ({ getValue }: { getValue: () => unknown }) => {
         const status = getValue() as string
         return (
           <span
@@ -179,7 +184,7 @@ export default function AdminDashboardLayout({
         </div>
       ),
     },
-  ], [formatCurrency])
+  ]
 
   const { pusher } = usePusher()
   const { showToast } = useToast()

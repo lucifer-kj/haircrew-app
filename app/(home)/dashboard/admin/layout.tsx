@@ -14,6 +14,7 @@ import {
   ChevronRight,
 } from 'lucide-react'
 import AuthGuard from '@/components/admin/AuthGuard'
+import AdminMobileTabBar from '@/components/admin/AdminMobileTabBar'
 
 const navItems = [
   { label: 'Overview', href: '/dashboard/admin', icon: LayoutDashboard },
@@ -31,16 +32,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   return (
     <AuthGuard>
       <div className="min-h-screen flex bg-gradient-to-br from-primary/10 to-secondary/10">
-        {/* Mobile sidebar toggle */}
+        {/* Desktop sidebar toggle and sidebar only */}
         <button
-          className="fixed top-4 left-4 z-30 md:hidden p-2 rounded-md bg-white/80 shadow-lg backdrop-blur-md"
+          className="fixed top-4 left-4 z-30 hidden md:block p-2 rounded-md bg-white/80 shadow-lg backdrop-blur-md"
           onClick={() => setSidebarOpen(true)}
           aria-label="Open sidebar"
         >
           <Menu className="h-6 w-6 text-primary" />
         </button>
 
-        {/* Sidebar */}
+        {/* Sidebar (desktop only) */}
         <aside
           className={`sticky top-20 h-[calc(100vh-80px)] w-64 overflow-y-auto z-40 bg-white dark:bg-slate-900/95 shadow-lg border-r border-slate-200 dark:border-slate-800 hidden md:block ${sidebarCollapsed ? 'w-16' : 'w-64'}`}
         >
@@ -88,12 +89,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           />
         )}
         {/* Main content */}
-        <main className={`flex-1 p-6 transition-all duration-200`}>
-          <div className="max-w-7xl mx-auto px-6">
+        <main className="flex-1 p-4 pb-20 md:pb-4 transition-all duration-200">
+          <div className="max-w-7xl mx-auto px-4">
             {children}
           </div>
         </main>
       </div>
+      <AdminMobileTabBar />
     </AuthGuard>
   )
 } 

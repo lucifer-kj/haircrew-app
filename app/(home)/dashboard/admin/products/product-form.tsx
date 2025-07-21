@@ -307,7 +307,7 @@ export default function ProductForm({
                   onClick={() => handleRemoveImage(url)}
                   variant="destructive"
                   size="icon"
-                  className="absolute top-2 right-2 h-6 w-6 rounded-full opacity-90 hover:opacity-100 focus:opacity-100 focus-visible:ring-2 focus-visible:ring-offset-2"
+                  className="absolute top-2 right-2 h-6 w-6 rounded-full opacity-90 hover:opacity-100 focus:opacity-100 focus-visible:ring-2 focus-visible:ring-offset-2 min-h-touch min-w-touch"
                   aria-label="Remove image"
                 >
                   <X className="h-3 w-3" />
@@ -323,10 +323,13 @@ export default function ProductForm({
           variant="outline"
           onClick={onClose}
           disabled={loading}
+          className="min-h-touch min-w-touch"
         >
           Cancel
         </Button>
-        <Button type="submit" disabled={loading}>
+        <Button type="submit" disabled={loading}
+          className="min-h-touch min-w-touch"
+        >
           {loading ? (
             <>
               <span className="animate-spin inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full mr-2" />

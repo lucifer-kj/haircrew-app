@@ -268,35 +268,31 @@ export default function ProductPage({ params }: PageProps) {
     }).format(price)
   }
 
-  // Remove early returns, use conditional rendering
-  let content = null
   if (loading) {
-    content = (
-      <div className="flex justify-center items-center min-h-[60vh]">
-        <LoadingSpinner size="lg" />
-      </div>
-    )
-  } else if (error) {
-    content = (
+    return <div className="flex justify-center items-center min-h-[40vh]" aria-live="polite"><LoadingSpinner size="lg" /></div>;
+  }
+  if (error) {
+    return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
         <div className="text-red-600 text-lg mb-4">{error}</div>
         <Button onClick={() => window.location.reload()}>Try Again</Button>
       </div>
-    )
-  } else if (!product) {
-    content = (
+    );
+  }
+  if (!product) {
+    return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
         <div className="text-gray-600 text-lg mb-4">Product not found.</div>
         <Button asChild>
           <Link href="/products">Back to Products</Link>
         </Button>
       </div>
-    )
-  } else {
-    content = (
-      <div className="container mx-auto px-4 py-8">
-        {/* Breadcrumb */}
-        <nav className="mb-8">
+    );
+  }
+  return (
+    <div className="container mx-auto px-4 py-8"> 
+      {/* Breadcrumb */}
+      <nav className="mb-8" aria-label="Breadcrumb">
           <ol className="flex items-center space-x-2 text-sm text-gray-600">
             <li>
               <Link href="/" className="hover:text-[var(--primary)]">
@@ -346,15 +342,15 @@ export default function ProductPage({ params }: PageProps) {
           <div className="space-y-4">
             <div className="relative aspect-square bg-gray-100 rounded-lg overflow-hidden">
               <Image
-                src={product.images[selectedImage] || '/Images/p1.jpg'}
-                alt={product.name}
+                src={product?.images?.[selectedImage] || '/Images/p1.jpg'}
+                alt={product?.name || 'Product Image'}
                 fill
                 className="object-cover"
               />
             </div>
-            {product.images.length > 1 && (
+            {product?.images && product.images.length > 1 && (
               <div className="grid grid-cols-4 gap-2">
-                {product.images.map((image, index) => (
+                {product.images?.map((image, index) => (
                   <button
                     key={index}
                     onClick={() => setSelectedImage(index)}
@@ -366,7 +362,7 @@ export default function ProductPage({ params }: PageProps) {
                   >
                     <Image
                       src={image}
-                      alt={`${product.name} ${index + 1}`}
+                      alt={`${product?.name || 'Product'} ${index + 1}`}
                       fill
                       className="object-cover"
                     />
@@ -386,10 +382,10 @@ export default function ProductPage({ params }: PageProps) {
                 <StarRating rating={averageRating} size="md" showValue={true} />
                 <Badge
                   variant={
-                    product.stock > 10 ? 'default' : product.stock > 0 ? 'secondary' : 'destructive'
+                    typeof product?.stock === 'number' && product.stock > 10 ? 'default' : typeof product?.stock === 'number' && product.stock > 0 ? 'secondary' : 'destructive'
                   }
                 >
-                  {product.stock > 10 ? 'In Stock' : product.stock > 0 ? 'Low Stock' : 'Out of Stock'}
+                  {typeof product?.stock === 'number' && product.stock > 10 ? 'In Stock' : typeof product?.stock === 'number' && product.stock > 0 ? 'Low Stock' : 'Out of Stock'}
                 </Badge>
               </div>
             </div>
@@ -399,14 +395,13 @@ export default function ProductPage({ params }: PageProps) {
                 <span className="text-3xl font-bold text-[var(--primary)]">
                   {formatPrice(product.price)}
                 </span>
-                {product.comparePrice &&
-                  product.comparePrice > product.price && (
+                {typeof product?.comparePrice === 'number' && typeof product?.price === 'number' && product.comparePrice > product.price && (
                     <span className="text-lg text-gray-500 line-through">
                       {formatPrice(product.comparePrice)}
                     </span>
                   )}
               </div>
-              {product.comparePrice && product.comparePrice > product.price && (
+              {typeof product?.comparePrice === 'number' && typeof product?.price === 'number' && product.comparePrice > product.price && (
                 <Badge variant="secondary" className="w-fit">
                   {Math.round(
                     ((product.comparePrice - product.price) /
@@ -440,7 +435,7 @@ export default function ProductPage({ params }: PageProps) {
                   </span>
                   <Button
                     onClick={() => setQuantity(quantity + 1)}
-                    disabled={quantity >= product.stock}
+                    disabled={typeof product?.stock !== 'number' || quantity >= product.stock}
                     className="px-3 py-1 bg-transparent hover:bg-gray-100 rounded"
                   >
                     +
@@ -452,7 +447,7 @@ export default function ProductPage({ params }: PageProps) {
                 <Button
                   className="flex-1 bg-[var(--primary)] hover:bg-[var(--primary-secondary)] text-white text-lg py-3"
                   onClick={handleAddToCart}
-                  disabled={product.stock === 0}
+                  disabled={typeof product?.stock !== 'number' || product.stock === 0}
                 >
                   <ShoppingCart className="w-5 h-5 mr-2" />
                   Add to Cart
@@ -662,8 +657,3 @@ export default function ProductPage({ params }: PageProps) {
       </div>
     )
   }
-
-  return (
-    {content}
-  )
-}

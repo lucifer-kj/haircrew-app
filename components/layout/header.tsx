@@ -2,7 +2,6 @@
 
 import Link from 'next/link'
 import {
-  Search,
   X,
   ShoppingCart,
   Trash2,
@@ -10,8 +9,9 @@ import {
   Search as SearchIcon,
   User as UserIcon,
 } from 'lucide-react'
+import SearchBar from '@/components/ui/search-bar'
 import { Button } from '@/components/ui/button'
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useCartStore } from '@/store/cart-store'
 import {
@@ -25,96 +25,6 @@ import { FocusTrap } from '@headlessui/react'
 import { usePathname } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { signOut } from 'next-auth/react'
-
-type SearchResult = { id: string; name: string; slug: string }
-function AutocompleteSearchBar() {
-  const [search, setSearch] = useState('')
-  const [results, setResults] = useState<SearchResult[]>([])
-  const [show, setShow] = useState(false)
-  const router = useRouter()
-  const debounceRef = useRef<NodeJS.Timeout | null>(null)
-  const abortControllerRef = useRef<AbortController | null>(null)
-
-  useEffect(() => {
-    if (debounceRef.current) clearTimeout(debounceRef.current)
-
-    // Cancel previous request
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort()
-    }
-
-    if (search.length > 1) {
-      debounceRef.current = setTimeout(async () => {
-        abortControllerRef.current = new AbortController()
-
-        try {
-          const res = await fetch(
-            `/api/products/latest?search=${encodeURIComponent(search)}`,
-            {
-              signal: abortControllerRef.current.signal,
-            }
-          )
-          if (res.ok) {
-            const data: SearchResult[] = await res.json()
-            setResults(data.slice(0, 5))
-            setShow(true)
-          }
-        } catch (error) {
-          if (error instanceof Error && error.name !== 'AbortError') {
-            console.error('Search error:', error)
-          }
-        }
-      }, 300)
-    } else {
-      setShow(false)
-      setResults([])
-    }
-
-    return () => {
-      if (debounceRef.current) clearTimeout(debounceRef.current)
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort()
-      }
-    }
-  }, [search])
-  return (
-    <div className="relative w-full">
-      <input
-        type="search"
-        value={search}
-        onChange={e => setSearch(e.target.value)}
-        placeholder="Search products..."
-        className="w-full pl-10 pr-4 py-2 rounded-full border border-gray-300 focus:border-secondary focus:ring-2 focus:ring-secondary/30 transition-all shadow-sm hover:shadow-md outline-none bg-white"
-        onFocus={() => setShow(search.length > 1)}
-        onBlur={() => setTimeout(() => setShow(false), 150)}
-      />
-      <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
-      <AnimatePresence>
-        {show && (
-          <motion.ul
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 10 }}
-            className="absolute left-0 right-0 mt-2 bg-white border border-gray-200 rounded-xl shadow-lg z-50 overflow-hidden"
-          >
-            {results.length === 0 && (
-              <li className="px-4 py-2 text-gray-500">No results</li>
-            )}
-            {results.map(item => (
-              <li
-                key={item.id}
-                className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                onMouseDown={() => router.push(`/products/${item.slug}`)}
-              >
-                {item.name}
-              </li>
-            ))}
-          </motion.ul>
-        )}
-      </AnimatePresence>
-    </div>
-  )
-}
 
 function MobileTabBar() {
   const pathname = usePathname()
@@ -300,11 +210,28 @@ export function Header() {
                 </PopoverContent>
               </Popover>
             ))}
+            <div className="relative flex items-center">
+              <a
+                href="/cart"
+                aria-label="View cart"
+                tabIndex={0}
+                className="relative flex items-center"
+              >
+                <ShoppingCart className="w-6 h-6" />
+                <span
+                  className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full px-2 py-0.5 text-xs font-bold"
+                  aria-live="polite"
+                  aria-atomic="true"
+                >
+                  {cartCount > 0 ? cartCount : null}
+                </span>
+              </a>
+            </div>
           </nav>
 
           {/* Search Bar */}
           <div className="hidden md:flex flex-1 max-w-md mx-4">
-            <AutocompleteSearchBar />
+            <SearchBar />
           </div>
 
           {/* Right side actions */}
@@ -486,7 +413,7 @@ export function Header() {
                   <div className="flex-1 overflow-y-auto">
                     {/* Mobile Search */}
                     <div className="p-4 border-b">
-                      <AutocompleteSearchBar />
+                      <SearchBar />
                     </div>
 
                     {/* Mobile Categories */}

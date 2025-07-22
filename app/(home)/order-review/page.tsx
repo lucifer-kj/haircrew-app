@@ -9,6 +9,8 @@ import Image from 'next/image'
 import { useSession, signIn } from 'next-auth/react'
 import { Card } from '@/components/ui/card'
 import { toast } from 'sonner'
+import { AccessibleErrorMessage } from '@/components/ui/accessibility'
+import { z } from 'zod'
 
 const UPI_ID = 'owner@upi'
 const UPI_NAME = 'Owner'
@@ -37,6 +39,17 @@ export default function OrderReviewPage() {
   const [, setShowModalOrderId] = useState<string>('')
   const modalTimeout = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [error, setError] = useState<string>('')
+  const CheckoutSchema = z.object({
+    name: z.string().min(2, 'Name is required.'),
+    phone: z.string().min(10, 'Phone is required.'),
+    address: z.string().min(5, 'Address is required.'),
+    city: z.string().min(2, 'City is required.'),
+    state: z.string().min(2, 'State is required.'),
+    pincode: z.string().min(4, 'Pincode is required.'),
+    country: z.string().min(2, 'Country is required.'),
+    paymentMethod: z.enum(['COD', 'UPI'], { required_error: 'Payment method is required.' }),
+  })
+  const [fieldErrors, setFieldErrors] = useState<{ [key: string]: string }>({})
 
   useEffect(() => {
     const data = sessionStorage.getItem('checkout_shipping')
@@ -63,6 +76,18 @@ export default function OrderReviewPage() {
   const handlePlaceOrder = async () => {
     setIsPlacing(true)
     setError('')
+    setFieldErrors({})
+    const shippingData = shipping || {}
+    const result = CheckoutSchema.safeParse({ ...shippingData, paymentMethod })
+    if (!result.success) {
+      const errors: { [key: string]: string } = {}
+      result.error.errors.forEach(err => {
+        if (err.path[0]) errors[err.path[0]] = err.message
+      })
+      setFieldErrors(errors)
+      setIsPlacing(false)
+      return
+    }
     const orderData = {
       method: paymentMethod,
       status: 'pending',
@@ -89,13 +114,11 @@ export default function OrderReviewPage() {
         router.push(`/order-received/${data.id}`)
       }, 2500)
     } else if (res.status === 401) {
-      setError(
-        'You must be signed in to place an order. Please sign in and try again.'
-      )
-      toast.error('Authentication required')
+      setError('You must be signed in to place an order. Please sign in and try again.')
+      toast.error('Authentication required. Please sign in to continue.')
     } else {
-      setError(data.error || 'Failed to place order')
-      toast.error(data.error || 'Failed to place order')
+      setError(data.error || 'An error occurred while placing your order. Please try again or contact support.')
+      toast.error(data.error || 'Order placement failed. Please try again.')
     }
   }
 
@@ -210,14 +233,20 @@ export default function OrderReviewPage() {
               <h2 className="font-semibold mb-2">Shipping Information</h2>
               <div className="text-sm text-gray-700">
                 <div>
-                  <b>Name:</b> {shipping.name}
+                  <b>Name:</b> {shipping?.name}
+                  {fieldErrors.name && <AccessibleErrorMessage error={fieldErrors.name} id="checkout-name-error" />}
                 </div>
                 <div>
-                  <b>Phone:</b> {shipping.phone}
+                  <b>Phone:</b> {shipping?.phone}
+                  {fieldErrors.phone && <AccessibleErrorMessage error={fieldErrors.phone} id="checkout-phone-error" />}
                 </div>
                 <div>
-                  <b>Address:</b> {shipping.address}, {shipping.city},{' '}
-                  {shipping.state}, {shipping.pincode}, {shipping.country}
+                  <b>Address:</b> {shipping?.address}, {shipping?.city}, {shipping?.state}, {shipping?.pincode}, {shipping?.country}
+                  {fieldErrors.address && <AccessibleErrorMessage error={fieldErrors.address} id="checkout-address-error" />}
+                  {fieldErrors.city && <AccessibleErrorMessage error={fieldErrors.city} id="checkout-city-error" />}
+                  {fieldErrors.state && <AccessibleErrorMessage error={fieldErrors.state} id="checkout-state-error" />}
+                  {fieldErrors.pincode && <AccessibleErrorMessage error={fieldErrors.pincode} id="checkout-pincode-error" />}
+                  {fieldErrors.country && <AccessibleErrorMessage error={fieldErrors.country} id="checkout-country-error" />}
                 </div>
               </div>
             </div>
@@ -230,34 +259,38 @@ export default function OrderReviewPage() {
                   else handleProceedToPayment()
                 }}
                 className="space-y-6"
+                aria-live="polite"
               >
                 <div className="mb-4">
                   <h2 className="font-semibold mb-2">Payment Method</h2>
                   <div className="flex gap-4">
-                    <label className="flex items-center gap-2">
+                    <label className="flex items-center gap-2" htmlFor="COD"> 
                       <input
-                        type="radio"
+                        type="radio"  
                         name="payment"
                         value="COD"
                         checked={paymentMethod === 'COD'}
                         onChange={() => setPaymentMethod('COD')}
+                        aria-describedby={fieldErrors.paymentMethod ? 'checkout-payment-error' : undefined}
                       />
                       Cash on Delivery
                     </label>
-                    <label className="flex items-center gap-2">
+                    <label className="flex items-center gap-2" htmlFor="UPI"> 
                       <input
                         type="radio"
                         name="payment"
                         value="UPI"
                         checked={paymentMethod === 'UPI'}
                         onChange={() => setPaymentMethod('UPI')}
+                        aria-describedby={fieldErrors.paymentMethod ? 'checkout-payment-error' : undefined}
                       />
                       UPI Payment
                     </label>
                   </div>
+                  {fieldErrors.paymentMethod && <AccessibleErrorMessage error={fieldErrors.paymentMethod} id="checkout-payment-error" />}
                 </div>
                 {error && (
-                  <div className="mb-4 text-red-600 text-center">{error}</div>
+                  <AccessibleErrorMessage error={error} id="order-review-error" />
                 )}
                 <Button
                   type="submit"
@@ -273,7 +306,7 @@ export default function OrderReviewPage() {
             )}
             {/* UPI Payment Step */}
             {step === 'upi' && (
-              <div className="text-center space-y-6">
+              <div className="text-center space-y-6" aria-live="polite">
                 <h2 className="text-xl font-bold">Scan to Pay with UPI</h2>
                 {upiQR && (
                   <Image

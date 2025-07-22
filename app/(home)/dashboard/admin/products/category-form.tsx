@@ -7,6 +7,8 @@ import { Label } from '@/components/ui/label'
 import { Upload, X, Loader2, Image as ImageIcon } from 'lucide-react'
 import { toast } from 'sonner'
 import Image from 'next/image'
+import { AccessibleFormField } from '@/components/ui/accessibility'
+import { z } from 'zod'
 
 interface Category {
   id: string
@@ -33,6 +35,11 @@ export default function CategoryForm({ onClose, onSuccess, initialData }: Catego
   const [loading, setLoading] = useState(false)
   const [imageFile, setImageFile] = useState<File | null>(null)
   const [imagePreview, setImagePreview] = useState<string>('')
+  const CategorySchema = z.object({
+    name: z.string().min(2, 'Category name is required.'),
+    description: z.string().optional(),
+  })
+  const [fieldErrors, setFieldErrors] = useState<{ name?: string; description?: string }>({})
 
   useEffect(() => {
     if (initialData) {
@@ -90,6 +97,16 @@ export default function CategoryForm({ onClose, onSuccess, initialData }: Catego
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setFieldErrors({})
+    const result = CategorySchema.safeParse(form)
+    if (!result.success) {
+      const errors: { name?: string; description?: string } = {}
+      result.error.errors.forEach(err => {
+        if (err.path[0]) errors[err.path[0] as 'name' | 'description'] = err.message
+      })
+      setFieldErrors(errors)
+      return
+    }
     
     if (!form.name.trim()) {
       toast.error('Category name is required')
@@ -143,28 +160,39 @@ export default function CategoryForm({ onClose, onSuccess, initialData }: Catego
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Name */}
-      <div>
-        <Label htmlFor="name">Category Name *</Label>
+      <AccessibleFormField
+        label="Category Name *"
+        error={fieldErrors.name}
+        required
+        id="name"
+      >
         <Input
           id="name"
           value={form.name}
           onChange={(e) => setForm(prev => ({ ...prev, name: e.target.value }))}
           placeholder="Enter category name"
           required
+          aria-describedby={fieldErrors.name ? 'category-name-error' : undefined}
+          aria-invalid={!!fieldErrors.name}
         />
-      </div>
+      </AccessibleFormField>
 
       {/* Description */}
-      <div>
-        <Label htmlFor="description">Description</Label>
+      <AccessibleFormField
+        label="Description"
+        id="description"
+        error={fieldErrors.description}
+      >
         <Textarea
           id="description"
           value={form.description}
           onChange={(e) => setForm(prev => ({ ...prev, description: e.target.value }))}
           placeholder="Enter category description"
           rows={3}
+          aria-describedby={fieldErrors.description ? 'category-description-error' : undefined}
+          aria-invalid={!!fieldErrors.description}
         />
-      </div>
+      </AccessibleFormField>
 
       {/* Image Upload */}
       <div>
@@ -183,6 +211,7 @@ export default function CategoryForm({ onClose, onSuccess, initialData }: Catego
                 type="button"
                 onClick={removeImage}
                 className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 min-h-touch min-w-touch"
+                aria-label="Remove image"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -234,6 +263,7 @@ export default function CategoryForm({ onClose, onSuccess, initialData }: Catego
           type="submit"
           disabled={loading || !form.name.trim()}
           className="flex-1 min-h-touch min-w-touch"
+          aria-disabled={loading || !form.name.trim()}
         >
           {loading ? (
             <>

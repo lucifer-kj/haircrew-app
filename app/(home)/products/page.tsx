@@ -1,9 +1,9 @@
 'use client'
 
 import { useEffect, useState, useRef } from 'react'
-import { Input } from '@/components/ui/input'
+import SearchBar from '@/components/ui/search-bar'
 import { Button } from '@/components/ui/button'
-import { ChevronLeft, ChevronRight, Search, X } from 'lucide-react'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { useSession } from 'next-auth/react'
 import {
   Select,
@@ -16,6 +16,7 @@ import ProductCard from '@/components/product-card'
 import { ErrorBoundary } from '@/components/ui/error-boundary'
 import { toast } from 'sonner'
 import { LoadingSpinner } from '@/components/ui/loading-spinner'
+import { useRouter } from 'next/navigation'
 
 interface Category {
   id: string
@@ -40,7 +41,6 @@ export default function ProductsPage() {
   const [categories, setCategories] = useState<Category[]>([])
   const [products, setProducts] = useState<Product[]>([])
   const [total, setTotal] = useState(0)
-  const [search, setSearch] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
   const [priceRange, setPriceRange] = useState<string>('all')
   const [stockStatus, setStockStatus] = useState<string>('all')
@@ -53,15 +53,7 @@ export default function ProductsPage() {
   const [wishlist, setWishlist] = useState<string[]>([])
   const [wishlistLoading, setWishlistLoading] = useState<string | null>(null)
   const debounceRef = useRef<NodeJS.Timeout | null>(null)
-
-  // Check for search parameter from header redirect
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search)
-    const searchParam = urlParams.get('search')
-    if (searchParam) {
-      setSearch(searchParam)
-    }
-  }, [])
+  const router = useRouter()
 
   useEffect(() => {
     fetch('/api/categories')
@@ -77,7 +69,6 @@ export default function ProductsPage() {
       setError(null)
       let url = `/api/products?page=${currentPage}&pageSize=${pageSize}`
       if (selectedCategory) url += `&category=${selectedCategory}`
-      if (search) url += `&search=${encodeURIComponent(search)}`
       if (priceRange !== 'all') url += `&priceRange=${priceRange}`
       if (stockStatus !== 'all') url += `&stockStatus=${stockStatus}`
       if (sortBy !== 'newest') url += `&sortBy=${sortBy}`
@@ -97,7 +88,7 @@ export default function ProductsPage() {
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current)
     }
-  }, [selectedCategory, search, priceRange, stockStatus, sortBy, currentPage])
+  }, [selectedCategory, priceRange, stockStatus, sortBy, currentPage])
 
   // Fetch wishlist on load
   useEffect(() => {
@@ -154,18 +145,15 @@ export default function ProductsPage() {
     }
   }
 
-  const clearSearch = () => {
-    setSearch('')
-    setCurrentPage(1)
-  }
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault()
-    setCurrentPage(1)
-  }
-
   // Remove early returns, use conditional rendering
   const safeProducts = Array.isArray(products) ? products : []
+
+  // Prefetch product detail routes for instant navigation
+  const handleProductHover = (slug: string) => {
+    if (typeof window !== 'undefined') {
+      router.prefetch(`/products/${slug}`)
+    }
+  }
 
   return (
     <ErrorBoundary>
@@ -247,35 +235,11 @@ export default function ProductsPage() {
                   {loading
                     ? 'Loading...'
                     : `${total} product${total !== 1 ? 's' : ''} found`}
-                  {search && (
-                    <span className="ml-2 text-sm text-gray-500">
-                      for &quot;{search}&quot;
-                    </span>
-                  )}
+                  {/* Removed search and sortBy display as they are now handled by SearchBar */}
                 </p>
               </div>
               <div className="flex gap-2">
-                <form onSubmit={handleSearch} className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                  <Input
-                    type="search"
-                    placeholder="Search products..."
-                    value={search}
-                    onChange={e => setSearch(e.target.value)}
-                    className="pl-10 pr-10 max-w-xs"
-                  />
-                  {search && (
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 hover:bg-transparent"
-                      onClick={clearSearch}
-                    >
-                      <X className="h-4 w-4 text-gray-400" />
-                    </Button>
-                  )}
-                </form>
+                <SearchBar className="max-w-xs" />
                 <Select value={sortBy} onValueChange={setSortBy}>
                   <SelectTrigger className="w-40">
                     <SelectValue placeholder="Sort by" />
@@ -293,23 +257,7 @@ export default function ProductsPage() {
             </div>
 
             {/* Search Results Summary */}
-            {search && (
-              <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-blue-800">
-                    Showing results for: <strong>&quot;{search}&quot;</strong>
-                  </span>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={clearSearch}
-                    className="text-blue-600 hover:text-blue-800"
-                  >
-                    Clear search
-                  </Button>
-                </div>
-              </div>
-            )}
+            {/* Removed local search results summary as it's now handled by SearchBar */}
 
             {/* Product Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -319,14 +267,19 @@ export default function ProductsPage() {
                 </div>
               ) : (
                 safeProducts.map(product => (
-                  <ProductCard
+                  <div
                     key={product.id}
-                    product={product}
-                    showWishlist={true}
-                    onWishlistToggle={handleWishlist}
-                    isInWishlist={wishlist.includes(product.id)}
-                    wishlistLoading={wishlistLoading === product.id}
-                  />
+                    onMouseEnter={() => handleProductHover(product.slug)}
+                    onFocus={() => handleProductHover(product.slug)}
+                  >
+                    <ProductCard
+                      product={product}
+                      showWishlist={true}
+                      onWishlistToggle={handleWishlist}
+                      isInWishlist={wishlist.includes(product.id)}
+                      wishlistLoading={wishlistLoading === product.id}
+                    />
+                  </div>
                 ))
               )}
             </div>

@@ -3,12 +3,15 @@ import { authOptions } from '@/auth'
 import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import ProfileClient from './profile-client'
+import { headers } from 'next/headers'
 
 export default async function ProfilePage() {
   const session = await getServerSession(authOptions)
+  const headersList = await headers();
+  const pathname = headersList.get('x-pathname') || '/dashboard/user/profile'
 
   if (!session?.user?.email) {
-    redirect('/dashboard/user')
+    redirect(`/auth/signin?reason=expired&redirect=${encodeURIComponent(pathname)}`)
   }
 
   const user = await prisma.user.findUnique({

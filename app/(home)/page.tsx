@@ -4,12 +4,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { useEffect, useState, useMemo, Suspense } from 'react'
-import { useSession } from 'next-auth/react'
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover'
+
 import { useRef } from 'react'
 import { useCallback } from 'react'
 import LatestProductsSection from '@/components/latest-products-section'
@@ -266,9 +261,6 @@ function HeroCarousel() {
 
 export default function HomePage() {
   const [latestProducts, setLatestProducts] = useState<ProductType[]>([])
-  const { data: session } = useSession()
-  const [showSignInPopover, setShowSignInPopover] = useState(false)
-  const [mobile, setMobile] = useState('')
   const [productsLoading, setProductsLoading] = useState(true)
   const router = useRouter()
 
@@ -280,10 +272,6 @@ export default function HomePage() {
     router.prefetch('/cart')
     router.prefetch('/dashboard/profile')
   }, [router])
-
-  useEffect(() => {
-    if (!session) setShowSignInPopover(true)
-  }, [session])
 
   // Fetch latest products
   useEffect(() => {
@@ -305,44 +293,6 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen">
-      {/* Sign-In Popover */}
-      <Popover open={showSignInPopover} onOpenChange={setShowSignInPopover}>
-        <PopoverContent
-          align="center"
-          className="w-96 max-w-full p-6 rounded-xl shadow-2xl border bg-white z-50"
-        >
-          <div className="flex flex-col gap-4">
-            <h2 className="text-xl font-bold mb-1">Login or Signup</h2>
-            <p className="text-gray-600 text-sm mb-2">
-              Register now and get exclusive HairCrew rewards instantly!
-            </p>
-            <input
-              type="tel"
-              placeholder="Mobile Number"
-              value={mobile}
-              onChange={e => setMobile(e.target.value)}
-              className="border rounded-lg px-4 py-2 text-base focus:border-secondary focus:ring-2 focus:ring-secondary/20 outline-none"
-              maxLength={10}
-            />
-            <button
-              className="bg-secondary text-white rounded-full py-2 font-semibold shadow hover:bg-secondary/90 transition"
-              disabled={mobile.length !== 10}
-            >
-              Send OTP
-            </button>
-            <button
-              className="text-xs text-gray-400 hover:text-gray-600 mt-2"
-              onClick={() => setShowSignInPopover(false)}
-            >
-              Close
-            </button>
-          </div>
-        </PopoverContent>
-        <PopoverTrigger asChild>
-          <span />
-        </PopoverTrigger>
-      </Popover>
-
       {/* Hero Section - Rendered immediately with internal loading state */}
       <Suspense fallback={<HeroSkeleton />}>
         <HeroCarousel />

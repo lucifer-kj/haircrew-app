@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useCartStore } from '@/store/cart-store'
 import { Button } from '@/components/ui/button'
 import { Drawer } from 'vaul'
@@ -18,6 +18,14 @@ export default function CartDrawer() {
     useCartStore()
   const [mounted, setMounted] = useState(false)
   const reduced = useReducedMotion()
+  const drawerRef = useRef<HTMLDivElement>(null)
+
+  // Focus the drawer when it opens
+  useEffect(() => {
+    if (drawerRef.current) {
+      drawerRef.current.focus()
+    }
+  }, [])
 
   useEffect(() => {
     setMounted(true)

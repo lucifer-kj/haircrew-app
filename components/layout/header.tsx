@@ -211,21 +211,105 @@ export function Header() {
               </Popover>
             ))}
             <div className="relative flex items-center">
-              <a
-                href="/cart"
-                aria-label="View cart"
-                tabIndex={0}
-                className="relative flex items-center"
-              >
-                <ShoppingCart className="w-6 h-6" />
-                <span
-                  className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full px-2 py-0.5 text-xs font-bold"
-                  aria-live="polite"
-                  aria-atomic="true"
-                >
-                  {cartCount > 0 ? cartCount : null}
-                </span>
-              </a>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <motion.button
+                    className="relative p-2 text-gray-700 hover:text-secondary transition-colors hidden md:flex"
+                    whileHover={reduced ? undefined : { scale: 1.05 }}
+                    whileTap={reduced ? undefined : { scale: 0.95 }}
+                  >
+                    <ShoppingCart className="w-6 h-6" />
+                    <span
+                      className="absolute -top-1 -right-1 bg-secondary text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold"
+                      aria-hidden={cartCount === 0}
+                      style={{ opacity: cartCount > 0 ? 1 : 0 }}
+                    >
+                      {cartCount > 0 ? cartCount : ''}
+                    </span>
+                  </motion.button>
+                </PopoverTrigger>
+                <PopoverContent align="end" className="w-80 p-0">
+                  <div className="p-4">
+                    <h3 className="font-semibold mb-4">Shopping Cart</h3>
+                    {items.length === 0 ? (
+                      <p className="text-gray-500 text-center py-8">
+                        Your cart is empty
+                      </p>
+                    ) : (
+                      <>
+                        <div className="max-h-64 overflow-y-auto space-y-3">
+                          {items.map(item => (
+                            <div
+                              key={item.id}
+                              className="flex items-center space-x-3"
+                            >
+                              <div className="w-12 h-12 bg-gray-200 rounded-lg flex-shrink-0" />
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium truncate">
+                                  {item.name}
+                                </p>
+                                <p className="text-xs text-gray-500">
+                                  ₹{item.price}
+                                </p>
+                              </div>
+                              <div className="flex items-center space-x-1">
+                                <button
+                                  onClick={() =>
+                                    updateQuantity(
+                                      item.id,
+                                      Math.max(0, item.quantity - 1)
+                                    )
+                                  }
+                                  className="w-6 h-6 rounded-full border border-gray-300 flex items-center justify-center text-xs hover:bg-gray-100"
+                                >
+                                  -
+                                </button>
+                                <span className="text-sm w-8 text-center">
+                                  {item.quantity}
+                                </span>
+                                <button
+                                  onClick={() =>
+                                    updateQuantity(item.id, item.quantity + 1)
+                                  }
+                                  className="w-6 h-6 rounded-full border border-gray-300 flex items-center justify-center text-xs hover:bg-gray-100"
+                                >
+                                  +
+                                </button>
+                              </div>
+                              <button
+                                onClick={() => removeItem(item.id)}
+                                className="text-gray-400 hover:text-red-500 transition-colors"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                        <div className="border-t pt-4 mt-4">
+                          <div className="flex justify-between items-center mb-4">
+                            <span className="font-semibold">Total:</span>
+                            <span className="font-semibold">₹{getTotal()}</span>
+                          </div>
+                          <div className="space-y-2">
+                            <Button
+                              onClick={() => router.push('/cart')}
+                              className="w-full bg-secondary hover:bg-secondary/90"
+                            >
+                              View Cart
+                            </Button>
+                            <Button
+                              onClick={() => router.push('/checkout')}
+                              className="w-full bg-black hover:bg-gray-800"
+                            >
+                              Checkout
+                            </Button>
+                          </div>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </PopoverContent>
+              </Popover>
             </div>
           </nav>
 
@@ -236,105 +320,6 @@ export function Header() {
 
           {/* Right side actions */}
           <div className="flex items-center space-x-4">
-            {/* Cart - Hidden on mobile/small screens */}
-            <Popover>
-              <PopoverTrigger asChild>
-                <motion.button
-                  className="relative p-2 text-gray-700 hover:text-secondary transition-colors hidden md:flex"
-                  whileHover={reduced ? undefined : { scale: 1.05 }}
-                  whileTap={reduced ? undefined : { scale: 0.95 }}
-                >
-                  <ShoppingCart className="w-6 h-6" />
-                  {cartCount > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-secondary text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
-                      {cartCount}
-                    </span>
-                  )}
-                </motion.button>
-              </PopoverTrigger>
-              <PopoverContent align="end" className="w-80 p-0">
-                <div className="p-4">
-                  <h3 className="font-semibold mb-4">Shopping Cart</h3>
-                  {items.length === 0 ? (
-                    <p className="text-gray-500 text-center py-8">
-                      Your cart is empty
-                    </p>
-                  ) : (
-                    <>
-                      <div className="max-h-64 overflow-y-auto space-y-3">
-                        {items.map(item => (
-                          <div
-                            key={item.id}
-                            className="flex items-center space-x-3"
-                          >
-                            <div className="w-12 h-12 bg-gray-200 rounded-lg flex-shrink-0" />
-                            <div className="flex-1 min-w-0">
-                              <p className="text-sm font-medium truncate">
-                                {item.name}
-                              </p>
-                              <p className="text-xs text-gray-500">
-                                ₹{item.price}
-                              </p>
-                            </div>
-                            <div className="flex items-center space-x-1">
-                              <button
-                                onClick={() =>
-                                  updateQuantity(
-                                    item.id,
-                                    Math.max(0, item.quantity - 1)
-                                  )
-                                }
-                                className="w-6 h-6 rounded-full border border-gray-300 flex items-center justify-center text-xs hover:bg-gray-100"
-                              >
-                                -
-                              </button>
-                              <span className="text-sm w-8 text-center">
-                                {item.quantity}
-                              </span>
-                              <button
-                                onClick={() =>
-                                  updateQuantity(item.id, item.quantity + 1)
-                                }
-                                className="w-6 h-6 rounded-full border border-gray-300 flex items-center justify-center text-xs hover:bg-gray-100"
-                              >
-                                +
-                              </button>
-                            </div>
-                            <button
-                              onClick={() => removeItem(item.id)}
-                              className="text-gray-400 hover:text-red-500 transition-colors"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-                      <div className="border-t pt-4 mt-4">
-                        <div className="flex justify-between items-center mb-4">
-                          <span className="font-semibold">Total:</span>
-                          <span className="font-semibold">₹{getTotal()}</span>
-                        </div>
-                        <div className="space-y-2">
-                          <Button
-                            onClick={() => router.push('/cart')}
-                            className="w-full bg-secondary hover:bg-secondary/90"
-                          >
-                            View Cart
-                          </Button>
-                          <Button
-                            onClick={() => router.push('/checkout')}
-                            className="w-full bg-black hover:bg-gray-800"
-                          >
-                            Checkout
-                          </Button>
-                        </div>
-                      </div>
-                    </>
-                  )}
-                </div>
-              </PopoverContent>
-            </Popover>
-
             {/* User/Account Dropdown */}
             {session ? (
               <Popover>

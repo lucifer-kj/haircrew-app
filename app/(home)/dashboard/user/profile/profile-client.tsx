@@ -4,6 +4,7 @@ import { User, Mail, Calendar, Edit } from 'lucide-react'
 import { GlassCard, GlassButton, GlassPanel } from '@/components/ui/glass-card'
 import Image from 'next/image'
 import { signOut } from 'next-auth/react'
+import { useMemo } from 'react'
 
 interface ProfileClientProps {
   user: {
@@ -11,7 +12,7 @@ interface ProfileClientProps {
     name: string
     email: string
     image: string
-    memberSince: string
+    createdAt: string | Date
   }
   stats: {
     ordersCount: number
@@ -21,6 +22,16 @@ interface ProfileClientProps {
 }
 
 export default function ProfileClient({ user, stats }: ProfileClientProps) {
+  // Format memberSince on the client using browser locale
+  const memberSince = useMemo(() => {
+    if (!user.createdAt) return ''
+    return new Date(user.createdAt).toLocaleDateString(undefined, {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    })
+  }, [user.createdAt])
+
   return (
     <div
       className="min-h-screen py-12 px-4"
@@ -68,7 +79,7 @@ export default function ProfileClient({ user, stats }: ProfileClientProps) {
 
                 <div className="flex items-center justify-center md:justify-start gap-2 text-slate-700">
                   <Calendar className="h-4 w-4 text-primary" />
-                  <span>Member since {user.memberSince}</span>
+                  <span>Member since {memberSince}</span>
                 </div>
               </div>
             </div>

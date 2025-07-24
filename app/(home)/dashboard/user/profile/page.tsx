@@ -14,6 +14,11 @@ export default async function ProfilePage() {
     redirect(`/auth/signin?reason=expired&redirect=${encodeURIComponent(pathname)}`)
   }
 
+  // If admin, redirect to admin dashboard
+  if (session.user.role === 'ADMIN') {
+    redirect('/dashboard/admin')
+  }
+
   const user = await prisma.user.findUnique({
     where: { email: session.user.email },
     select: {
@@ -28,12 +33,6 @@ export default async function ProfilePage() {
   if (!user) {
     redirect('/auth/signin')
   }
-
-  const memberSince = new Date(user.createdAt).toLocaleDateString(undefined, {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  })
 
   // Get counts for the profile summary
   const [ordersCount, addressesCount, wishlistCount] = await Promise.all([
@@ -55,7 +54,7 @@ export default async function ProfilePage() {
         name: user.name || '',
         email: user.email || '',
         image: user.image || '',
-        memberSince,
+        createdAt: user.createdAt,
       }}
       stats={{
         ordersCount,

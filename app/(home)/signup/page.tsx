@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { AccessibleErrorMessage } from '@/components/ui/accessibility'
 import { toast } from 'sonner'
 import { z } from 'zod'
+import { signIn } from 'next-auth/react'
 
 export default function SignupPage() {
   const router = useRouter()
@@ -61,9 +62,19 @@ export default function SignupPage() {
     setLoading(false)
     const data = await res.json()
     if (res.ok) {
-      setSuccess('Account created! Redirecting to login...')
-      toast.success('Account created! Redirecting to login...')
-      setTimeout(() => router.push('/login'), 1500)
+      // Automatically log in the user after registration
+      const loginRes = await signIn('credentials', {
+        redirect: false,
+        email: form.email,
+        password: form.password,
+      })
+      if (loginRes && !loginRes.error) {
+        toast.success('Account created! Logging you in...')
+        router.push('/dashboard')
+      } else {
+        toast.success('Account created! Please sign in.')
+        router.push('/login')
+      }
     } else {
       setError(data.error || 'Failed to create account.')
       toast.error(data.error || 'Failed to create account.')

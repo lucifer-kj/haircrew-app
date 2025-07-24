@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState, useRef } from 'react'
-import SearchBar from '@/components/ui/search-bar'
+import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { useSession } from 'next-auth/react'
@@ -54,12 +54,22 @@ export default function ProductsPage() {
   const [wishlistLoading, setWishlistLoading] = useState<string | null>(null)
   const debounceRef = useRef<NodeJS.Timeout | null>(null)
   const router = useRouter()
+  const [search, setSearch] = useState('')
 
   useEffect(() => {
     fetch('/api/categories')
       .then(res => res.json())
       .then(data => setCategories(Array.isArray(data) ? data : []))
       .catch(() => setCategories([]))
+  }, [])
+
+  // Check for search parameter from header redirect (optional, for deep linking)
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search)
+    const searchParam = urlParams.get('search')
+    if (searchParam) {
+      setSearch(searchParam)
+    }
   }, [])
 
   useEffect(() => {
@@ -69,6 +79,7 @@ export default function ProductsPage() {
       setError(null)
       let url = `/api/products?page=${currentPage}&pageSize=${pageSize}`
       if (selectedCategory) url += `&category=${selectedCategory}`
+      if (search) url += `&search=${encodeURIComponent(search)}`
       if (priceRange !== 'all') url += `&priceRange=${priceRange}`
       if (stockStatus !== 'all') url += `&stockStatus=${stockStatus}`
       if (sortBy !== 'newest') url += `&sortBy=${sortBy}`
@@ -88,7 +99,7 @@ export default function ProductsPage() {
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current)
     }
-  }, [selectedCategory, priceRange, stockStatus, sortBy, currentPage])
+  }, [selectedCategory, search, priceRange, stockStatus, sortBy, currentPage])
 
   // Fetch wishlist on load
   useEffect(() => {
@@ -143,6 +154,16 @@ export default function ProductsPage() {
     } finally {
       setWishlistLoading(null)
     }
+  }
+
+  const clearSearch = () => {
+    setSearch('')
+    setCurrentPage(1)
+  }
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault()
+    setCurrentPage(1)
   }
 
   // Remove early returns, use conditional rendering
@@ -239,7 +260,26 @@ export default function ProductsPage() {
                 </p>
               </div>
               <div className="flex gap-2">
-                <SearchBar className="max-w-xs" />
+                <form onSubmit={handleSearch} className="relative">
+                  <Input
+                    type="search"
+                    placeholder="Search products..."
+                    value={search}
+                    onChange={e => setSearch(e.target.value)}
+                    className="pl-10 pr-10 max-w-xs"
+                  />
+                  {search && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 hover:bg-transparent"
+                      onClick={clearSearch}
+                    >
+                      
+                    </Button>
+                  )}
+                </form>
                 <Select value={sortBy} onValueChange={setSortBy}>
                   <SelectTrigger className="w-40">
                     <SelectValue placeholder="Sort by" />
@@ -257,7 +297,23 @@ export default function ProductsPage() {
             </div>
 
             {/* Search Results Summary */}
-            {/* Removed local search results summary as it's now handled by SearchBar */}
+            {search && (
+              <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-blue-800">
+                    Showing results for: <strong>"{search}"</strong>
+                  </span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={clearSearch}
+                    className="text-blue-600 hover:text-blue-800"
+                  >
+                    Clear search
+                  </Button>
+                </div>
+              </div>
+            )}
 
             {/* Product Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">

@@ -2,7 +2,7 @@
 
 import { Suspense, useEffect, useState, useRef } from 'react'
 import { useSearchParams } from 'next/navigation'
-import ProductCard from '@/components/product-card'
+import ProductCard, { Product } from '@/components/product-card'
 import { LoadingSpinner } from '@/components/ui/loading-spinner'
 
 function ShampooCategoryPageInner() {
@@ -10,7 +10,7 @@ function ShampooCategoryPageInner() {
   const type = searchParams.get('type') || '';
   const category = 'shampoo';
 
-  const [products, setProducts] = useState<any[]>([])
+  const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const debounceRef = useRef<NodeJS.Timeout | null>(null)
@@ -24,7 +24,7 @@ function ShampooCategoryPageInner() {
       if (type) url += `&type=${encodeURIComponent(type)}`
       fetch(url)
         .then(res => res.json())
-        .then((data: { products: any[] }) => {
+        .then((data: { products: Product[] }) => {
           setProducts(Array.isArray(data.products) ? data.products : [])
         })
         .catch(() => {

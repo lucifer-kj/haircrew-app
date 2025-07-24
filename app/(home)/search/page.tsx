@@ -1,22 +1,20 @@
 'use client'
 
 import { useEffect, useState, useRef, Suspense } from 'react'
-import { useSearchParams, useRouter } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import ProductCard from '@/components/product-card'
+import ProductCard, { Product } from '@/components/product-card'
 import { LoadingSpinner } from '@/components/ui/loading-spinner'
 
 function SearchPageInner() {
   const searchParams = useSearchParams();
-  const router = useRouter();
   const initialQuery = searchParams.get('query') || '';
 
   const [search, setSearch] = useState(initialQuery)
-  const [products, setProducts] = useState<any[]>([])
+  const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [total, setTotal] = useState(0)
   const debounceRef = useRef<NodeJS.Timeout | null>(null)
 
   // Fetch products when search changes
@@ -24,7 +22,6 @@ function SearchPageInner() {
     if (debounceRef.current) clearTimeout(debounceRef.current)
     if (!search) {
       setProducts([])
-      setTotal(0)
       setError(null)
       setLoading(false)
       return
@@ -34,13 +31,11 @@ function SearchPageInner() {
       setError(null)
       fetch(`/api/products?search=${encodeURIComponent(search)}&page=1&pageSize=24`)
         .then(res => res.json())
-        .then((data: { products: any[]; total: number }) => {
+        .then((data: { products: Product[] }) => {
           setProducts(Array.isArray(data.products) ? data.products : [])
-          setTotal(typeof data.total === 'number' ? data.total : 0)
         })
         .catch(() => {
           setProducts([])
-          setTotal(0)
           setError('Error loading products.')
         })
         .finally(() => setLoading(false))
@@ -102,7 +97,7 @@ function SearchPageInner() {
         <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg max-w-md mx-auto">
           <div className="flex items-center justify-between">
             <span className="text-sm text-blue-800">
-              Showing results for: <strong>"{search}"</strong>
+              Showing results for: <strong>&quot;{search}&quot;</strong>
             </span>
             <Button
               variant="ghost"

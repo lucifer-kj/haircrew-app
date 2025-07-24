@@ -301,7 +301,7 @@ export default function ProductsPage() {
               <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-blue-800">
-                    Showing results for: <strong>"{search}"</strong>
+                    Showing results for: <strong>&quot;{search}&quot;</strong>
                   </span>
                   <Button
                     variant="ghost"

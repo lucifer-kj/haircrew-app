@@ -10,7 +10,7 @@ const envSchema = z.object({
   PUSHER_CLUSTER: z.string().min(1).default('ap2'),
   RESEND_API_KEY: z.string().min(1),
   NEXT_PUBLIC_BASE_URL: z.string().url().optional(),
-  NEXT_PUBLIC_PUSHER_KEY: z.string().min(1),
+  NEXT_PUBLIC_PUSHER_APP_KEY: z.string().min(1),
   NEXT_PUBLIC_PUSHER_CLUSTER: z.string().min(1).default('ap2'),
   UPLOADTHING_TOKEN: z.string().min(1),
 })

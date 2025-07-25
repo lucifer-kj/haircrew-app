@@ -180,36 +180,10 @@ export function Header() {
 
           {/* Desktop Navigation with dropdowns */}
           <nav className="hidden lg:flex items-center space-x-4 mx-8">
-            {categories.map(cat => (
-              <Popover key={cat.slug}>
-                <PopoverTrigger asChild>
-                  <motion.button
-                    className="text-black hover:text-secondary font-medium px-3 py-2 rounded transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary/50"
-                    whileHover={reduced ? undefined : { scale: 1.02 }}
-                    whileTap={reduced ? undefined : { scale: 0.98 }}
-                  >
-                    {cat.name}
-                  </motion.button>
-                </PopoverTrigger>
-                <PopoverContent
-                  align="start"
-                  className="mt-2 p-0 w-48 bg-white border border-gray-200 rounded-xl shadow-lg"
-                >
-                  <ul className="py-2">
-                    {cat.sub.map(sub => (
-                      <li key={sub}>
-                        <Link
-                          href={`/categories/${cat.slug}?type=${encodeURIComponent(sub)}`}
-                          className="block px-4 py-2 text-gray-700 hover:bg-secondary/10 hover:text-secondary rounded transition-colors"
-                        >
-                          {sub}
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                </PopoverContent>
-              </Popover>
-            ))}
+            <Link href="/explore" className="text-black hover:text-secondary font-medium px-3 py-2 rounded transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary/50">Explore</Link>
+            <Link href="/categories" className="text-black hover:text-secondary font-medium px-3 py-2 rounded transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary/50">Category</Link>
+            <Link href="/contact" className="text-black hover:text-secondary font-medium px-3 py-2 rounded transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary/50">Contact</Link>
+            <Link href="/help" className="text-black hover:text-secondary font-medium px-3 py-2 rounded transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary/50">Help</Link>
             <div className="relative flex items-center">
               <Popover>
                 <PopoverTrigger asChild>
@@ -447,53 +421,32 @@ export function Header() {
                       </h3>
                       <div className="grid grid-cols-2 gap-2">
                         <Link
-                          href="/help"
+                          href="/explore"
                           className="py-1.5 text-gray-600 hover:text-secondary transition-colors"
                           onClick={() => setMobileNavOpen(false)}
                         >
-                          Help Center
+                          Explore
                         </Link>
                         <Link
-                          href="/shipping"
+                          href="/categories"
                           className="py-1.5 text-gray-600 hover:text-secondary transition-colors"
                           onClick={() => setMobileNavOpen(false)}
                         >
-                          Shipping Info
-                        </Link>
-                        <Link
-                          href="/returns"
-                          className="py-1.5 text-gray-600 hover:text-secondary transition-colors"
-                          onClick={() => setMobileNavOpen(false)}
-                        >
-                          Returns Policy
-                        </Link>
-                        <Link
-                          href="/about"
-                          className="py-1.5 text-gray-600 hover:text-secondary transition-colors"
-                          onClick={() => setMobileNavOpen(false)}
-                        >
-                          About Us
+                          Category
                         </Link>
                         <Link
                           href="/contact"
                           className="py-1.5 text-gray-600 hover:text-secondary transition-colors"
                           onClick={() => setMobileNavOpen(false)}
                         >
-                          Contact Us
+                          Contact
                         </Link>
                         <Link
-                          href="/privacy"
+                          href="/help"
                           className="py-1.5 text-gray-600 hover:text-secondary transition-colors"
                           onClick={() => setMobileNavOpen(false)}
                         >
-                          Privacy Policy
-                        </Link>
-                        <Link
-                          href="/terms"
-                          className="py-1.5 text-gray-600 hover:text-secondary transition-colors"
-                          onClick={() => setMobileNavOpen(false)}
-                        >
-                          Terms of Service
+                          Help
                         </Link>
                       </div>
                     </div>

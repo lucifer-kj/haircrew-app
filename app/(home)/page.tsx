@@ -322,7 +322,8 @@ export default function HomePage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <Link href="/categories/shampoo" prefetch={true} className="group">
+            {/* TODO: Replace these hardcoded IDs with dynamic values if possible */}
+            <Link href="/products?category=shampoo" prefetch={true} className="group">
               <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow">
                 <div className="relative h-64">
                   <Image
@@ -345,7 +346,7 @@ export default function HomePage() {
             </Link>
 
             <Link
-              href="/categories/conditioner"
+              href="/products?category=conditioner"
               prefetch={true}
               className="group"
             >
@@ -371,7 +372,7 @@ export default function HomePage() {
             </Link>
 
             <Link
-              href="/categories/treatment"
+              href="/products?category=treatment"
               prefetch={true}
               className="group"
             >

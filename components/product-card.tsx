@@ -155,6 +155,8 @@ export default function ProductCard({
               sizes="(max-width: 768px) 100vw, 300px"
               className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-300"
               priority={false}
+              loading="lazy"
+              fetchPriority="auto"
             />
           </div>
         </Link>

@@ -268,6 +268,35 @@ model Setting {
   value String
 }
 
+model NewsletterSignup {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  createdAt DateTime @default(now())
+
+  @@map("newsletter_signups")
+}
+
+model HelpRequest {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  message   String
+  type      HelpType
+  createdAt DateTime @default(now())
+
+  @@map("help_requests")
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  type      String
+  message   String
+  data      Json?
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  @@map("notifications")
+}
+
 
 // Enums
 enum UserRole {
@@ -291,5 +320,10 @@ enum PaymentStatus {
   FAILED
   REFUNDED
   PARTIALLY_REFUNDED
+}
+
+enum HelpType {
+  QUERY
+  COMPLAINT
 }
 

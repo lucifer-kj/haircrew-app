@@ -6,7 +6,7 @@ import { authOptions } from '@/auth'
 import { OrderStatus, PaymentStatus } from '@prisma/client'
 import { validateInput, orderSchema, sanitizeInput } from '@/lib/validation'
 import Logger from '@/lib/logger'
-import { pusherServer } from '@/lib/pusher'
+import { pusherServer } from '@/lib/pusher-server'
 import { sendOrderConfirmationEmail } from '@/lib/email'
 import { getShippingFee } from '@/lib/shipping'
 

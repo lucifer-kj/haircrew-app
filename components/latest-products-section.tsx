@@ -108,10 +108,22 @@ export default function LatestProductsSection({
 function ProductSkeleton() {
   return (
     <div className="bg-white rounded-xl shadow-md flex flex-col animate-pulse overflow-hidden">
-      <div className="aspect-[4/3] bg-[#EAE4D5] w-full" />
+      <div className="aspect-[4/3] bg-[#EAE4D5] w-full relative">
+        {/* Add shimmer effect overlay */}
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent shimmer-animation"></div>
+      </div>
       <div className="p-4 flex-1 flex flex-col justify-between">
         <div className="h-5 bg-[#B6B09F] rounded w-3/4 mb-2" />
         <div className="h-4 bg-[#B6B09F] rounded w-1/2 mb-4" />
+        <div className="flex items-center mb-2">
+          {/* Rating skeleton */}
+          <div className="flex space-x-1">
+            {[1, 2, 3, 4, 5].map(i => (
+              <div key={i} className="w-4 h-4 rounded-full bg-[#B6B09F]"></div>
+            ))}
+          </div>
+          <div className="h-3 bg-[#B6B09F] rounded w-16 ml-auto"></div>
+        </div>
         <div className="h-10 bg-[#9929EA] rounded w-full" />
       </div>
     </div>

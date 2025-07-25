@@ -26,7 +26,7 @@ export const PusherProvider: React.FC<{ children: ReactNode }> = ({
   const pusherRef = useRef<Pusher | null>(null)
 
   useEffect(() => {
-    const key = process.env.NEXT_PUBLIC_PUSHER_KEY || ''
+    const key = process.env.NEXT_PUBLIC_PUSHER_APP_KEY || ''
     const cluster = process.env.NEXT_PUBLIC_PUSHER_CLUSTER || 'ap2'
     if (!key) return
     const p = new Pusher(key, {

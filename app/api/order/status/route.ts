@@ -7,7 +7,7 @@ import {
   sendShippingUpdateEmail,
 } from '@/lib/email'
 import { Prisma } from '@prisma/client'
-import { pusherServer } from '@/lib/pusher'
+import { pusherServer } from '@/lib/pusher-server'
 
 export async function POST(req: NextRequest) {
   try {

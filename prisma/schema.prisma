@@ -297,6 +297,16 @@ model Notification {
   @@map("notifications")
 }
 
+model CarouselImage {
+  id          String   @id @default(cuid())
+  url         String
+  altText     String?
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  createdBy   String   // User ID who uploaded it
+}
+
 
 // Enums
 enum UserRole {

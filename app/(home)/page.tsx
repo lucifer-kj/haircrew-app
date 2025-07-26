@@ -17,6 +17,8 @@ import NewsletterSection from '@/components/newsletter-section'
 import { HeroSkeleton } from '@/components/ui/skeleton-loader'
 import type { Product as ProductType } from '@/types/product'
 import { useRouter } from 'next/navigation'
+import { Carousel } from '@/components/Carousel';
+import { AdminCarouselControls } from '@/components/AdminCarouselControls';
 
 // Separate component for hero carousel to optimize rendering
 function HeroCarousel() {
@@ -297,6 +299,10 @@ export default function HomePage() {
       <Suspense fallback={<HeroSkeleton />}>
         <HeroCarousel />
       </Suspense>
+
+      {/* Admin Carousel Controls and Carousel */}
+      <AdminCarouselControls />
+      <Carousel />
 
       {/* Marquee Section */}
       <MarqueeEffectDoubleExample />

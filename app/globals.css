@@ -234,6 +234,15 @@
   left: 100%;
 }
 
+@keyframes progress {
+  from { width: 0%; }
+  to { width: 100%; }
+}
+
+.animate-progress {
+  animation: progress 5s linear forwards;
+}
+
 @media (pointer: coarse) {
   .hover-effect {
     @apply active:scale-95 transition-transform;

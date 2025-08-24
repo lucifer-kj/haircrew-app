@@ -12,8 +12,8 @@ import { toast } from 'sonner'
 import { AccessibleErrorMessage } from '@/components/ui/accessibility'
 import { z } from 'zod'
 
-const UPI_ID = 'owner@upi'
-const UPI_NAME = 'Owner'
+const UPI_ID = '9718707211@ybl'
+const UPI_NAME = 'Shah Faisal'
 
 interface ShippingInfo {
   name: string

@@ -243,7 +243,7 @@ export default function AdminDashboardLayout({
   }, [])
 
   return (
-    <div className="w-full max-w-full px-2 sm:px-4">
+  <div className="w-full max-w-full px-2 sm:px-4">
       {/* Welcome Section - Only show when no children */}
       {!children && (
         <div className="mb-8">
@@ -287,7 +287,7 @@ export default function AdminDashboardLayout({
           )}
 
           {/* Sales Analytics: Revenue Chart */}
-          <div className="bg-white dark:bg-slate-800/80 rounded-xl shadow p-6 mb-8 w-full max-w-full overflow-x-auto">
+          <div className="bg-white dark:bg-slate-800/80 rounded-xl shadow p-6 mb-8 w-full max-w-full overflow-x-auto" style={{ maxWidth: '100vw' }}>
             <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4 gap-4">
               <h2 className="text-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
                 Revenue Chart
@@ -345,7 +345,7 @@ export default function AdminDashboardLayout({
 
           {/* Order Statistics Section */}
           {orderStats && (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8 w-full max-w-full">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8 w-full max-w-full" style={{ maxWidth: '100vw' }}>
               {/* Order Volume Bar Chart */}
               <div className="bg-white dark:bg-slate-800/80 rounded-xl shadow p-6 flex flex-col">
                 <h3 className="text-lg font-bold mb-4 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
@@ -462,7 +462,7 @@ export default function AdminDashboardLayout({
           )}
 
           {/* Low Stock Alerts */}
-          <div className="bg-white dark:bg-slate-800/80 rounded-xl shadow p-6 mb-8 w-full max-w-full overflow-x-auto">
+          <div className="bg-white dark:bg-slate-800/80 rounded-xl shadow p-6 mb-8 w-full max-w-full overflow-x-auto" style={{ maxWidth: '100vw' }}>
             <h2 className="text-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent mb-4">
               Low Stock Alerts
             </h2>
@@ -532,7 +532,7 @@ export default function AdminDashboardLayout({
           </div>
 
           {/* Top Products Section */}
-          <div className="bg-white dark:bg-slate-800/80 rounded-xl shadow p-6 mb-8 w-full max-w-full overflow-x-auto">
+          <div className="bg-white dark:bg-slate-800/80 rounded-xl shadow p-6 mb-8 w-full max-w-full overflow-x-auto" style={{ maxWidth: '100vw' }}>
             <h2 className="text-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent mb-4">
               Top Products
             </h2>
@@ -591,7 +591,7 @@ export default function AdminDashboardLayout({
           </div>
 
           {/* Export & Reports Section */}
-          <div className="bg-white dark:bg-slate-800/80 rounded-xl shadow p-6 mb-8 w-full max-w-full overflow-x-auto">
+          <div className="bg-white dark:bg-slate-800/80 rounded-xl shadow p-6 mb-8 w-full max-w-full overflow-x-auto" style={{ maxWidth: '100vw' }}>
             <h2 className="text-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent mb-4">
               Export & Reports
             </h2>

@@ -26,7 +26,7 @@ function DataTable<T>({
   }
 
   return (
-    <div className="bg-white dark:bg-slate-800/80 rounded-xl shadow p-6 overflow-x-auto">
+    <div className="bg-white dark:bg-slate-800/80 rounded-xl shadow p-6 overflow-x-auto" style={{ maxWidth: '100vw' }}>
       {/* Header with filters */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4 gap-4">
         <h2 className="text-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
@@ -57,7 +57,7 @@ function DataTable<T>({
       </div>
 
       {/* Table */}
-      <table className="min-w-full text-sm" role="table" aria-label="Data table">
+  <table className="min-w-full text-sm" role="table" aria-label="Data table" style={{ minWidth: '600px' }}>
         <thead>
           <tr className="bg-slate-100 dark:bg-slate-900/40">
             {columns.map((column) => (

@@ -40,47 +40,60 @@ export function RoutePrefetcher() {
   const pathname = usePathname()
 
   useEffect(() => {
-    // Don't prefetch on low-end devices or with reduced data preference
-    if (
-      'connection' in navigator &&
-      (navigator as NetworkInformation).connection?.saveData
-    ) {
-      return
+    // Network-aware prefetching
+    const connection = (navigator as NetworkInformation).connection;
+    const saveData = connection?.saveData;
+    const effectiveType = connection?.effectiveType;
+    const isSlow = effectiveType && ['2g', '3g'].includes(effectiveType);
+    const isOffline = !navigator.onLine;
+    if (saveData || isSlow || isOffline) {
+      // Don't prefetch on slow, metered, or offline connections
+      return;
     }
 
-    // Check if we're on a mobile device with potentially slow connection
-    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
+    // Prefetch batching and throttling
+    const BATCH_SIZE = 3;
+    const BATCH_DELAY = 500; // ms between batches
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    const routesToPrefetch = isMobile ? IMPORTANT_ROUTES.slice(0, 5) : IMPORTANT_ROUTES;
 
-    // Prefetch static routes
-    const routesToPrefetch = isMobile
-      ? IMPORTANT_ROUTES.slice(0, 5)
-      : IMPORTANT_ROUTES
+    let batchIndex = 0;
+    function batchPrefetch() {
+      const batch = routesToPrefetch.slice(batchIndex, batchIndex + BATCH_SIZE);
+      batch.forEach(route => {
+        if (route !== pathname) {
+          router.prefetch(route);
+        }
+      });
+      batchIndex += BATCH_SIZE;
+      if (batchIndex < routesToPrefetch.length) {
+        setTimeout(batchPrefetch, BATCH_DELAY);
+      }
+    }
 
     // Use idle callback for non-critical prefetching
-    const prefetchRoutes = () => {
-      routesToPrefetch.forEach(route => {
-        if (route !== pathname) {
-          router.prefetch(route)
-        }
-      })
-    }
-
-    // Check if requestIdleCallback is available
     if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
-      // Use TypeScript type assertion for requestIdleCallback
-      ;(window.requestIdleCallback || setTimeout)(prefetchRoutes)
+      (window.requestIdleCallback || setTimeout)(batchPrefetch);
     } else {
-      // Fallback for browsers that don't support requestIdleCallback
-      setTimeout(prefetchRoutes, 200)
+      setTimeout(batchPrefetch, 200);
     }
 
-    // Prefetch category routes dynamically
+    // Prefetch category routes dynamically, batched
     if (pathname === '/categories' || pathname === '/products') {
-      CATEGORIES.forEach(category => {
-        router.prefetch(`/categories/${category}`)
-      })
+      let catIndex = 0;
+      function batchCategoryPrefetch() {
+        const batch = CATEGORIES.slice(catIndex, catIndex + BATCH_SIZE);
+        batch.forEach(category => {
+          router.prefetch(`/categories/${category}`);
+        });
+        catIndex += BATCH_SIZE;
+        if (catIndex < CATEGORIES.length) {
+          setTimeout(batchCategoryPrefetch, BATCH_DELAY);
+        }
+      }
+      batchCategoryPrefetch();
     }
-  }, [router, pathname])
+  }, [router, pathname]);
 
   // This component doesn't render anything
   return null

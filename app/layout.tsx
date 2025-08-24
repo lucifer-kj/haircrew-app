@@ -54,6 +54,46 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+        {/* SEO Meta Tags */}
+        <title>HairCrew Professional – Luxury Salon-Quality Haircare</title>
+        <meta name="description" content="HairCrew offers premium, cruelty-free, and innovative haircare products delivering salon-quality results at home. Discover the luxury of self-care with HairCrew." />
+        <meta name="keywords" content="HairCrew, luxury haircare, salon-quality shampoo, keratin treatment, cruelty-free hair products, premium haircare brand" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="canonical" href="https://www.haircrew.in/" />
+        {/* Open Graph */}
+        <meta property="og:title" content="HairCrew Professional – Luxury Haircare Brand" />
+        <meta property="og:description" content="Indulge in HairCrew’s premium, cruelty-free formulas designed for salon-quality results at home. Experience opulence in every bottle." />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://www.haircrew.in/" />
+        <meta property="og:image" content="https://www.haircrew.in/assets/og-image.jpg" />
+        {/* Twitter Card */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="HairCrew Professional – Luxury Salon-Quality Haircare" />
+        <meta name="twitter:description" content="HairCrew offers premium, cruelty-free, and innovative haircare products delivering salon-quality results at home. Discover the luxury of self-care with HairCrew." />
+        <meta name="twitter:image" content="https://www.haircrew.in/assets/og-image.jpg" />
+        {/* Structured Data */}
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          "name": "HairCrew Professional",
+          "url": "https://www.haircrew.in/",
+          "logo": "https://www.haircrew.in/assets/logo.png",
+          "contactPoint": {
+            "@type": "ContactPoint",
+            "telephone": "+91-9718707211",
+            "contactType": "Customer Service",
+            "areaServed": "IN",
+            "availableLanguage": "English"
+          },
+          "sameAs": [
+            "https://www.facebook.in/haircrew",
+            "https://www.instagram.in/haircrew"
+          ]
+        }) }} />
+        {/* Favicon & Manifest */}
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+        <link rel="manifest" href="/manifest.json" />
         {/* Preconnect to important domains for faster loading */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link

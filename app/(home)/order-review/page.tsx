@@ -29,6 +29,7 @@ export default function OrderReviewPage() {
   const router = useRouter()
   const { data: session, status } = useSession()
   const { items, getTotal } = useCartStore()
+  const [cartError, setCartError] = useState('')
   const [shipping, setShipping] = useState<ShippingInfo | null>(null)
   const [paymentMethod, setPaymentMethod] = useState<'COD' | 'UPI'>('COD')
   const [upiQR, setUpiQR] = useState<string>('')
@@ -58,8 +59,16 @@ export default function OrderReviewPage() {
   }, [router])
 
   useEffect(() => {
-    if (items.length === 0) {
-      router.replace('/products')
+    // Cart validation
+    if (!items || items.length === 0) {
+      setCartError('Your cart is empty. Please add items before proceeding.')
+      setTimeout(() => router.replace('/products'), 2000)
+      return
+    }
+    if (items.some(item => item.quantity <= 0)) {
+      setCartError('Cart contains invalid item quantities.')
+      setTimeout(() => router.replace('/products'), 2000)
+      return
     }
   }, [items, router])
 
@@ -178,7 +187,14 @@ export default function OrderReviewPage() {
 
   // Conditional rendering logic
   let content = null
-  if (!shipping || items.length === 0) {
+  if (cartError) {
+    content = (
+      <div className="container mx-auto px-4 py-12 max-w-md text-center">
+        <h2 className="text-xl font-bold mb-4">Cart Error</h2>
+        <p className="mb-6 text-red-500">{cartError}</p>
+      </div>
+    )
+  } else if (!shipping || items.length === 0) {
     content = null
   } else if (status === 'loading') {
     content = <div className="text-center py-12">Checking authentication...</div>

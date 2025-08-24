@@ -13,6 +13,9 @@ import { cartSlideIn } from '@/lib/motion.config'
 import { useReducedMotion } from '@/lib/useReducedMotion'
 
 export default function CartDrawer() {
+  const [loadingId, setLoadingId] = useState<string | null>(null)
+  const [clearLoading, setClearLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const [open, setOpen] = useState(false)
   const { items, removeItem, updateQuantity, clearCart, getTotal, getCount } =
     useCartStore()
@@ -102,12 +105,22 @@ export default function CartDrawer() {
                             <Button
                               size="sm"
                               variant="outline"
-                              onClick={() =>
-                                updateQuantity(item.id, item.quantity - 1)
-                              }
-                              disabled={item.quantity <= 1}
+                              onClick={async () => {
+                                setLoadingId(item.id)
+                                try {
+                                  await updateQuantity(item.id, item.quantity - 1)
+                                } catch  {
+                                  setError('Failed to update quantity')
+                                } finally {
+                                  setLoadingId(null)
+                                }
+                              }}
+                              disabled={item.quantity <= 1 || loadingId === item.id}
+                              className="w-11 h-11 rounded-full flex items-center justify-center"
+                              aria-label={`Decrease quantity for ${item.name}`}
+                              tabIndex={0}
                             >
-                              -
+                              {loadingId === item.id ? <span className="loader" /> : '-'}
                             </Button>
                             <span className="px-2 font-medium">
                               {item.quantity}
@@ -115,21 +128,44 @@ export default function CartDrawer() {
                             <Button
                               size="sm"
                               variant="outline"
-                              onClick={() =>
-                                updateQuantity(item.id, item.quantity + 1)
-                              }
-                              disabled={item.quantity >= item.stock}
+                              onClick={async () => {
+                                setLoadingId(item.id)
+                                try {
+                                  await updateQuantity(item.id, item.quantity + 1)
+                                } catch  {
+                                  setError('Failed to update quantity')
+                                } finally {
+                                  setLoadingId(null)
+                                }
+                              }}
+                              disabled={item.quantity >= item.stock || loadingId === item.id}
+                              className="w-11 h-11 rounded-full flex items-center justify-center"
+                              aria-label={`Increase quantity for ${item.name}`}
+                              tabIndex={0}
                             >
-                              +
+                              {loadingId === item.id ? <span className="loader" /> : '+'}
                             </Button>
                           </div>
                         </div>
                         <Button
                           variant="ghost"
                           size="icon"
-                          onClick={() => removeItem(item.id)}
+                          onClick={async () => {
+                            setLoadingId(item.id)
+                            try {
+                              await removeItem(item.id)
+                            } catch  {
+                              setError('Failed to remove item')
+                            } finally {
+                              setLoadingId(null)
+                            }
+                          }}
+                          disabled={loadingId === item.id}
+                          className="w-11 h-11 rounded-full flex items-center justify-center"
+                          aria-label={`Remove ${item.name} from cart`}
+                          tabIndex={0}
                         >
-                          <Trash2 className="w-5 h-5 text-red-500" />
+                          {loadingId === item.id ? <span className="loader" /> : <Trash2 className="w-5 h-5 text-red-500" />}
                         </Button>
                       </div>
                     ))}
@@ -161,11 +197,24 @@ export default function CartDrawer() {
                 {items.length > 0 && (
                   <Button
                     variant="outline"
-                    onClick={clearCart}
+                    onClick={async () => {
+                      setClearLoading(true)
+                      try {
+                        await clearCart()
+                      } catch  {
+                        setError('Failed to clear cart')
+                      } finally {
+                        setClearLoading(false)
+                      }
+                    }}
                     className="w-full mt-2"
+                    disabled={clearLoading}
                   >
-                    Clear Cart
+                    {clearLoading ? <span className="loader" /> : 'Clear Cart'}
                   </Button>
+                )}
+                {error && (
+                  <div className="text-red-500 text-center mb-2 text-sm">{error}</div>
                 )}
               </div>
             </motion.aside>

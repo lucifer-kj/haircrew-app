@@ -31,10 +31,12 @@ export async function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname
   const isAdminRoute = path.startsWith('/dashboard/admin')
   const isUserDashboard = path.startsWith('/dashboard/user')
+  // Use structured logger
+  const Logger = (await import('@/lib/logger')).default
 
-  // Redirect unauthenticated users
+  // Redirect unauthenticated users to /auth/signin
   if (!token && (isAdminRoute || isUserDashboard)) {
-    console.warn('Unauthenticated access attempt:', path)
+  Logger.warn('Unauthenticated access attempt', { action: 'middleware', resource: path })
     const response = NextResponse.redirect(new URL('/auth/signin', request.url))
     Object.entries(securityHeaders).forEach(([key, value]) => {
       response.headers.set(key, value)
@@ -42,19 +44,19 @@ export async function middleware(request: NextRequest) {
     return response
   }
 
-  // Handle admin routes
+  // Strict admin check: must be ADMIN
   if (isAdminRoute && token?.role !== 'ADMIN') {
-    console.warn('Unauthorized (not admin) access attempt:', path)
-    const response = NextResponse.redirect(new URL('/', request.url))
+  Logger.warn('Unauthorized admin access', { action: 'middleware', userId: typeof token?.user === 'string' ? token.user : undefined, resource: path })
+    const response = NextResponse.redirect(new URL('/auth/signin', request.url))
     Object.entries(securityHeaders).forEach(([key, value]) => {
       response.headers.set(key, value)
     })
     return response
   }
 
-  // Handle user dashboard routes - redirect to profile
-  if (isUserDashboard && path !== '/dashboard/user/profile') {
-    console.warn('User dashboard access attempt - redirecting to profile:', path)
+  // Handle user dashboard routes - redirect to profile only if authenticated
+  if (isUserDashboard && path !== '/dashboard/user/profile' && token) {
+  Logger.info('User dashboard access - redirecting to profile', { action: 'middleware', userId: typeof token?.user === 'string' ? token.user : undefined, resource: path })
     const response = NextResponse.redirect(new URL('/dashboard/user/profile', request.url))
     Object.entries(securityHeaders).forEach(([key, value]) => {
       response.headers.set(key, value)

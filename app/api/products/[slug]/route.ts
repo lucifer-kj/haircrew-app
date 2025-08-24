@@ -50,13 +50,15 @@ export async function PATCH(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
     const { slug } = await params
-    const { stock } = await req.json()
-    if (typeof stock !== 'number' || stock < 0) {
-      return NextResponse.json(
-        { error: 'Invalid stock value' },
-        { status: 400 }
-      )
+    const body = await req.json()
+    // Zod validation
+    const { z } = await import('zod')
+    const updateSchema = z.object({ stock: z.number().int().min(0) })
+    const parsed = updateSchema.safeParse(body)
+    if (!parsed.success) {
+      return NextResponse.json({ error: 'Invalid stock value', details: parsed.error.errors }, { status: 400 })
     }
+    const { stock } = parsed.data
     const product = await prisma.product.update({
       where: { slug },
       data: { stock },

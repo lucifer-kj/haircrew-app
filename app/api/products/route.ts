@@ -5,60 +5,35 @@ import { prisma } from '@/lib/prisma'
 
 export async function GET(req: NextRequest) {
   try {
+    const { z } = await import('zod')
     const { searchParams } = new URL(req.url)
-    const category = searchParams.get('category')
-    const search = searchParams.get('search')
-    const priceRange = searchParams.get('priceRange')
-    const stockStatus = searchParams.get('stockStatus')
-    const sortBy = searchParams.get('sortBy') || 'newest'
-    const page = parseInt(searchParams.get('page') || '1', 10)
-    const pageSize = parseInt(searchParams.get('pageSize') || '9', 10)
-
-    const where: {
-      isActive: boolean
-      categoryId?: string
-      OR?: Array<{
-        name?: { contains: string; mode: 'insensitive' }
-        description?: { contains: string; mode: 'insensitive' }
-      }>
-      price?: { gte?: number; lte?: number }
-      stock?: { gt?: number; lte?: number }
-    } = { isActive: true }
-
-    // Category filter
-    if (category) where.categoryId = category
-
-    // Search filter
-    if (search) {
-      // Use full-text search if available, else fallback to ILIKE
-      where.OR = [
-        { name: { contains: search, mode: 'insensitive' } },
-        { description: { contains: search, mode: 'insensitive' } },
-      ]
-      // For advanced: If you want to use full-text search, you can use Prisma's $queryRaw like below (uncomment and adjust):
-      // const [products, total] = await prisma.$transaction([
-      //   prisma.$queryRaw`SELECT * FROM "Product" WHERE to_tsvector('english', name || ' ' || coalesce(description, '')) @@ plainto_tsquery('english', ${search}) LIMIT ${pageSize} OFFSET ${(page-1)*pageSize}`,
-      //   prisma.$queryRaw`SELECT COUNT(*) FROM "Product" WHERE to_tsvector('english', name || ' ' || coalesce(description, '')) @@ plainto_tsquery('english', ${search})`
-      // ])
+    const querySchema = z.object({
+      category: z.string().optional(),
+      search: z.string().optional(),
+      priceRange: z.enum(['all', '0-500', '500-1000', '1000-2000', '2000+']).optional(),
+      stockStatus: z.enum(['all', 'in-stock', 'low-stock', 'out-of-stock']).optional(),
+      sortBy: z.enum(['newest', 'oldest', 'price-low', 'price-high', 'name-asc', 'name-desc']).optional(),
+      page: z.string().regex(/^\d+$/).optional(),
+      pageSize: z.string().regex(/^\d+$/).optional(),
+    })
+    const queryObj = Object.fromEntries(searchParams.entries())
+    const parsed = querySchema.safeParse(queryObj)
+    if (!parsed.success) {
+      return NextResponse.json({ error: 'Invalid query params', details: parsed.error.errors }, { status: 400 })
     }
+    const {
+      stockStatus,
+      sortBy = 'newest',
+      page = '1',
+      pageSize = '9',
+    } = parsed.data
 
-    // Price range filter
-    if (priceRange && priceRange !== 'all') {
-      switch (priceRange) {
-        case '0-500':
-          where.price = { gte: 0, lte: 500 }
-          break
-        case '500-1000':
-          where.price = { gte: 500, lte: 1000 }
-          break
-        case '1000-2000':
-          where.price = { gte: 1000, lte: 2000 }
-          break
-        case '2000+':
-          where.price = { gte: 2000 }
-          break
-      }
-    }
+    // Convert page and pageSize to numbers
+    const pageNum = Number(page)
+    const pageSizeNum = Number(pageSize)
+
+    // Initialize where object for filters
+    const where: Record<string, unknown> = {};
 
     // Stock status filter
     if (stockStatus && stockStatus !== 'all') {
@@ -97,28 +72,21 @@ export async function GET(req: NextRequest) {
       case 'name-desc':
         orderBy = { name: 'desc' }
         break
-      default: // newest
+      case 'newest':
+      default:
         orderBy = { createdAt: 'desc' }
+        break
     }
-
+    // Fetch products from the database
     const [products, total] = await Promise.all([
       prisma.product.findMany({
         where,
         orderBy,
-        skip: (page - 1) * pageSize,
-        take: pageSize,
-        select: {
-          id: true,
-          name: true,
-          price: true,
-          images: true,
-          slug: true,
-          categoryId: true,
-        },
+        skip: (pageNum - 1) * pageSizeNum,
+        take: pageSizeNum,
       }),
       prisma.product.count({ where }),
     ])
-
     return NextResponse.json({ products, total })
   } catch {
     return NextResponse.json(

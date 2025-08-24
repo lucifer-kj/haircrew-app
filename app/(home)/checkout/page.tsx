@@ -20,30 +20,40 @@ export default function CheckoutPage() {
   })
   const [error, setError] = useState('')
   // Address auto-fill
-  const [addresses, setAddresses] = useState<
-    {
-      id: string
-      name: string
-      phone: string
-      address: string
-      city: string
-      pincode: string
-      state: string
-      country: string
-    }[]
-  >([])
+  const [addresses, setAddresses] = useState<{
+    id: string
+    name: string
+    phone: string
+    address: string
+    city: string
+    pincode: string
+    state: string
+    country: string
+  }[]>([])
+  const [addressLoading, setAddressLoading] = useState(true)
+  const [addressError, setAddressError] = useState('')
   const [selectedAddress, setSelectedAddress] = useState('')
 
-  const { getTotal } = useCartStore()
+  const { getTotal, items } = useCartStore()
   const subtotal = getTotal()
   const total = subtotal // Add shipping/discount logic if needed
 
   useEffect(() => {
+    setAddressLoading(true)
     fetch('/api/user/addresses', { credentials: 'include' })
-      .then(res => res.json())
-      .then(data =>
-        Array.isArray(data) ? setAddresses(data) : setAddresses([])
-      )
+      .then(res => {
+        if (!res.ok) throw new Error('Failed to fetch addresses')
+        return res.json()
+      })
+      .then(data => {
+        setAddresses(Array.isArray(data) ? data : []);
+setAddressError('');
+      })
+      .catch(() => {
+        setAddressError('Could not load addresses. Please try again later.')
+        setAddresses([])
+      })
+      .finally(() => setAddressLoading(false))
   }, [])
 
   const handleSelectAddress = (id: string) => {
@@ -70,6 +80,19 @@ export default function CheckoutPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+    // Cart validation
+        if (!items || items.length === 0) {
+          setError('Your cart is empty. Please add items before proceeding.')
+          return
+        }
+        if (items.some(item => item.quantity <= 0)) {
+          setError('Cart contains invalid item quantities.')
+          return
+        }
+        if (items.some(item => item.quantity > item.stock)) {
+          setError('Cart contains items exceeding available stock.')
+          return
+        }
     // Basic validation
     if (
       !form.name ||
@@ -94,158 +117,164 @@ export default function CheckoutPage() {
         <div className="flex-1 p-8 bg-white rounded-l-xl">
           {/* Stepper */}
           <div className="flex items-center justify-center mb-8">
-            <div className="flex items-center gap-4">
-              <div className="flex flex-col items-center">
-                <div className="w-8 h-8 rounded-full bg-orange-500 text-white flex items-center justify-center font-bold">
-                  1
-                </div>
-                <span className="text-xs mt-1 font-medium text-orange-600">
-                  Billing Address
-                </span>
-              </div>
-              <div className="w-8 h-0.5 bg-gray-300" />
-              <div className="flex flex-col items-center">
-                <div className="w-8 h-8 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center font-bold">
-                  2
-                </div>
-                <span className="text-xs mt-1 font-medium text-gray-400">
-                  Shipping Method
-                </span>
-              </div>
-              <div className="w-8 h-0.5 bg-gray-300" />
-              <div className="flex flex-col items-center">
-                <div className="w-8 h-8 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center font-bold">
-                  3
-                </div>
-                <span className="text-xs mt-1 font-medium text-gray-400">
-                  Payment Method
-                </span>
-              </div>
-            </div>
+            {/* ...existing code... */}
           </div>
           <h1 className="text-2xl font-bold mb-6 text-center">Checkout</h1>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Address Select Dropdown */}
-            {addresses.length > 0 && (
-              <div className="mb-2">
-                <label className="block text-sm font-medium mb-1">
-                  Choose Saved Address
-                </label>
-                <select
-                  className="w-full border rounded px-3 py-2 text-base"
-                  value={selectedAddress}
-                  onChange={e => handleSelectAddress(e.target.value)}
-                >
-                  <option value="">-- Select an address --</option>
-                  {addresses.map(addr => (
-                    <option key={addr.id} value={addr.id}>
-                      {addr.name}, {addr.address}, {addr.city}, {addr.state},{' '}
-                      {addr.pincode}, {addr.country}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  Full Name
-                </label>
-                <Input
-                  name="name"
-                  value={form.name}
-                  onChange={handleChange}
-                  placeholder="Full Name"
-                  required
-                  aria-invalid={!!error && !form.name}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  Phone Number
-                </label>
-                <Input
-                  name="phone"
-                  value={form.phone}
-                  onChange={handleChange}
-                  placeholder="Phone Number"
-                  required
-                  aria-invalid={!!error && !form.phone}
-                />
-              </div>
+          {addressLoading ? (
+            <div className="text-center py-8">Loading addresses...</div>
+          ) : addressError ? (
+            <div className="text-center py-8 text-red-500 flex flex-col items-center gap-2">
+              <span>{addressError}</span>
+              <Button
+                type="button"
+                className="bg-secondary text-white rounded px-4 py-2"
+                onClick={() => {
+                  setAddressLoading(true)
+                  fetch('/api/user/addresses', { credentials: 'include' })
+                    .then(res => {
+                      if (!res.ok) throw new Error('Failed to fetch addresses')
+                      return res.json()
+                    })
+                    .then(data => {
+                      void (Array.isArray(data) ? setAddresses(data) : setAddresses([]))
+                      setAddressError('')
+                    })
+                    .catch(() => {
+                      setAddressError('Could not load addresses. Please try again later.')
+                      setAddresses([])
+                    })
+                    .finally(() => setAddressLoading(false))
+                }}
+              >
+                Retry
+              </Button>
             </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">Address</label>
-              <Input
-                name="address"
-                value={form.address}
-                onChange={handleChange}
-                placeholder="Address"
-                required
-                aria-invalid={!!error && !form.address}
-              />
-              {!form.address && error && (
-                <div className="text-red-500 text-xs mt-1">
-                  This value is required
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Address Select Dropdown */}
+              {addresses.length > 0 && (
+                <div className="mb-2">
+                  <label className="block text-sm font-medium mb-1">
+                    Choose Saved Address
+                  </label>
+                  <select
+                    className="w-full border rounded px-3 py-2 text-base"
+                    value={selectedAddress}
+                    onChange={e => handleSelectAddress(e.target.value)}
+                  >
+                    <option value="">-- Select an address --</option>
+                    {addresses.map(addr => (
+                      <option key={addr.id} value={addr.id}>
+                        {addr.name}, {addr.address}, {addr.city}, {addr.state},{' '}
+                        {addr.pincode}, {addr.country}
+                      </option>
+                    ))}
+                  </select>
                 </div>
               )}
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* ...existing code... */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    Full Name
+                  </label>
+                  <Input
+                    name="name"
+                    value={form.name}
+                    onChange={handleChange}
+                    placeholder="Full Name"
+                    required
+                    aria-invalid={!!error && !form.name}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    Phone Number
+                  </label>
+                  <Input
+                    name="phone"
+                    value={form.phone}
+                    onChange={handleChange}
+                    placeholder="Phone Number"
+                    required
+                    aria-invalid={!!error && !form.phone}
+                  />
+                </div>
+              </div>
               <div>
-                <label className="block text-sm font-medium mb-1">City</label>
+                <label className="block text-sm font-medium mb-1">Address</label>
                 <Input
-                  name="city"
-                  value={form.city}
+                  name="address"
+                  value={form.address}
                   onChange={handleChange}
-                  placeholder="City"
+                  placeholder="Address"
                   required
-                  aria-invalid={!!error && !form.city}
+                  aria-invalid={!!error && !form.address}
                 />
+                {!form.address && error && (
+                  <div className="text-red-500 text-xs mt-1">
+                    This value is required
+                  </div>
+                )}
               </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  Pincode
-                </label>
-                <Input
-                  name="pincode"
-                  value={form.pincode}
-                  onChange={handleChange}
-                  placeholder="Pincode"
-                  required
-                  aria-invalid={!!error && !form.pincode}
-                />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">City</label>
+                  <Input
+                    name="city"
+                    value={form.city}
+                    onChange={handleChange}
+                    placeholder="City"
+                    required
+                    aria-invalid={!!error && !form.city}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    Pincode
+                  </label>
+                  <Input
+                    name="pincode"
+                    value={form.pincode}
+                    onChange={handleChange}
+                    placeholder="Pincode"
+                    required
+                    aria-invalid={!!error && !form.pincode}
+                  />
+                </div>
               </div>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">State</label>
-                <Input
-                  name="state"
-                  value={form.state}
-                  onChange={handleChange}
-                  placeholder="State"
-                />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">State</label>
+                  <Input
+                    name="state"
+                    value={form.state}
+                    onChange={handleChange}
+                    placeholder="State"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    Country
+                  </label>
+                  <Input
+                    name="country"
+                    value={form.country}
+                    onChange={handleChange}
+                    placeholder="Country"
+                  />
+                </div>
               </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  Country
-                </label>
-                <Input
-                  name="country"
-                  value={form.country}
-                  onChange={handleChange}
-                  placeholder="Country"
-                />
-              </div>
-            </div>
-            {error && <div className="text-red-500 text-sm mt-2">{error}</div>}
-            <Button
-              type="submit"
-              className="w-full bg-orange-500 hover:bg-orange-600 text-white text-base font-semibold py-3 rounded-md shadow-md mt-4"
-            >
-              Continue to Review
-            </Button>
-          </form>
+              {error && <div className="text-red-500 text-sm mt-2">{error}</div>}
+              <Button
+                type="submit"
+                className="w-full min-h-[44px] bg-orange-500 hover:bg-orange-600 text-white text-base font-semibold py-3 rounded-md shadow-md mt-4"
+                disabled={!!error}
+              >
+                Continue to Review
+              </Button>
+            </form>
+          )}
         </div>
         {/* Right: Order Summary */}
         <div className="flex-1 p-8 bg-gray-50 rounded-r-xl">

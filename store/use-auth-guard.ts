@@ -15,7 +15,7 @@ export function useAuthGuard(role?: string, fallbackPath: string = '/dashboard/u
     if (status === 'loading') return
     if (!session) {
       router.replace('/auth/signin')
-    } else if (role && (session.user as { role?: string }).role !== role) {
+    } else if (role && session.user.role !== role) {
       router.replace(fallbackPath)
     }
   }, [session, status, role, fallbackPath, router])

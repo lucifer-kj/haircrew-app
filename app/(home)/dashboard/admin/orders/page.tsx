@@ -7,7 +7,7 @@ import { serializeOrder } from '@/types/dashboard'
 
 export default async function AdminOrdersPage() {
   const session = await getServerSession(authOptions)
-  if (!session?.user || (session.user as { role?: string }).role !== 'ADMIN') {
+  if (!session?.user || session.user.role !== 'ADMIN') {
     redirect('/')
   }
   const orders = await prisma.order.findMany({

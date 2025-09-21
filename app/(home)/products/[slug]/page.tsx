@@ -7,11 +7,7 @@ import StarRating from '@/components/star-rating'
 import { ErrorBoundary } from '@/components/ui/error-boundary'
 import ProductClient from './product-client'
 
-// Types for props
-interface PageProps {
-  params: { slug: string };
-  searchParams: { [key: string]: string | string[] | undefined };
-}
+
 
 interface Product {
   id: string
@@ -50,9 +46,9 @@ interface RelatedProduct {
 
 // Example: generateMetadata for SEO
 export async function generateMetadata(
-  { params }: PageProps
+  { params }: { params: Promise<{ slug: string }> }
 ): Promise<Metadata> {
-  const { slug } = params;
+  const { slug } = await params;
   
   try {
     const product = await getProduct(slug);
@@ -135,12 +131,13 @@ function formatPrice(price: number): string {
 }
 
 // Main page component (Server Component)
-export default async function ProductPage({ params }: PageProps) {
+export default async function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
   // Fetch all data in parallel
   const [product, reviews, relatedProducts] = await Promise.all([
-    getProduct(params.slug),
-    getReviews(params.slug),
-    getRelatedProducts(params.slug),
+    getProduct(slug),
+    getReviews(slug),
+    getRelatedProducts(slug),
   ]);
 
   // Handle product not found

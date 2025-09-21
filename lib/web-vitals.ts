@@ -1,4 +1,4 @@
-import { getCLS, getFID, getFCP, getLCP, getTTFB } from 'web-vitals'
+import { onCLS, onINP, onFCP, onLCP, onTTFB } from 'web-vitals'
 
 // Web Vitals reporting function
 export function reportWebVitals(metric: {
@@ -17,7 +17,7 @@ export function reportWebVitals(metric: {
   if (process.env.NODE_ENV === 'production') {
     // Send to Google Analytics 4
     if (typeof window !== 'undefined' && 'gtag' in window) {
-      const gtag = (window as any).gtag
+      const gtag = (window as { gtag: (...args: unknown[]) => void }).gtag
       gtag('event', metric.name, {
         event_category: 'Web Vitals',
         value: Math.round(metric.name === 'CLS' ? metric.value * 1000 : metric.value),
@@ -61,12 +61,12 @@ export function reportWebVitals(metric: {
 export function initWebVitals() {
   if (typeof window === 'undefined') return
 
-  // Get all Web Vitals metrics
-  getCLS(reportWebVitals)
-  getFID(reportWebVitals)
-  getFCP(reportWebVitals)
-  getLCP(reportWebVitals)
-  getTTFB(reportWebVitals)
+  // Get all Web Vitals metrics using the current API
+  onCLS(reportWebVitals)
+  onINP(reportWebVitals) // INP replaced FID in web-vitals v3+
+  onFCP(reportWebVitals)
+  onLCP(reportWebVitals)
+  onTTFB(reportWebVitals)
 
   // Additional performance monitoring
   if ('PerformanceObserver' in window) {
@@ -103,7 +103,7 @@ export function initGoogleAnalytics(measurementId: string) {
 
   // Initialize gtag
   window.dataLayer = window.dataLayer || []
-  function gtag(...args: any[]) {
+  function gtag(...args: unknown[]) {
     window.dataLayer.push(args)
   }
   window.gtag = gtag
@@ -118,7 +118,7 @@ export function initGoogleAnalytics(measurementId: string) {
 // Declare gtag function for TypeScript
 declare global {
   interface Window {
-    dataLayer: any[]
-    gtag: (...args: any[]) => void
+    dataLayer: unknown[]
+    gtag: (...args: unknown[]) => void
   }
 }

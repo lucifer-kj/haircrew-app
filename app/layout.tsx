@@ -11,6 +11,7 @@ import AnimatedLayoutClient from '@/components/providers/animated-layout-client'
 import RoutePrefetcher from '@/components/providers/route-prefetch'
 import { Toaster } from 'sonner'
 import { WebVitalsProvider } from '@/components/providers/web-vitals-provider'
+import { SkipToContent } from '@/components/ui/accessibility'
 
 const geistSans = Geist({
   variable: '--font-geist-sans',

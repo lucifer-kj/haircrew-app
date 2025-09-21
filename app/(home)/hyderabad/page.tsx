@@ -1,5 +1,6 @@
 import { Metadata } from 'next'
 import React from 'react'
+import Link from 'next/link'
 
 export const metadata: Metadata = {
   title: 'HairCrew Hyderabad - Professional Hair Care Products in Hyderabad',
@@ -23,7 +24,7 @@ export default function HyderabadPage() {
         
         <div className="prose max-w-none mb-8">
           <p className="text-lg text-gray-700 mb-4">
-            Welcome to HairCrew Hyderabad! We're excited to serve the City of Pearls with our premium collection of professional hair care products. From Banjara Hills to HITEC City, we deliver salon-quality products across all areas of Hyderabad.
+            Welcome to HairCrew Hyderabad! We&apos;re excited to serve the City of Pearls with our premium collection of professional hair care products. From Banjara Hills to HITEC City, we deliver salon-quality products across all areas of Hyderabad.
           </p>
           
           <h2 className="text-2xl font-semibold text-gray-900 mb-4">
@@ -34,7 +35,7 @@ export default function HyderabadPage() {
             <li>Fast delivery across all areas of Hyderabad</li>
             <li>Professional-grade hair care products</li>
             <li>Salon-quality results at home</li>
-            <li>Expert recommendations for Hyderabad's climate</li>
+            <li>Expert recommendations for Hyderabad&apos;s climate</li>
             <li>Cruelty-free and premium formulations</li>
           </ul>
           
@@ -68,7 +69,7 @@ export default function HyderabadPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <div className="text-center">
               <h3 className="font-semibold text-gray-900 mb-2">Professional Shampoos</h3>
-              <p className="text-gray-700 text-sm">Perfect for Hyderabad's dry climate</p>
+              <p className="text-gray-700 text-sm">Perfect for Hyderabad&apos;s dry climate</p>
             </div>
             <div className="text-center">
               <h3 className="font-semibold text-gray-900 mb-2">Hair Conditioners</h3>
@@ -85,12 +86,11 @@ export default function HyderabadPage() {
             <p className="text-blue-800 mb-4">
               Explore our complete range of professional hair care products and experience salon-quality results at home in Hyderabad.
             </p>
-            <a 
-              href="/products" 
+            <Link href="/products" 
               className="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
             >
               Shop Now
-            </a>
+            </Link>
           </div>
         </div>
       </div>

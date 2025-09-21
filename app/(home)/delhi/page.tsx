@@ -4,7 +4,6 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Truck, MapPin, Clock, Star, Users, Award, Phone, Mail } from 'lucide-react'
 import Link from 'next/link'
-import Image from 'next/image'
 
 export const metadata: Metadata = {
   title: 'HairCrew Delhi - Professional Hair Care Products | Fast Delivery',
@@ -99,7 +98,7 @@ export default function DelhiPage() {
             HairCrew Delhi - Your Hair Care Partner
           </h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
-            Delhi's trusted destination for professional hair care products. Fast local delivery, 
+            Delhi&apos;s trusted destination for professional hair care products. Fast local delivery, 
             salon partnerships, and expert recommendations for all your hair care needs.
           </p>
           <div className="flex flex-wrap justify-center gap-4 mb-8">

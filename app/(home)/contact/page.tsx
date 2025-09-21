@@ -81,7 +81,7 @@ export default function ContactPage() {
           Contact HairCrew
         </h1>
         <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-          Get in touch with us for any questions, support, or feedback. We're here to help with all your hair care needs.
+          Get in touch with us for any questions, support, or feedback. We&apos;re here to help with all your hair care needs.
         </p>
       </div>
 
@@ -111,7 +111,7 @@ export default function ContactPage() {
                 <div>
                   <h3 className="font-semibold text-lg">Email</h3>
                   <p className="text-gray-600">support@haircrew.in</p>
-                  <p className="text-sm text-gray-500">We'll respond within 24 hours</p>
+                  <p className="text-sm text-gray-500">We&apos;ll respond within 24 hours</p>
                 </div>
               </div>
 
@@ -159,13 +159,13 @@ export default function ContactPage() {
                 <div>
                   <h4 className="font-semibold text-lg mb-2">Order Assistance</h4>
                   <p className="text-gray-600">
-                    Questions about your order, shipping, or returns? We'll help resolve any issues quickly.
+                    Questions about your order, shipping, or returns? We&apos;ll help resolve any issues quickly.
                   </p>
                 </div>
                 <div>
                   <h4 className="font-semibold text-lg mb-2">Business Inquiries</h4>
                   <p className="text-gray-600">
-                    Interested in partnerships, wholesale, or other business opportunities? Let's talk.
+                    Interested in partnerships, wholesale, or other business opportunities? Let&apos;s talk.
                   </p>
                 </div>
               </div>
@@ -270,7 +270,7 @@ export default function ContactPage() {
                 </p>
               </div>
               <div>
-                <h4 className="font-semibold text-lg mb-2">What's your return policy?</h4>
+                <h4 className="font-semibold text-lg mb-2">What&apos;s your return policy?</h4>
                 <p className="text-gray-600">
                   We offer a 30-day return policy for unused products in original packaging. Contact us to initiate a return.
                 </p>

@@ -53,7 +53,7 @@ export default function RootLayout({
     <html lang="en">
       <head>
         {/* SEO Meta Tags */}
-        <title>HairCrew - Delhi's Premier Hair Care Products</title>
+        <title>HairCrew - Delhi&apos;s Premier Hair Care Products</title>
         <meta name="description" content="HairCrew offers premium, cruelty-free, and innovative haircare products delivering salon-quality results at home. Delhi's trusted hair care partner with fast local delivery." />
         <meta name="keywords" content="HairCrew, Delhi hair care, salon-quality shampoo, keratin treatment, cruelty-free hair products, premium haircare Delhi, professional hair products Delhi" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />

@@ -43,7 +43,7 @@ export default function DelhiPage() {
         "addressCountry": "IN"
       },
       "areaServed": "Delhi",
-      "telephone": "+91-9718707211"
+      "telephone": "+91 97187 07211"
     }
   };
 
@@ -214,7 +214,7 @@ export default function DelhiPage() {
                 <div>
                   <h4 className="font-semibold">Local Support</h4>
                   <p className="text-sm text-gray-600">
-                    Delhi-based customer support team. Call +91-9718707211 for assistance.
+                    Delhi-based customer support team. Call +91 97187 07211 for assistance.
                   </p>
                 </div>
               </div>
@@ -234,7 +234,7 @@ export default function DelhiPage() {
                   <Phone className="h-8 w-8 text-primary" />
                 </div>
                 <h3 className="font-semibold text-lg mb-2">Call Us</h3>
-                <p className="text-gray-600">+91-9718707211</p>
+                <p className="text-gray-600">+91 97187 07211</p>
                 <p className="text-sm text-gray-500">Mon-Fri 9AM-6PM, Sat 10AM-4PM</p>
               </div>
               <div className="text-center">
@@ -242,7 +242,7 @@ export default function DelhiPage() {
                   <Mail className="h-8 w-8 text-primary" />
                 </div>
                 <h3 className="font-semibold text-lg mb-2">Email Us</h3>
-                <p className="text-gray-600">support@haircrew.in</p>
+                <p className="text-gray-600">shahf3724@gmail.com</p>
                 <p className="text-sm text-gray-500">24-hour response time</p>
               </div>
               <div className="text-center">

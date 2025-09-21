@@ -77,8 +77,8 @@ export default function RootLayout({
           "url": "https://www.haircrew.in/",
           "logo": "https://www.haircrew.in/assets/logo.png",
           "description": "HairCrew - Delhi's trusted partner for professional hair care products. Quality, innovation, and beauty in every bottle. Serving Delhi with salon-quality products and expert recommendations.",
-          "telephone": "+91-9718707211",
-          "email": "support@haircrew.in",
+          "telephone": "+91 97187 07211",
+          "email": "shahf3724@gmail.com",
           "address": {
             "@type": "PostalAddress",
             "addressLocality": "Delhi",

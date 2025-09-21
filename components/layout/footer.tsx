@@ -66,12 +66,12 @@ export function Footer() {
             <div className="flex items-center space-x-3 mb-2">
               <Mail className="w-4 h-4 text-secondary" />
               <span className="text-secondary text-sm">
-                support@haircrew.com
+                shahf3724@gmail.com
               </span>
             </div>
             <div className="flex items-center space-x-3">
               <Phone className="w-4 h-4 text-secondary" />
-              <span className="text-secondary text-sm">+1 (555) 123-4567</span>
+              <span className="text-secondary text-sm">+91 97187 07211</span>
             </div>
           </div>
         </div>

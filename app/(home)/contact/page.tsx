@@ -99,7 +99,7 @@ export default function ContactPage() {
                 </div>
                 <div>
                   <h3 className="font-semibold text-lg">Phone</h3>
-                  <p className="text-gray-600">+91-9718707211</p>
+                  <p className="text-gray-600">+91 97187 07211</p>
                   <p className="text-sm text-gray-500">Mon-Fri 9AM-6PM IST</p>
                 </div>
               </div>
@@ -110,7 +110,7 @@ export default function ContactPage() {
                 </div>
                 <div>
                   <h3 className="font-semibold text-lg">Email</h3>
-                  <p className="text-gray-600">support@haircrew.in</p>
+                  <p className="text-gray-600">shahf3724@gmail.com</p>
                   <p className="text-sm text-gray-500">We&apos;ll respond within 24 hours</p>
                 </div>
               </div>

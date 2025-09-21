@@ -1,11 +1,12 @@
 // lib/auth.ts
-import NextAuth, { type NextAuthConfig } from 'next-auth'
+import NextAuth from 'next-auth'
+import type { NextAuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import { compare } from 'bcryptjs'
 import { prisma } from '@/lib/prisma'
 import type { UserRole } from '@/types/auth'
 
-export const authOptions: NextAuthConfig = {
+export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
       name: 'credentials',
@@ -64,7 +65,7 @@ export const authOptions: NextAuthConfig = {
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user }: { token: any; user: any }) {
       // When user signs in, add their data to the token
       if (user) {
         token.id = user.id
@@ -72,7 +73,7 @@ export const authOptions: NextAuthConfig = {
       }
       return token
     },
-    async session({ session, token }) {
+    async session({ session, token }: { session: any; token: any }) {
       // Add user data from token to session
       if (token && session.user) {
         session.user.id = token.id

@@ -5,10 +5,11 @@ import { authOptions } from '@/auth'
 import { validateInput, productSchema, sanitizeInput } from '@/lib/validation'
 import Logger from '@/lib/logger'
 import { z } from 'zod'
+import type { Session } from 'next-auth'
 
 // Get all products for admin
 export async function GET(req: NextRequest) {
-  const session = await getServerSession(authOptions)
+  const session: Session | null = await getServerSession(authOptions)
   if (!session?.user || session.user.role !== 'ADMIN') {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
@@ -104,7 +105,7 @@ const deleteProductSchema = z.object({
 
 // Create a new product
 export async function POST(req: NextRequest) {
-  const session = await getServerSession(authOptions)
+  const session: Session | null = await getServerSession(authOptions)
   if (!session?.user || session.user.role !== 'ADMIN') {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
@@ -178,7 +179,7 @@ export async function POST(req: NextRequest) {
 
 // Update a product
 export async function PATCH(req: NextRequest) {
-  const session = await getServerSession(authOptions)
+  const session: Session | null = await getServerSession(authOptions)
   if (!session?.user || session.user.role !== 'ADMIN') {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
@@ -237,7 +238,7 @@ export async function PATCH(req: NextRequest) {
 
 // Delete a product
 export async function DELETE(req: NextRequest) {
-  const session = await getServerSession(authOptions)
+  const session: Session | null = await getServerSession(authOptions)
   if (!session?.user || session.user.role !== 'ADMIN') {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }

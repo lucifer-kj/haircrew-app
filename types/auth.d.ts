@@ -20,12 +20,6 @@ declare module 'next-auth' {
       role: UserRole
     } & DefaultSession['user']
   }
-
-  interface Session {
-    user: {
-      role: UserRole
-    } & DefaultSession['user']
-  }
 }
 
 declare module 'next-auth/jwt' {

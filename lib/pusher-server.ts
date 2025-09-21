@@ -1,9 +1,20 @@
 import Pusher from 'pusher';
+import { env } from './env';
 
-export const pusherServer = new Pusher({
-  appId: process.env.PUSHER_APP_ID!,
-  key: process.env.NEXT_PUBLIC_PUSHER_APP_KEY!,
-  secret: process.env.PUSHER_SECRET!,
-  cluster: 'us2',
-  useTLS: true,
-}); 
+let pusherServer: Pusher | null = null;
+
+export function getPusherServer() {
+  if (!pusherServer) {
+    if (!env.PUSHER_APP_ID || !env.PUSHER_KEY || !env.PUSHER_SECRET) {
+      throw new Error('Pusher configuration is missing');
+    }
+    pusherServer = new Pusher({
+      appId: env.PUSHER_APP_ID,
+      key: env.PUSHER_KEY,
+      secret: env.PUSHER_SECRET,
+      cluster: env.PUSHER_CLUSTER || 'us2',
+      useTLS: true,
+    });
+  }
+  return pusherServer;
+} 

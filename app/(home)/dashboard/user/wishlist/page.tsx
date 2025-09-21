@@ -8,9 +8,10 @@ import { Heart } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { WishlistItem } from '@/types/dashboard'
+import type { Session } from 'next-auth'
 
 export default async function WishlistPage() {
-  const session = await getServerSession(authOptions)
+  const session: Session | null = await getServerSession(authOptions)
 
   if (!session?.user?.email) {
     redirect('/dashboard/user')

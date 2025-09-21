@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/auth'
-import { pusherServer } from '@/lib/pusher-server'
+import { getPusherServer } from '@/lib/pusher-server'
 
 export async function GET(
   req: NextRequest,
@@ -64,7 +64,7 @@ export async function PATCH(
       data: { stock },
     })
     // Pusher: Notify clients of stock update
-    await pusherServer.trigger('products', 'stock-updated', {
+    await getPusherServer().trigger('products', 'stock-updated', {
       id: product.id,
       name: product.name,
       stock: product.stock,

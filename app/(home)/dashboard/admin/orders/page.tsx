@@ -4,9 +4,10 @@ import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import AdminOrdersClient from './admin-orders-client'
 import { serializeOrder } from '@/types/dashboard'
+import type { Session } from 'next-auth'
 
 export default async function AdminOrdersPage() {
-  const session = await getServerSession(authOptions)
+  const session: Session | null = await getServerSession(authOptions)
   if (!session?.user || session.user.role !== 'ADMIN') {
     redirect('/')
   }

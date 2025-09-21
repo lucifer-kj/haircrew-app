@@ -3,9 +3,10 @@
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/auth'
 import { redirect } from 'next/navigation'
+import type { Session } from 'next-auth'
 
 export default async function DashboardRedirectPage() {
-  const session = await getServerSession(authOptions)
+  const session: Session | null = await getServerSession(authOptions)
   
   if (!session?.user) {
     redirect('/auth/signin')

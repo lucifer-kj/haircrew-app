@@ -5,9 +5,10 @@ import { prisma } from '@/lib/prisma'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { MapPin } from 'lucide-react'
 import { Address } from '@/types/dashboard'
+import type { Session } from 'next-auth'
 
 export default async function AddressesPage() {
-  const session = await getServerSession(authOptions)
+  const session: Session | null = await getServerSession(authOptions)
 
   if (!session?.user?.email) {
     redirect('/dashboard/user')

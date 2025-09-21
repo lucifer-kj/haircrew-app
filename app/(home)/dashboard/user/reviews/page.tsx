@@ -6,9 +6,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Star } from 'lucide-react'
 import { Review, serializeReview } from '@/types/dashboard'
+import type { Session } from 'next-auth'
 
 export default async function ReviewsPage() {
-  const session = await getServerSession(authOptions)
+  const session: Session | null = await getServerSession(authOptions)
 
   if (!session?.user?.email) {
     redirect('/dashboard/user')

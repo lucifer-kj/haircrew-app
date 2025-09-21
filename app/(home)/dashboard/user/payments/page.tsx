@@ -6,9 +6,10 @@ import { CreditCard, Wallet } from 'lucide-react'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/auth'
 import { PaymentOrder, serializePaymentOrder } from '@/types/dashboard'
+import type { Session } from 'next-auth'
 
 export default async function PaymentsPage() {
-  const session = await getServerSession(authOptions)
+  const session: Session | null = await getServerSession(authOptions)
 
   if (!session?.user?.email) {
     redirect('/dashboard/user')

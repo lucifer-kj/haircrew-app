@@ -1,7 +1,18 @@
 import { Resend } from 'resend'
 import { env } from './env'
 
-const resend = new Resend(env.RESEND_API_KEY)
+// Lazy initialization to prevent build-time errors
+let resend: Resend | null = null
+
+function getResend() {
+  if (!resend) {
+    if (!env.RESEND_API_KEY) {
+      throw new Error('RESEND_API_KEY is not configured')
+    }
+    resend = new Resend(env.RESEND_API_KEY)
+  }
+  return resend
+}
 
 const BRAND_LOGO_URL = `${env.NEXT_PUBLIC_BASE_URL || ''}/favicon.ico`
 const BRAND_PRIMARY = '#9929EA'
@@ -92,7 +103,7 @@ export async function sendOrderConfirmationEmail(
   if (!to) throw new Error('No recipient email')
   const subject = 'Your Order is Confirmed!'
   const html = orderConfirmationTemplate({ name, orderId })
-  await resend.emails.send({
+  await getResend().emails.send({
     from: 'no-reply@haircrew.com',
     to,
     subject,
@@ -109,7 +120,7 @@ export async function sendShippingUpdateEmail(
   if (!to) throw new Error('No recipient email')
   const subject = 'Your Order Status Update'
   const html = shippingUpdateTemplate({ name, orderId, status })
-  await resend.emails.send({
+  await getResend().emails.send({
     from: 'no-reply@haircrew.com',
     to,
     subject,
@@ -125,7 +136,7 @@ export async function sendPasswordResetEmail(
   if (!to) throw new Error('No recipient email')
   const subject = 'Reset Your Password'
   const html = passwordResetTemplate({ name, resetUrl })
-  await resend.emails.send({
+  await getResend().emails.send({
     from: 'no-reply@haircrew.com',
     to,
     subject,

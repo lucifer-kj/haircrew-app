@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { pusherServer } from '@/lib/pusher-server';
+import { getPusherServer } from '@/lib/pusher-server';
 import { prisma } from '@/lib/prisma';
 
 export async function POST(req: NextRequest) {
@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
   });
 
   // Broadcast to admin channel
-  await pusherServer.trigger('presence-admin-dashboard', 'admin-notification', {
+  await getPusherServer().trigger('presence-admin-dashboard', 'admin-notification', {
     id: notification.id,
     type,
     message,

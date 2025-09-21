@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/auth'
 import Logger from '@/lib/logger'
+import type { Session } from 'next-auth'
 
 // Helper function to get date range based on filter
 function getDateRange(filter: string) {
@@ -35,7 +36,7 @@ function getDateRange(filter: string) {
 }
 
 export async function GET(req: NextRequest) {
-  const session = await getServerSession(authOptions)
+  const session: Session | null = await getServerSession(authOptions)
   if (!session?.user || session.user.role !== 'ADMIN') {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }

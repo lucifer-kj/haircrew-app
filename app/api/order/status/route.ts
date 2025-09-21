@@ -7,7 +7,7 @@ import {
   sendShippingUpdateEmail,
 } from '@/lib/email'
 import { Prisma } from '@prisma/client'
-import { pusherServer } from '@/lib/pusher-server'
+import { getPusherServer } from '@/lib/pusher-server'
 
 export async function POST(req: NextRequest) {
   try {
@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
         data: { paymentStatus: 'PAID', status: 'PROCESSING' },
       })
       // Pusher: Notify admin in real time
-      await pusherServer.trigger('orders', 'order-status-updated', {
+      await getPusherServer().trigger('orders', 'order-status-updated', {
         orderId,
         status: 'PAID',
         user: {
@@ -79,7 +79,7 @@ export async function POST(req: NextRequest) {
       })
       // Pusher: Notify user/admin of status change
       if (event) {
-        await pusherServer.trigger('orders', event, {
+        await getPusherServer().trigger('orders', event, {
           orderId,
           status: newStatus,
           user: {

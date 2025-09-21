@@ -4,9 +4,10 @@ import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import ProfileClient from './profile-client'
 import { headers } from 'next/headers'
+import type { Session } from 'next-auth'
 
 export default async function ProfilePage() {
-  const session = await getServerSession(authOptions)
+  const session: Session | null = await getServerSession(authOptions)
   const headersList = await headers();
   const pathname = headersList.get('x-pathname') || '/dashboard/user/profile'
 

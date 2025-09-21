@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic'
 export const revalidate = 300
 import { prisma } from '@/lib/prisma'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'

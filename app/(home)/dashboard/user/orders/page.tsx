@@ -4,9 +4,10 @@ import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import OrdersClient from './orders-client'
 import { serializeOrder } from '@/types/dashboard'
+import type { Session } from 'next-auth'
 
 export default async function OrdersPage() {
-  const session = await getServerSession(authOptions)
+  const session: Session | null = await getServerSession(authOptions)
 
   if (!session?.user?.email) {
     redirect('/dashboard/user')

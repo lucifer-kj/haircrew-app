@@ -6,7 +6,7 @@ import { authOptions } from '@/auth'
 import { OrderStatus, PaymentStatus } from '@prisma/client'
 import { validateInput, orderSchema, sanitizeInput } from '@/lib/validation'
 import Logger from '@/lib/logger'
-import { pusherServer } from '@/lib/pusher-server'
+import { getPusherServer } from '@/lib/pusher-server'
 import { sendOrderConfirmationEmail } from '@/lib/email'
 import { getShippingFee } from '@/lib/shipping'
 
@@ -120,7 +120,7 @@ export async function POST(req: NextRequest) {
     Logger.order('created', result.id, userId, {
       ip: req.headers.get('x-forwarded-for') || 'unknown',
     })
-    await pusherServer.trigger('orders', 'new-order', {
+    await getPusherServer().trigger('orders', 'new-order', {
       orderId: result.id,
       user: { id: user.id, name: user.name, email: user.email },
       total: result.total,

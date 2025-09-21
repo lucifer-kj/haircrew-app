@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState, createContext, useContext } from 'react';
-import { pusherClient } from '@/lib/pusher-client';
+import { getPusherClient } from '@/lib/pusher-client';
 import { Notification as NotificationType } from '@/types/notification';
 
 const AdminNotificationContext = createContext<NotificationType[]>([]);
@@ -14,18 +14,19 @@ export function AdminNotificationProvider({ children }: { children: React.ReactN
       // Fallback: notifications are disabled
       return;
     }
-    const channel = pusherClient.subscribe('presence-admin-dashboard');
+    const pusher = getPusherClient();
+    const channel = pusher.subscribe('presence-admin-dashboard');
     channel.bind('admin-notification', (data: NotificationType) => {
       setNotifications((prev: NotificationType[]) => [data, ...prev.slice(0, 49)]);
     });
     // Error handling for Pusher connection failures
-    pusherClient.connection.bind('error', (err: unknown) => {
+    pusher.connection.bind('error', (err: unknown) => {
       // Use your structured logger here if available
       if (typeof window !== 'undefined' && window.console) {
         console.error('Pusher connection error', err);
       }
     });
-    pusherClient.connection.bind('state_change', (states: unknown) => {
+    pusher.connection.bind('state_change', (states: unknown) => {
       if (
         typeof states === 'object' &&
         states !== null &&
@@ -40,8 +41,8 @@ export function AdminNotificationProvider({ children }: { children: React.ReactN
     return () => {
       channel.unbind_all();
       channel.unsubscribe();
-      pusherClient.connection.unbind('error');
-      pusherClient.connection.unbind('state_change');
+      pusher.connection.unbind('error');
+      pusher.connection.unbind('state_change');
     };
   }, [notificationsEnabled]);
 

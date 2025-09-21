@@ -5,6 +5,7 @@ import { authOptions } from '@/auth'
 import { validateInput, sanitizeInput } from '@/lib/validation'
 import Logger from '@/lib/logger'
 import { z } from 'zod'
+import type { Session } from 'next-auth'
 
 const categoryUpdateSchema = z.object({
   name: z.string().min(1, 'Category name is required').max(100).optional(),
@@ -18,7 +19,7 @@ export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await getServerSession(authOptions)
+  const session: Session | null = await getServerSession(authOptions)
   if (!session?.user || session.user.role !== 'ADMIN') {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
@@ -77,7 +78,7 @@ export async function DELETE(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await getServerSession(authOptions)
+  const session: Session | null = await getServerSession(authOptions)
   if (!session?.user || session.user.role !== 'ADMIN') {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }

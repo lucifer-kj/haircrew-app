@@ -1,20 +1,23 @@
 {
   "name": "HairCrew Professional",
   "short_name": "HairCrew",
+  "description": "India's premier hair care products - salon quality at home",
   "icons": [
     {
-      "src": "/favicon-192x192.png",
+      "src": "/logo.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "/favicon-512x512.png",
+      "src": "/logo.png",
       "sizes": "512x512",
       "type": "image/png"
     }
   ],
-  "theme_color": "#000000",
+  "theme_color": "#891997",
   "background_color": "#ffffff",
   "display": "standalone",
-  "start_url": "/"
+  "start_url": "/",
+  "scope": "/",
+  "orientation": "portrait-primary"
 }

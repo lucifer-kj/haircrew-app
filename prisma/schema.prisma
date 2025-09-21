@@ -307,6 +307,19 @@ model CarouselImage {
   createdBy   String   // User ID who uploaded it
 }
 
+model WebVitals {
+  id        String   @id @default(cuid())
+  name      String   // CLS, FID, FCP, LCP, TTFB, etc.
+  value     Float    // The metric value
+  metricId  String   // Unique identifier for the metric
+  delta     Float?   // The delta value
+  url       String   // Page URL where metric was measured
+  userAgent String?  // User agent string
+  timestamp DateTime @default(now())
+  
+  @@map("web_vitals")
+}
+
 
 // Enums
 enum UserRole {

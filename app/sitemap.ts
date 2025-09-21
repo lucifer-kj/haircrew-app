@@ -44,6 +44,24 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ]
 
+  // City-specific pages for pan-India coverage
+  const cityPages = [
+    { city: 'kolkata', priority: 0.8 },
+    { city: 'mumbai', priority: 0.8 },
+    { city: 'bangalore', priority: 0.8 },
+    { city: 'chennai', priority: 0.8 },
+    { city: 'hyderabad', priority: 0.8 },
+    { city: 'pune', priority: 0.7 },
+    { city: 'ahmedabad', priority: 0.7 },
+    { city: 'jaipur', priority: 0.7 },
+    { city: 'lucknow', priority: 0.7 },
+  ].map(city => ({
+    url: `${baseUrl}/${city.city}`,
+    lastModified: new Date(),
+    changeFrequency: 'weekly' as const,
+    priority: city.priority,
+  }))
+
   try {
     // Dynamic product pages
     const products = await prisma.product.findMany({
@@ -71,10 +89,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.7,
     }))
 
-    return [...staticPages, ...productPages, ...categoryPages]
+    return [...staticPages, ...cityPages, ...productPages, ...categoryPages]
   } catch (error) {
     console.error('Error generating sitemap:', error)
     // Return static pages if database is unavailable
-    return staticPages
+    return [...staticPages, ...cityPages]
   }
 }

@@ -10,7 +10,7 @@ import { ErrorBoundary } from '@/components/ui/error-boundary'
 import AnimatedLayoutClient from '@/components/providers/animated-layout-client'
 import RoutePrefetcher from '@/components/providers/route-prefetch'
 import { Toaster } from 'sonner'
-import { SkipToContent } from '@/components/ui/accessibility'
+import { WebVitalsProvider } from '@/components/providers/web-vitals-provider'
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -25,15 +25,15 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'HairCrew - Professional Hair Care Products',
+  title: 'HairCrew - India\'s Premier Hair Care Products',
   description:
-    'Your trusted partner for professional hair care products. Quality, innovation, and beauty in every bottle.',
+    'India\'s trusted partner for professional hair care products. Quality, innovation, and beauty in every bottle. Serving all major cities with salon-quality products.',
   // Improve SEO and sharing
   openGraph: {
     type: 'website',
-    title: 'HairCrew - Professional Hair Care Products',
+    title: 'HairCrew - India\'s Premier Hair Care Products',
     description:
-      'Your trusted partner for professional hair care products. Quality, innovation, and beauty in every bottle.',
+      'India\'s trusted partner for professional hair care products. Quality, innovation, and beauty in every bottle. Serving all major cities with salon-quality products.',
     siteName: 'HairCrew',
   },
 }
@@ -52,31 +52,28 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        {/* SEO Meta Tags */}
-        <title>HairCrew - Delhi&apos;s Premier Hair Care Products</title>
-        <meta name="description" content="HairCrew offers premium, cruelty-free, and innovative haircare products delivering salon-quality results at home. Delhi's trusted hair care partner with fast local delivery." />
-        <meta name="keywords" content="HairCrew, Delhi hair care, salon-quality shampoo, keratin treatment, cruelty-free hair products, premium haircare Delhi, professional hair products Delhi" />
+        {/* Additional Meta Tags */}
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="canonical" href="https://www.haircrew.in/" />
         {/* Open Graph */}
         <meta property="og:title" content="HairCrew Professional – Luxury Haircare Brand" />
-        <meta property="og:description" content="Indulge in HairCrew’s premium, cruelty-free formulas designed for salon-quality results at home. Experience opulence in every bottle." />
+        <meta property="og:description" content="HairCrew offers premium, cruelty-free, and innovative haircare products delivering salon-quality results at home. Serving all major cities across India with fast delivery and expert recommendations." />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://www.haircrew.in/" />
-        <meta property="og:image" content="https://www.haircrew.in/assets/og-image.jpg" />
+        <meta property="og:image" content="https://www.haircrew.in/logo.png" />
         {/* Twitter Card */}
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="HairCrew Professional – Luxury Salon-Quality Haircare" />
-        <meta name="twitter:description" content="HairCrew offers premium, cruelty-free, and innovative haircare products delivering salon-quality results at home. Discover the luxury of self-care with HairCrew." />
-        <meta name="twitter:image" content="https://www.haircrew.in/assets/og-image.jpg" />
+        <meta name="twitter:description" content="HairCrew offers premium, cruelty-free, and innovative haircare products delivering salon-quality results at home. Serving all major cities across India with fast delivery and expert recommendations." />
+        <meta name="twitter:image" content="https://www.haircrew.in/logo.png" />
         {/* Enhanced Local Business Structured Data */}
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
           "@context": "https://schema.org",
           "@type": "LocalBusiness",
           "name": "HairCrew",
           "url": "https://www.haircrew.in/",
-          "logo": "https://www.haircrew.in/assets/logo.png",
-          "description": "HairCrew - Delhi's trusted partner for professional hair care products. Quality, innovation, and beauty in every bottle. Serving Delhi with salon-quality products and expert recommendations.",
+          "logo": "https://www.haircrew.in/logo.png",
+          "description": "HairCrew - India's trusted partner for professional hair care products. Quality, innovation, and beauty in every bottle. Serving all major cities across India with salon-quality products and expert recommendations.",
           "telephone": "+91 97187 07211",
           "email": "shahf3724@gmail.com",
           "address": {
@@ -93,16 +90,83 @@ export default function RootLayout({
                 "@type": "State",
                 "name": "Delhi"
               }
+            },
+            {
+              "@type": "City",
+              "name": "Kolkata",
+              "containedInPlace": {
+                "@type": "State",
+                "name": "West Bengal"
+              }
+            },
+            {
+              "@type": "City",
+              "name": "Mumbai",
+              "containedInPlace": {
+                "@type": "State",
+                "name": "Maharashtra"
+              }
+            },
+            {
+              "@type": "City",
+              "name": "Bangalore",
+              "containedInPlace": {
+                "@type": "State",
+                "name": "Karnataka"
+              }
+            },
+            {
+              "@type": "City",
+              "name": "Chennai",
+              "containedInPlace": {
+                "@type": "State",
+                "name": "Tamil Nadu"
+              }
+            },
+            {
+              "@type": "City",
+              "name": "Hyderabad",
+              "containedInPlace": {
+                "@type": "State",
+                "name": "Telangana"
+              }
+            },
+            {
+              "@type": "City",
+              "name": "Pune",
+              "containedInPlace": {
+                "@type": "State",
+                "name": "Maharashtra"
+              }
+            },
+            {
+              "@type": "City",
+              "name": "Ahmedabad",
+              "containedInPlace": {
+                "@type": "State",
+                "name": "Gujarat"
+              }
+            },
+            {
+              "@type": "City",
+              "name": "Jaipur",
+              "containedInPlace": {
+                "@type": "State",
+                "name": "Rajasthan"
+              }
+            },
+            {
+              "@type": "City",
+              "name": "Lucknow",
+              "containedInPlace": {
+                "@type": "State",
+                "name": "Uttar Pradesh"
+              }
             }
           ],
           "serviceArea": {
-            "@type": "GeoCircle",
-            "geoMidpoint": {
-              "@type": "GeoCoordinates",
-              "latitude": 28.6139,
-              "longitude": 77.2090
-            },
-            "geoRadius": "50000"
+            "@type": "Country",
+            "name": "India"
           },
           "openingHoursSpecification": [
             {
@@ -148,24 +212,24 @@ export default function RootLayout({
           "makesOffer": [
             {
               "@type": "Offer",
-              "name": "Local Delivery in Delhi",
-              "description": "Fast delivery to all areas in Delhi",
+              "name": "Pan-India Delivery",
+              "description": "Fast delivery to all major cities across India",
               "price": "0",
               "priceCurrency": "INR",
               "availability": "https://schema.org/InStock",
               "areaServed": {
-                "@type": "City",
-                "name": "Delhi"
+                "@type": "Country",
+                "name": "India"
               }
             },
             {
               "@type": "Offer",
               "name": "Salon Partnership Program",
-              "description": "Special pricing and support for Delhi salons",
+              "description": "Special pricing and support for salons across India",
               "availability": "https://schema.org/InStock",
               "areaServed": {
-                "@type": "City",
-                "name": "Delhi"
+                "@type": "Country",
+                "name": "India"
               }
             }
           ],
@@ -175,12 +239,14 @@ export default function RootLayout({
           ],
           "foundingDate": "2020",
           "numberOfEmployees": "10-50",
-          "knowsAbout": ["Hair Care", "Professional Hair Products", "Salon Quality Products", "Hair Treatment", "Hair Styling", "Delhi Hair Care"],
-          "keywords": "HairCrew, Delhi hair care, professional hair products Delhi, salon products Delhi, hair care Delhi"
+          "knowsAbout": ["Hair Care", "Professional Hair Products", "Salon Quality Products", "Hair Treatment", "Hair Styling", "India Hair Care", "Pan India Delivery", "Professional Haircare India"],
+          "keywords": "HairCrew, India hair care, professional hair products India, salon products India, hair care India, Kolkata hair care, Delhi hair care, Mumbai hair care, Bangalore hair care, Chennai hair care, Hyderabad hair care, Pune hair care, Ahmedabad hair care, Jaipur hair care, Lucknow hair care"
         }) }} />
         {/* Favicon & Manifest */}
-        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
-        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+        <link rel="icon" href="/favicon.ico" sizes="any" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon.ico" />
+        <link rel="apple-touch-icon" href="/logo.png" />
         <link rel="manifest" href="/manifest.json" />
         {/* Preconnect to important domains for faster loading */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -197,6 +263,7 @@ export default function RootLayout({
       >
         <AuthProvider>
           <ClientRoot>
+            <WebVitalsProvider />
             <div className="min-h-screen flex flex-col">
               <SkipToContent />
               <Header />

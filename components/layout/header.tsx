@@ -182,6 +182,7 @@ export function Header() {
           <nav className="hidden lg:flex items-center space-x-4 mx-8">
             <Link href="/explore" className="text-black hover:text-secondary font-medium px-3 py-2 rounded transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary/50">Explore</Link>
             <Link href="/categories" className="text-black hover:text-secondary font-medium px-3 py-2 rounded transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary/50">Category</Link>
+            <Link href="/delhi" className="text-black hover:text-secondary font-medium px-3 py-2 rounded transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary/50">Delhi</Link>
             <Link href="/contact" className="text-black hover:text-secondary font-medium px-3 py-2 rounded transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary/50">Contact</Link>
             <Link href="/help" className="text-black hover:text-secondary font-medium px-3 py-2 rounded transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary/50">Help</Link>
             <div className="relative flex items-center">

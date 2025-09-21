@@ -53,9 +53,9 @@ export default function RootLayout({
     <html lang="en">
       <head>
         {/* SEO Meta Tags */}
-        <title>HairCrew Professional – Luxury Salon-Quality Haircare</title>
-        <meta name="description" content="HairCrew offers premium, cruelty-free, and innovative haircare products delivering salon-quality results at home. Discover the luxury of self-care with HairCrew." />
-        <meta name="keywords" content="HairCrew, luxury haircare, salon-quality shampoo, keratin treatment, cruelty-free hair products, premium haircare brand" />
+        <title>HairCrew - Delhi's Premier Hair Care Products</title>
+        <meta name="description" content="HairCrew offers premium, cruelty-free, and innovative haircare products delivering salon-quality results at home. Delhi's trusted hair care partner with fast local delivery." />
+        <meta name="keywords" content="HairCrew, Delhi hair care, salon-quality shampoo, keratin treatment, cruelty-free hair products, premium haircare Delhi, professional hair products Delhi" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="canonical" href="https://www.haircrew.in/" />
         {/* Open Graph */}
@@ -69,24 +69,114 @@ export default function RootLayout({
         <meta name="twitter:title" content="HairCrew Professional – Luxury Salon-Quality Haircare" />
         <meta name="twitter:description" content="HairCrew offers premium, cruelty-free, and innovative haircare products delivering salon-quality results at home. Discover the luxury of self-care with HairCrew." />
         <meta name="twitter:image" content="https://www.haircrew.in/assets/og-image.jpg" />
-        {/* Structured Data */}
+        {/* Enhanced Local Business Structured Data */}
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
           "@context": "https://schema.org",
-          "@type": "Organization",
-          "name": "HairCrew Professional",
+          "@type": "LocalBusiness",
+          "name": "HairCrew",
           "url": "https://www.haircrew.in/",
           "logo": "https://www.haircrew.in/assets/logo.png",
-          "contactPoint": {
-            "@type": "ContactPoint",
-            "telephone": "+91-9718707211",
-            "contactType": "Customer Service",
-            "areaServed": "IN",
-            "availableLanguage": "English"
+          "description": "HairCrew - Delhi's trusted partner for professional hair care products. Quality, innovation, and beauty in every bottle. Serving Delhi with salon-quality products and expert recommendations.",
+          "telephone": "+91-9718707211",
+          "email": "support@haircrew.in",
+          "address": {
+            "@type": "PostalAddress",
+            "addressLocality": "Delhi",
+            "addressRegion": "Delhi",
+            "addressCountry": "IN"
           },
+          "areaServed": [
+            {
+              "@type": "City",
+              "name": "Delhi",
+              "containedInPlace": {
+                "@type": "State",
+                "name": "Delhi"
+              }
+            }
+          ],
+          "serviceArea": {
+            "@type": "GeoCircle",
+            "geoMidpoint": {
+              "@type": "GeoCoordinates",
+              "latitude": 28.6139,
+              "longitude": 77.2090
+            },
+            "geoRadius": "50000"
+          },
+          "openingHoursSpecification": [
+            {
+              "@type": "OpeningHoursSpecification",
+              "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+              "opens": "09:00",
+              "closes": "18:00"
+            },
+            {
+              "@type": "OpeningHoursSpecification",
+              "dayOfWeek": "Saturday",
+              "opens": "10:00",
+              "closes": "16:00"
+            }
+          ],
+          "hasOfferCatalog": {
+            "@type": "OfferCatalog",
+            "name": "Hair Care Products",
+            "itemListElement": [
+              {
+                "@type": "Offer",
+                "itemOffered": {
+                  "@type": "Product",
+                  "name": "Professional Shampoos"
+                }
+              },
+              {
+                "@type": "Offer",
+                "itemOffered": {
+                  "@type": "Product",
+                  "name": "Hair Conditioners"
+                }
+              },
+              {
+                "@type": "Offer",
+                "itemOffered": {
+                  "@type": "Product",
+                  "name": "Hair Treatments"
+                }
+              }
+            ]
+          },
+          "makesOffer": [
+            {
+              "@type": "Offer",
+              "name": "Local Delivery in Delhi",
+              "description": "Fast delivery to all areas in Delhi",
+              "price": "0",
+              "priceCurrency": "INR",
+              "availability": "https://schema.org/InStock",
+              "areaServed": {
+                "@type": "City",
+                "name": "Delhi"
+              }
+            },
+            {
+              "@type": "Offer",
+              "name": "Salon Partnership Program",
+              "description": "Special pricing and support for Delhi salons",
+              "availability": "https://schema.org/InStock",
+              "areaServed": {
+                "@type": "City",
+                "name": "Delhi"
+              }
+            }
+          ],
           "sameAs": [
             "https://www.facebook.in/haircrew",
             "https://www.instagram.in/haircrew"
-          ]
+          ],
+          "foundingDate": "2020",
+          "numberOfEmployees": "10-50",
+          "knowsAbout": ["Hair Care", "Professional Hair Products", "Salon Quality Products", "Hair Treatment", "Hair Styling", "Delhi Hair Care"],
+          "keywords": "HairCrew, Delhi hair care, professional hair products Delhi, salon products Delhi, hair care Delhi"
         }) }} />
         {/* Favicon & Manifest */}
         <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />

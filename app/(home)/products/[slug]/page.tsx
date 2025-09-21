@@ -162,8 +162,98 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
     ? 0 
     : reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length;
 
+  // Generate structured data for the product
+  const productStructuredData = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": product.name,
+    "description": product.description,
+    "image": product.images,
+    "sku": product.id,
+    "brand": {
+      "@type": "Brand",
+      "name": "HairCrew"
+    },
+    "offers": {
+      "@type": "Offer",
+      "url": `https://www.haircrew.in/products/${product.slug}`,
+      "priceCurrency": "INR",
+      "price": product.price,
+      "availability": product.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+      "seller": {
+        "@type": "Organization",
+        "name": "HairCrew"
+      }
+    },
+    "category": product.category.name,
+    "aggregateRating": reviews.length > 0 ? {
+      "@type": "AggregateRating",
+      "ratingValue": averageRating,
+      "reviewCount": reviews.length,
+      "bestRating": 5,
+      "worstRating": 1
+    } : undefined,
+    "review": reviews.map(review => ({
+      "@type": "Review",
+      "reviewRating": {
+        "@type": "Rating",
+        "ratingValue": review.rating,
+        "bestRating": 5,
+        "worstRating": 1
+      },
+      "author": {
+        "@type": "Person",
+        "name": review.user.name
+      },
+      "reviewBody": review.comment,
+      "datePublished": review.createdAt
+    }))
+  };
+
+  // Generate breadcrumb structured data
+  const breadcrumbStructuredData = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Home",
+        "item": "https://www.haircrew.in"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "Products",
+        "item": "https://www.haircrew.in/products"
+      },
+      {
+        "@type": "ListItem",
+        "position": 3,
+        "name": product.category.name,
+        "item": `https://www.haircrew.in/categories/${product.category.slug}`
+      },
+      {
+        "@type": "ListItem",
+        "position": 4,
+        "name": product.name,
+        "item": `https://www.haircrew.in/products/${product.slug}`
+      }
+    ]
+  };
+
   return (
     <ErrorBoundary>
+      {/* Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productStructuredData) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbStructuredData) }}
+      />
+      
       <div className="container mx-auto px-4 py-8">
         {/* Breadcrumb */}
         <nav className="mb-8" aria-label="Breadcrumb">

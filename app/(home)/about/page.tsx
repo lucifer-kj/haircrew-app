@@ -1,7 +1,28 @@
+import { Metadata } from 'next'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Heart, Shield, Truck, Star, Users, Award } from 'lucide-react'
 import NewsletterSection from '@/components/newsletter-section'
+
+export const metadata: Metadata = {
+  title: 'About HairCrew - Your Trusted Hair Care Partner',
+  description: 'Learn about HairCrew\'s mission to provide premium hair care products. Discover our story, values, and commitment to quality hair care solutions.',
+  keywords: 'about HairCrew, hair care company, premium hair products, HairCrew story, hair care mission',
+  openGraph: {
+    title: 'About HairCrew - Your Trusted Hair Care Partner',
+    description: 'Learn about HairCrew\'s mission to provide premium hair care products.',
+    type: 'website',
+    url: 'https://www.haircrew.in/about',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'About HairCrew - Your Trusted Hair Care Partner',
+    description: 'Learn about HairCrew\'s mission to provide premium hair care products.',
+  },
+  alternates: {
+    canonical: 'https://www.haircrew.in/about',
+  },
+}
 
 export default function AboutPage() {
   const features = [

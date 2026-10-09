@@ -13,6 +13,7 @@ import { motion } from 'framer-motion'
 import { fadeIn } from '@/lib/motion.config'
 import { useScrollReveal } from '@/lib/useScrollReveal'
 import { useReducedMotion } from '@/lib/useReducedMotion'
+import { Logo } from '@/components/ui/logo'
 
 export function Footer() {
   const reduced = useReducedMotion()
@@ -30,9 +31,9 @@ export function Footer() {
         <div className="flex flex-col md:flex-row justify-between items-center gap-6">
           {/* Logo and socials */}
           <div className="flex flex-col items-center md:items-start">
-            <span className="text-2xl font-bold bg-gradient-to-r from-foreground via-primary to-primary bg-clip-text text-transparent mb-3">
-              HairCrew
-            </span>
+            <div className="mb-3">
+              <Logo size="default" />
+            </div>
             <div className="flex space-x-4">
               <Link
                 href="#"

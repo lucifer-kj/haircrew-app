@@ -62,6 +62,16 @@ export async function middleware(request: NextRequest) {
     return response
   }
 
+  // Direct /admin route shortcut
+  if (path === '/admin') {
+    const targetUrl = token?.role === 'ADMIN' ? '/dashboard/admin' : '/admin/login'
+    const response = NextResponse.redirect(new URL(targetUrl, request.url))
+    Object.entries(securityHeaders).forEach(([key, value]) => {
+      response.headers.set(key, value)
+    })
+    return response
+  }
+
   // API Admin routes protection
   if (path.startsWith('/api/admin')) {
     if (!token || token.role !== 'ADMIN') {

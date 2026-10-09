@@ -137,7 +137,7 @@ function HeroCarousel() {
                           {slide.desc}
                         </p>
                         <Link href="/products" prefetch={true}>
-                          <Button className="bg-secondary hover:bg-secondary/90 text-white rounded-full font-semibold shadow-md px-8 py-3 text-lg">
+                          <Button className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full font-semibold shadow-lg px-8 py-3 text-lg cursor-pointer">
                             Shop Now
                           </Button>
                         </Link>
@@ -237,7 +237,7 @@ function HeroCarousel() {
               <Link
                 href="/products?promo=new"
                 prefetch={true}
-                className="h-full w-full rounded-xl shadow-md flex flex-col justify-end p-0 overflow-hidden group relative bg-gradient-to-br from-secondary to-[#B13BFF]"
+                className="h-full w-full rounded-xl shadow-md flex flex-col justify-end p-0 overflow-hidden group relative bg-gradient-to-br from-primary-dark via-primary to-purple-800"
                 style={{ minHeight: 0 }}
               >
                 <div className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-t from-black/80 via-black/40 to-transparent backdrop-blur-sm rounded-xl" />
@@ -248,7 +248,7 @@ function HeroCarousel() {
                   <p className="text-lg font-semibold text-white text-left max-w-xs mb-3">
                     Explore the latest in hair care innovation.
                   </p>
-                  <Button className="bg-white text-secondary rounded-full font-bold shadow hover:bg-gray-100 w-fit px-8 py-3 text-lg">
+                  <Button className="bg-white text-primary rounded-full font-bold shadow-md hover:bg-white/90 w-fit px-8 py-3 text-lg cursor-pointer">
                     Shop New
                   </Button>
                 </div>
@@ -272,7 +272,7 @@ export default function HomePage() {
     router.prefetch('/products')
     router.prefetch('/categories')
     router.prefetch('/cart')
-    router.prefetch('/dashboard/profile')
+    router.prefetch('/dashboard/user/profile')
   }, [router])
 
   // Fetch latest products

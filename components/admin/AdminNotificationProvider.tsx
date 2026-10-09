@@ -15,6 +15,10 @@ export function AdminNotificationProvider({ children }: { children: React.ReactN
       return;
     }
     const pusher = getPusherClient();
+    if (!pusher) {
+      // Pusher is optional/unconfigured; gracefully skip real-time notifications
+      return;
+    }
     const channel = pusher.subscribe('presence-admin-dashboard');
     channel.bind('admin-notification', (data: NotificationType) => {
       setNotifications((prev: NotificationType[]) => [data, ...prev.slice(0, 49)]);

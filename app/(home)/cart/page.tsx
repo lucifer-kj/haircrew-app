@@ -21,7 +21,7 @@ export default function CartPage() {
           <span className="text-5xl mb-4">🛒</span>
           <p className="mb-4">Your cart is empty.</p>
           <Link href="/products">
-            <Button className="bg-secondary text-white rounded-full px-6 py-2 font-semibold shadow-md hover:bg-secondary/90 transition">
+            <Button className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full px-6 py-2 font-semibold shadow-md transition">
               Shop Products
             </Button>
           </Link>
@@ -44,7 +44,7 @@ export default function CartPage() {
                 <div className="font-semibold text-base mb-1 line-clamp-1">
                   {item.name}
                 </div>
-                <div className="text-secondary font-bold mb-1 text-xs">
+                <div className="text-primary font-bold mb-1 text-sm">
                   ₹{item.price}
                 </div>
                 <div className="flex items-center gap-1">
@@ -61,7 +61,8 @@ export default function CartPage() {
                       }
                     }}
                     disabled={item.quantity <= 1 || loadingId === item.id}
-                    className="w-11 h-11 rounded-full border border-secondary text-secondary font-bold flex items-center justify-center text-lg bg-white hover:bg-secondary/10 transition"
+                    variant="outline"
+                    className="w-8 h-8 rounded-full border-border text-foreground font-bold flex items-center justify-center text-sm hover:border-primary hover:text-primary transition p-0 cursor-pointer"
                     aria-label={`Decrease quantity for ${item.name}`}
                     tabIndex={0}
                   >
@@ -83,7 +84,8 @@ export default function CartPage() {
                       }
                     }}
                     disabled={item.quantity >= item.stock || loadingId === item.id}
-                    className="w-11 h-11 rounded-full border border-secondary text-secondary font-bold flex items-center justify-center text-lg bg-white hover:bg-secondary/10 transition"
+                    variant="outline"
+                    className="w-8 h-8 rounded-full border-border text-foreground font-bold flex items-center justify-center text-sm hover:border-primary hover:text-primary transition p-0 cursor-pointer"
                     aria-label={`Increase quantity for ${item.name}`}
                     tabIndex={0}
                   >
@@ -126,9 +128,11 @@ export default function CartPage() {
               <span>₹{getTotal().toFixed(2)}</span>
             </div>
           </div>
-          <Button className="w-full bg-secondary hover:bg-secondary/90 text-white text-base font-semibold py-3 rounded-full shadow-md mt-4">
-            Go to Checkout
-          </Button>
+          <Link href="/checkout" className="block w-full">
+            <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground text-base font-semibold py-3 rounded-full shadow-md mt-4 cursor-pointer">
+              Go to Checkout
+            </Button>
+          </Link>
           <Button
             onClick={async () => {
               setClearLoading(true)
@@ -136,12 +140,12 @@ export default function CartPage() {
                 await clearCart()
               } catch  {
                 setError('Failed to clear cart')
-                // toast.error('Failed to clear cart')
               } finally {
                 setClearLoading(false)
               }
             }}
-            className="w-full mt-2 border border-secondary text-secondary bg-white hover:bg-secondary/10 font-semibold rounded-full py-3 transition"
+            variant="outline"
+            className="w-full mt-2 rounded-full py-3 font-medium text-muted-foreground hover:text-destructive hover:border-destructive/30 transition cursor-pointer"
             disabled={clearLoading}
           >
             {clearLoading ? <span className="loader" /> : 'Clear Cart'}

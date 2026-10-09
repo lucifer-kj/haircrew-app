@@ -26,16 +26,43 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'HairCrew - India\'s Premier Hair Care Products',
+  title: {
+    default: 'HairCrew - Luxury Salon-Quality Haircare',
+    template: '%s | HairCrew',
+  },
   description:
-    'India\'s trusted partner for professional hair care products. Quality, innovation, and beauty in every bottle. Serving all major cities with salon-quality products.',
-  // Improve SEO and sharing
+    "India's premier salon-grade professional haircare brand. Cruelty-free shampoos, conditioners, treatments, and serums crafted for radiant, healthy hair.",
+  icons: {
+    icon: [
+      { url: '/logo.png', sizes: '32x32', type: 'image/png' },
+      { url: '/logo.png', sizes: '192x192', type: 'image/png' },
+      { url: '/favicon.ico' },
+    ],
+    apple: [{ url: '/logo.png', sizes: '180x180', type: 'image/png' }],
+    shortcut: ['/logo.png'],
+  },
   openGraph: {
     type: 'website',
-    title: 'HairCrew - India\'s Premier Hair Care Products',
+    title: 'HairCrew - Luxury Salon-Quality Haircare',
     description:
-      'India\'s trusted partner for professional hair care products. Quality, innovation, and beauty in every bottle. Serving all major cities with salon-quality products.',
+      "India's premier salon-grade professional haircare brand. Cruelty-free shampoos, conditioners, treatments, and serums crafted for radiant, healthy hair.",
     siteName: 'HairCrew',
+    url: 'https://www.haircrew.in/',
+    images: [
+      {
+        url: 'https://www.haircrew.in/logo.png',
+        width: 1024,
+        height: 1024,
+        alt: 'HairCrew Luxury Haircare Logo',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'HairCrew - Luxury Salon-Quality Haircare',
+    description:
+      "India's premier salon-grade professional haircare brand. Cruelty-free shampoos, conditioners, treatments, and serums.",
+    images: ['https://www.haircrew.in/logo.png'],
   },
 }
 
@@ -51,7 +78,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         {/* Additional Meta Tags */}
         <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -244,9 +271,7 @@ export default function RootLayout({
           "keywords": "HairCrew, India hair care, professional hair products India, salon products India, hair care India, Kolkata hair care, Delhi hair care, Mumbai hair care, Bangalore hair care, Chennai hair care, Hyderabad hair care, Pune hair care, Ahmedabad hair care, Jaipur hair care, Lucknow hair care"
         }) }} />
         {/* Favicon & Manifest */}
-        <link rel="icon" href="/favicon.ico" sizes="any" />
-        <link rel="icon" type="image/png" sizes="32x32" href="/favicon.ico" />
-        <link rel="icon" type="image/png" sizes="16x16" href="/favicon.ico" />
+        <link rel="icon" href="/logo.png" type="image/png" />
         <link rel="apple-touch-icon" href="/logo.png" />
         <link rel="manifest" href="/manifest.json" />
         {/* Preconnect to important domains for faster loading */}
@@ -256,11 +281,10 @@ export default function RootLayout({
           href="https://fonts.gstatic.com"
           crossOrigin="anonymous"
         />
-        {/* Preload critical assets */}
-        <link rel="preload" href="/Images/banner1.jpg" as="image" />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        suppressHydrationWarning
       >
         <AuthProvider>
           <ClientRoot>

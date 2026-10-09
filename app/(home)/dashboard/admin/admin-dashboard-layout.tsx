@@ -170,7 +170,7 @@ export default function AdminDashboardLayout({
             View
           </button>
           <button
-            className="px-2 py-1 rounded bg-secondary text-white text-xs"
+            className="px-2 py-1 rounded bg-primary text-primary-foreground text-xs"
             title="Process"
           >
             Process
@@ -631,7 +631,7 @@ export default function AdminDashboardLayout({
                   Export Orders (CSV)
                 </button>
                 <button
-                  className="px-4 py-2 rounded bg-secondary text-white font-semibold shadow hover:bg-secondary/80 transition"
+                  className="px-4 py-2 rounded bg-primary text-primary-foreground font-semibold shadow hover:bg-primary/90 transition"
                   disabled
                 >
                   Export Products (CSV)

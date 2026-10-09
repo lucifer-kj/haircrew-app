@@ -26,12 +26,20 @@ import { FocusTrap } from '@headlessui/react'
 import { usePathname } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { signOut } from 'next-auth/react'
+import { Logo } from '@/components/ui/logo'
 
 function MobileTabBar() {
   const pathname = usePathname()
+  const [mounted, setMounted] = useState(false)
   const { getCount } = useCartStore()
   const cartCount = getCount()
   const { data: session } = useSession()
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  const displayCount = mounted ? cartCount : 0
   
   const tabs = [
     { href: '/', icon: Home, label: 'Home' },
@@ -40,7 +48,7 @@ function MobileTabBar() {
       href: '/cart',
       icon: ShoppingCart,
       label: 'Cart',
-      badge: cartCount > 0 ? cartCount : null,
+      badge: displayCount > 0 ? displayCount : null,
     },
     { 
       href: session?.user?.role === 'ADMIN' ? '/dashboard/admin' : '/dashboard/user/profile', 
@@ -64,11 +72,11 @@ function MobileTabBar() {
             aria-label={tab.label}
           >
             <motion.div
-              className="flex flex-col items-center justify-center h-full text-xs font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary transition"
+              className="flex flex-col items-center justify-center h-full text-xs font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-primary transition"
               initial={false}
               animate={
                 active
-                  ? { scale: 1.1, color: '#9929EA' }
+                  ? { scale: 1.08, color: '#8b15e8' }
                   : { scale: 1, color: '#6B7280' }
               }
               whileTap={{ scale: 0.92 }}
@@ -77,7 +85,7 @@ function MobileTabBar() {
               <div className="relative">
                 <tab.icon className="w-6 h-6 mb-1" />
                 {tab.badge && (
-                  <span className="absolute -top-1 -right-1 bg-secondary text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+                  <span className="absolute -top-1 -right-1 bg-primary text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center font-bold shadow-xs">
                     {tab.badge}
                   </span>
                 )}
@@ -93,6 +101,7 @@ function MobileTabBar() {
 
 export function Header() {
   const [scrolled, setScrolled] = useState(false)
+  const [mounted, setMounted] = useState(false)
   const { items, removeItem, updateQuantity, getTotal, getCount } =
     useCartStore()
   const cartCount = getCount()
@@ -100,11 +109,15 @@ export function Header() {
   const reduced = useFramerReducedMotion()
   const [mobileNavOpen, setMobileNavOpen] = useState(false)
   const { data: session } = useSession()
+
   useEffect(() => {
+    setMounted(true)
     const handleScroll = (): void => setScrolled(window.scrollY > 10)
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
+
+  const displayCartCount = mounted ? cartCount : 0
 
   // Category nav structure
   const categories = [
@@ -145,62 +158,54 @@ export function Header() {
 
   return (
     <>
-      {/* Top promo bar (hidden on mobile) */}
-      <div className="hidden md:block bg-gradient-to-r from-secondary to-[#B13BFF] text-white font-bold text-sm py-2">
-        <div className="container mx-auto px-4">
-          <p className="text-center text-sm">
-            🎉 Free shipping on orders over ₹250! Shop now
+      {/* Top promo bar */}
+      <div className="bg-gradient-to-r from-primary-dark via-primary to-purple-800 text-white font-medium text-xs sm:text-sm py-2 shadow-xs">
+        <div className="container mx-auto px-4 flex items-center justify-center">
+          <p className="text-center tracking-wide">
+            ✨ Free express shipping on all orders over ₹250! <Link href="/products" className="underline font-semibold ml-1 hover:text-white/80 transition-colors">Shop Now</Link>
           </p>
         </div>
       </div>
       <motion.header
-        className={`bg-white sticky top-0 z-50 transition-shadow ${scrolled ? 'shadow-lg' : 'shadow-none'}`}
+        className={`bg-white/95 backdrop-blur-md sticky top-0 z-50 transition-all border-b border-border/60 ${scrolled ? 'shadow-md' : 'shadow-none'}`}
         initial={false}
         animate={{
           boxShadow: scrolled
-            ? '0 2px 16px 0 rgba(0,0,0,0.08)'
+            ? '0 4px 20px -2px rgba(139, 21, 232, 0.08)'
             : '0 0px 0px 0 rgba(0,0,0,0)',
         }}
         transition={{ duration: 0.2 }}
       >
         <div className="container mx-auto px-4 flex items-center h-20 justify-between">
           {/* Logo */}
-          <motion.a
-            href="/"
-            className="flex items-center hover:opacity-80 transition-opacity"
-            whileHover={reduced ? undefined : { scale: 1.03 }}
-            whileTap={reduced ? undefined : { scale: 0.98 }}
-          >
-            <span className="text-2xl font-bold bg-gradient-to-r from-black via-secondary to-secondary bg-clip-text text-transparent">
-              HairCrew
-            </span>
-          </motion.a>
+          <Logo size="default" />
 
           {/* Spacer for desktop nav */}
-          <div className="hidden lg:flex flex-1 max-w-lg mx-8" />
+          <div className="hidden lg:flex flex-1 max-w-lg mx-6" />
 
           {/* Desktop Navigation with dropdowns */}
-          <nav className="hidden lg:flex items-center space-x-4 mx-8">
-            <Link href="/explore" className="text-black hover:text-secondary font-medium px-3 py-2 rounded transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary/50">Explore</Link>
-            <Link href="/categories" className="text-black hover:text-secondary font-medium px-3 py-2 rounded transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary/50">Category</Link>
-            <Link href="/delhi" className="text-black hover:text-secondary font-medium px-3 py-2 rounded transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary/50">Delhi</Link>
-            <Link href="/contact" className="text-black hover:text-secondary font-medium px-3 py-2 rounded transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary/50">Contact</Link>
-            <Link href="/help" className="text-black hover:text-secondary font-medium px-3 py-2 rounded transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary/50">Help</Link>
-            <div className="relative flex items-center">
+          <nav className="hidden lg:flex items-center space-x-2 mx-6">
+            <Link href="/explore" className="text-foreground/90 hover:text-primary hover:bg-secondary/60 font-medium px-3.5 py-2 rounded-xl transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50">Explore</Link>
+            <Link href="/categories" className="text-foreground/90 hover:text-primary hover:bg-secondary/60 font-medium px-3.5 py-2 rounded-xl transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50">Category</Link>
+            <Link href="/delhi" className="text-foreground/90 hover:text-primary hover:bg-secondary/60 font-medium px-3.5 py-2 rounded-xl transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50">Delhi</Link>
+            <Link href="/contact" className="text-foreground/90 hover:text-primary hover:bg-secondary/60 font-medium px-3.5 py-2 rounded-xl transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50">Contact</Link>
+            <Link href="/help" className="text-foreground/90 hover:text-primary hover:bg-secondary/60 font-medium px-3.5 py-2 rounded-xl transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50">Help</Link>
+            <div className="relative flex items-center ml-2">
               <Popover>
                 <PopoverTrigger asChild>
                   <motion.button
-                    className="relative p-2 text-gray-700 hover:text-secondary transition-colors hidden md:flex"
+                    className="relative p-2 text-foreground/80 hover:text-primary hover:bg-secondary/60 rounded-xl transition-colors hidden md:flex"
                     whileHover={reduced ? undefined : { scale: 1.05 }}
                     whileTap={reduced ? undefined : { scale: 0.95 }}
+                    aria-label="View Shopping Cart"
                   >
                     <ShoppingCart className="w-6 h-6" />
                     <span
-                      className="absolute -top-1 -right-1 bg-secondary text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold"
-                      aria-hidden={cartCount === 0}
-                      style={{ opacity: cartCount > 0 ? 1 : 0 }}
+                      className="absolute -top-1 -right-1 bg-primary text-white text-[10px] rounded-full w-5 h-5 flex items-center justify-center font-bold shadow-xs transition-opacity duration-200"
+                      aria-hidden={displayCartCount === 0}
+                      style={{ opacity: displayCartCount > 0 ? 1 : 0 }}
                     >
-                      {cartCount > 0 ? cartCount : ''}
+                      {displayCartCount > 0 ? displayCartCount : ''}
                     </span>
                   </motion.button>
                 </PopoverTrigger>
@@ -269,13 +274,14 @@ export function Header() {
                           <div className="space-y-2">
                             <Button
                               onClick={() => router.push('/cart')}
-                              className="w-full bg-secondary hover:bg-secondary/90"
+                              variant="outline"
+                              className="w-full rounded-xl"
                             >
                               View Cart
                             </Button>
                             <Button
                               onClick={() => router.push('/checkout')}
-                              className="w-full bg-black hover:bg-gray-800"
+                              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-xl shadow-xs"
                             >
                               Checkout
                             </Button>

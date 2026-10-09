@@ -197,11 +197,15 @@ export default function ProductsPage() {
         <div className="container mx-auto px-4 py-8 grid grid-cols-1 md:grid-cols-4 gap-8 min-h-screen">
           {/* Sidebar */}
           <aside className="md:col-span-1 bg-white rounded-lg shadow p-6 h-fit">
-            <h2 className="text-xl font-bold mb-4">Categories</h2>
-            <ul className="space-y-2 mb-6">
+            <h2 className="text-lg font-bold mb-3 text-foreground tracking-tight">Categories</h2>
+            <ul className="space-y-1.5 mb-6">
               <li>
                 <button
-                  className={`w-full text-left px-2 py-1 rounded ${!selectedCategory ? 'bg-[var(--primary)] text-white' : 'hover:bg-gray-100'}`}
+                  className={`w-full text-left px-3.5 py-2 rounded-xl text-sm font-medium transition-all cursor-pointer ${
+                    !selectedCategory
+                      ? 'bg-primary text-primary-foreground shadow-xs font-semibold'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-secondary/70'
+                  }`}
                   onClick={() => setSelectedCategory(null)}
                 >
                   All Categories
@@ -210,7 +214,11 @@ export default function ProductsPage() {
               {categories.map(category => (
                 <li key={category.id}>
                   <button
-                    className={`w-full text-left px-2 py-1 rounded ${selectedCategory === category.id ? 'bg-[var(--primary)] text-white' : 'hover:bg-gray-100'}`}
+                    className={`w-full text-left px-3.5 py-2 rounded-xl text-sm font-medium transition-all cursor-pointer ${
+                      selectedCategory === category.id
+                        ? 'bg-primary text-primary-foreground shadow-xs font-semibold'
+                        : 'text-muted-foreground hover:text-foreground hover:bg-secondary/70'
+                    }`}
                     onClick={() => setSelectedCategory(category.id)}
                   >
                     {category.name}

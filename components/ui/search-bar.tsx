@@ -23,15 +23,22 @@ export default function SearchBar({ initialQuery = '', placeholder = 'Search pro
 
   return (
     <form onSubmit={handleSubmit} className={`flex items-center gap-2 ${className}`}>
-      <Input
-        type="search"
-        value={query}
-        onChange={e => setQuery(e.target.value)}
-        placeholder={placeholder}
-        className="flex-1 px-4 py-2 rounded-full border border-gray-300 focus:border-secondary focus:ring-2 focus:ring-secondary/30 transition-all shadow-sm outline-none bg-white text-base"
-      />
-      <Button type="submit" className="bg-secondary text-white rounded-full px-4 py-2 font-semibold shadow-md hover:bg-secondary/90 transition">
-        <Search className="w-5 h-5" />
+      <div className="relative flex-1">
+        <Input
+          type="search"
+          value={query}
+          onChange={e => setQuery(e.target.value)}
+          placeholder={placeholder}
+          className="w-full px-4 py-2 h-10 rounded-full border border-border/80 focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20 transition-all shadow-xs bg-card text-sm"
+        />
+      </div>
+      <Button
+        type="submit"
+        size="icon"
+        aria-label="Search"
+        className="h-10 w-10 shrink-0 bg-primary hover:bg-primary/90 text-primary-foreground rounded-full shadow-xs transition-all active:scale-95 cursor-pointer"
+      >
+        <Search className="w-4 h-4" />
       </Button>
     </form>
   )

@@ -100,7 +100,7 @@ export default function HelpPage() {
         {success && <div className="text-green-600 text-sm">{success}</div>}
         <button
           type="submit"
-          className="w-full bg-secondary text-white font-bold py-2 rounded hover:bg-secondary/90 disabled:opacity-60"
+          className="w-full bg-primary text-primary-foreground font-semibold py-2.5 rounded-xl hover:bg-primary/90 transition shadow-sm disabled:opacity-60 cursor-pointer"
           disabled={loading}
         >
           {loading ? 'Submitting...' : 'Submit'}

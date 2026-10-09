@@ -113,8 +113,8 @@ export default function OrderReceivedPage({ params }: { params: tParams }) {
                   </div>
                 </div>
               ) : (
-                <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-xl text-xs text-blue-800">
-                  <strong>Cash on Delivery (COD):</strong> Please keep cash ready at delivery time.
+                <div className="mb-6 p-4 bg-primary/5 border border-primary/20 rounded-xl text-xs text-foreground">
+                  <strong className="text-primary font-semibold">Cash on Delivery (COD):</strong> Please keep cash ready at delivery time.
                 </div>
               )}
 

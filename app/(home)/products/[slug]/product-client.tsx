@@ -154,7 +154,7 @@ function ReviewFormClient() {
       <button
         type="submit"
         disabled={isSubmitting}
-        className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+        className="bg-primary text-primary-foreground font-semibold px-5 py-2.5 rounded-xl hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 shadow-xs"
       >
         {isSubmitting && <LoadingSpinner size="sm" />}
         {isSubmitting ? 'Submitting...' : 'Submit Review'}
@@ -408,8 +408,8 @@ export default function ProductClient({
             <LoadingSpinner size="sm" />
           ) : (
             <Heart
-              className={`w-6 h-6 ${
-                inWishlist ? 'fill-blue-600 text-blue-600' : 'text-gray-400'
+              className={`w-6 h-6 transition-colors ${
+                inWishlist ? 'fill-rose-500 text-rose-500' : 'text-gray-400 hover:text-rose-500'
               }`}
             />
           )}
@@ -425,8 +425,8 @@ export default function ProductClient({
                 key={index}
                 onClick={() => setSelectedImage(index)}
                 className={`relative aspect-square bg-gray-100 rounded-lg overflow-hidden border-2 ${
-                  selectedImage === index ? 'border-blue-600' : 'border-transparent'
-                } hover:border-blue-400 transition-colors`}
+                  selectedImage === index ? 'border-primary shadow-xs' : 'border-transparent'
+                } hover:border-primary/50 transition-colors`}
               >
                 <Image
                   src={image}
@@ -466,7 +466,7 @@ export default function ProductClient({
 
         <div className="flex gap-3">
           <Button
-            className="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-lg py-3"
+            className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-lg py-3 rounded-xl shadow-xs transition-colors"
             onClick={handleAddToCart}
             disabled={product.stock === 0}
           >
@@ -476,17 +476,17 @@ export default function ProductClient({
           <Button 
             onClick={handleWishlist}
             disabled={wishlistLoading}
-            className="border border-gray-300 bg-white hover:bg-gray-50 text-gray-900 text-lg py-3"
+            className="border border-input bg-background hover:bg-secondary/60 text-foreground text-lg py-3 rounded-xl transition-colors"
           >
             {wishlistLoading ? (
               <LoadingSpinner size="sm" />
             ) : (
-              <Heart className={`w-5 h-5 ${inWishlist ? 'fill-blue-600 text-blue-600' : ''}`} />
+              <Heart className={`w-5 h-5 transition-colors ${inWishlist ? 'fill-rose-500 text-rose-500' : ''}`} />
             )}
           </Button>
           <Button 
             onClick={handleShare}
-            className="border border-gray-300 bg-white hover:bg-gray-50 text-gray-900 text-lg py-3"
+            className="border border-input bg-background hover:bg-secondary/60 text-foreground text-lg py-3 rounded-xl transition-colors"
           >
             <Share2 className="w-5 h-5" />
           </Button>
@@ -517,12 +517,12 @@ export default function ProductClient({
                       <CardTitle className="text-lg font-semibold mb-2 text-center line-clamp-2">
                         {relatedProduct.name}
                       </CardTitle>
-                      <div className="text-blue-600 font-bold text-xl mb-3">
+                      <div className="text-primary font-bold text-xl mb-3">
                         {formatPrice(relatedProduct.price)}
                       </div>
                       <Link
                         href={`/products/${relatedProduct.slug}`}
-                        className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors text-sm"
+                        className="bg-primary text-primary-foreground px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors text-sm font-medium"
                       >
                         View Product
                       </Link>

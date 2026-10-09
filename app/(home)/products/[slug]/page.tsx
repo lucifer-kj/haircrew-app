@@ -204,7 +204,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
           <div className="text-gray-600 text-lg mb-4">Product not found.</div>
           <Link 
             href="/products"
-            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+            className="bg-primary text-primary-foreground px-5 py-2.5 rounded-xl font-medium hover:bg-primary/90 transition-colors shadow-xs"
           >
             Back to Products
           </Link>
@@ -313,36 +313,36 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
       <div className="container mx-auto px-4 py-8">
         {/* Breadcrumb */}
         <nav className="mb-8" aria-label="Breadcrumb">
-          <ol className="flex items-center space-x-2 text-sm text-gray-600">
+          <ol className="flex items-center space-x-2 text-sm text-muted-foreground">
             <li>
-              <Link href="/" className="hover:text-blue-600">
+              <Link href="/" className="hover:text-primary transition-colors">
                 Home
               </Link>
             </li>
             <li>/</li>
             <li>
-              <Link href="/products" className="hover:text-blue-600">
+              <Link href="/products" className="hover:text-primary transition-colors">
                 Products
               </Link>
             </li>
             <li>/</li>
             <li>
               <Link
-                href={`/categories/${product.category.slug}`}
-                className="hover:text-blue-600"
+                href={`/categories`}
+                className="hover:text-primary transition-colors"
               >
-                {product.category.name}
+                {product.category?.name || 'Category'}
               </Link>
             </li>
             <li>/</li>
-            <li className="text-gray-900">{product.name}</li>
+            <li className="text-foreground font-medium truncate max-w-[200px] sm:max-w-xs">{product.name}</li>
           </ol>
         </nav>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16">
           {/* Image Gallery - Server-rendered */}
           <div className="space-y-4">
-            <div className="relative aspect-square bg-gray-100 rounded-lg overflow-hidden">
+            <div className="relative aspect-square bg-gray-100 rounded-2xl overflow-hidden border border-border shadow-xs">
               <Image
                 src={product.images[0] || '/Images/p1.jpg'}
                 alt={product.name || 'Product Image'}
@@ -357,7 +357,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                 {product.images.slice(1, 5).map((image: string, index: number) => (
                   <div
                     key={index}
-                    className="relative aspect-square bg-gray-100 rounded-lg overflow-hidden"
+                    className="relative aspect-square bg-gray-100 rounded-xl overflow-hidden border border-border/60"
                   >
                     <Image
                       src={image}
@@ -375,13 +375,14 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
           {/* Product Information - Server-rendered */}
           <div className="space-y-6">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">{product.name}</h1>
+              <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground tracking-tight mb-3">{product.name}</h1>
               <div className="flex items-center gap-4 mb-4">
                 <StarRating rating={averageRating} size="md" showValue={true} />
                 <Badge
                   variant={
                     product.stock > 10 ? 'default' : product.stock > 0 ? 'secondary' : 'destructive'
                   }
+                  className="rounded-full px-3 py-0.5 text-xs font-semibold"
                 >
                   {product.stock > 10 ? 'In Stock' : product.stock > 0 ? 'Low Stock' : 'Out of Stock'}
                 </Badge>
@@ -390,25 +391,24 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
 
             <div className="space-y-2">
               <div className="flex items-center gap-3">
-                <span className="text-3xl font-bold text-blue-600">
+                <span className="text-3xl sm:text-4xl font-black text-primary tracking-tight">
                   {formatPrice(product.price)}
                 </span>
                 {product.comparePrice && product.comparePrice > product.price && (
-                  <span className="text-lg text-gray-500 line-through">
+                  <span className="text-lg text-muted-foreground line-through">
                     {formatPrice(product.comparePrice)}
                   </span>
                 )}
               </div>
               {product.comparePrice && product.comparePrice > product.price && (
-                <Badge variant="secondary" className="w-fit">
-                  {Math.round(((product.comparePrice - product.price) / product.comparePrice) * 100)}
-                  % OFF
+                <Badge variant="secondary" className="w-fit bg-primary/10 text-primary border-primary/20">
+                  {Math.round(((product.comparePrice - product.price) / product.comparePrice) * 100)}% OFF
                 </Badge>
               )}
             </div>
 
             <div className="prose max-w-none">
-              <p className="text-gray-700 leading-relaxed">{product.description}</p>
+              <p className="text-muted-foreground leading-relaxed">{product.description}</p>
             </div>
 
             {/* Interactive components moved to client component */}
@@ -423,13 +423,13 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         {/* Reviews Section - Server-rendered structure */}
         <div className="mb-16">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold">Customer Reviews</h2>
+            <h2 className="text-2xl font-bold tracking-tight">Customer Reviews</h2>
             {reviews.length > 0 && (
               <div className="flex items-center gap-4">
                 <div className="flex items-center">
-                  <span className="text-2xl font-bold mr-2">{averageRating.toFixed(1)}</span>
+                  <span className="text-2xl font-bold mr-2 text-foreground">{averageRating.toFixed(1)}</span>
                   <StarRating rating={averageRating} size="md" />
-                  <span className="ml-2 text-sm text-gray-600">({reviews.length} reviews)</span>
+                  <span className="ml-2 text-sm text-muted-foreground">({reviews.length} reviews)</span>
                 </div>
               </div>
             )}
@@ -447,27 +447,27 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         {/* Related Products - Server-rendered */}
         {relatedProducts.length > 0 && (
           <div>
-            <h2 className="text-2xl font-bold mb-6">Related Products</h2>
+            <h2 className="text-2xl font-bold tracking-tight mb-6">Related Products</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {relatedProducts.slice(0, 4).map((relatedProduct) => (
-                <div key={relatedProduct.id} className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow p-4">
+                <div key={relatedProduct.id} className="bg-card border border-border/60 rounded-2xl shadow-xs hover:shadow-md transition-all p-4 group">
                   <Link href={`/products/${relatedProduct.slug}`}>
-                    <div className="relative aspect-square bg-gray-100 rounded-lg overflow-hidden mb-4">
+                    <div className="relative aspect-square bg-muted/40 rounded-xl overflow-hidden mb-4">
                       <Image
                         src={relatedProduct.images[0] || '/Images/p1.jpg'}
                         alt={relatedProduct.name}
                         fill
-                        className="object-cover"
+                        className="object-cover group-hover:scale-105 transition-transform duration-300"
                         sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 25vw"
                       />
                     </div>
-                    <h3 className="text-lg font-semibold mb-2 text-center">
+                    <h3 className="text-base font-semibold mb-1 text-center line-clamp-1 group-hover:text-primary transition-colors">
                       {relatedProduct.name}
                     </h3>
-                    <div className="text-blue-600 font-bold text-xl mb-2 text-center">
+                    <div className="text-primary font-bold text-lg mb-3 text-center">
                       {formatPrice(relatedProduct.price)}
                     </div>
-                    <div className="text-blue-600 underline mt-2 text-center hover:text-blue-800">
+                    <div className="text-xs font-semibold text-center text-primary py-2 px-3 rounded-lg bg-primary/10 group-hover:bg-primary group-hover:text-primary-foreground transition-all">
                       View Product
                     </div>
                   </Link>

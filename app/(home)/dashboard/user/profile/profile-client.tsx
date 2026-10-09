@@ -97,8 +97,8 @@ export default function ProfileClient({ user, stats }: ProfileClientProps) {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <GlassCard className="text-center">
             <div className="flex flex-col items-center">
-              <div className="p-3 rounded-full bg-blue-500/10 mb-3">
-                <User className="h-6 w-6 text-blue-500" />
+              <div className="p-3 rounded-full bg-primary/10 mb-3">
+                <User className="h-6 w-6 text-primary" />
               </div>
               <p className="text-3xl font-bold text-slate-800">
                 {stats.ordersCount}

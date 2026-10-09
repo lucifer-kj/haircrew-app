@@ -81,13 +81,13 @@ export default function AhmedabadPage() {
             </div>
           </div>
           
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
-            <h3 className="font-semibold text-blue-900 mb-2">Ready to Transform Your Hair?</h3>
-            <p className="text-blue-800 mb-4">
+          <div className="bg-primary/5 border border-primary/20 rounded-2xl p-6 md:p-8">
+            <h3 className="font-bold text-xl text-foreground mb-2">Ready to Transform Your Hair?</h3>
+            <p className="text-muted-foreground mb-6 max-w-xl">
               Explore our complete range of professional hair care products and experience salon-quality results at home in Ahmedabad.
             </p>
             <Link href="/products" 
-              className="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
+              className="inline-flex items-center justify-center bg-primary text-primary-foreground font-semibold px-6 py-3 rounded-xl hover:bg-primary/90 transition-colors shadow-xs"
             >
               Shop Now
             </Link>

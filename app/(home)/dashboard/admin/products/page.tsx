@@ -408,7 +408,7 @@ export default function AdminProductsPage() {
                 <p className="text-sm font-medium text-gray-600">Total Products</p>
                 <p className="text-2xl font-bold">{products.length}</p>
               </div>
-              <Package className="w-8 h-8 text-blue-500" />
+              <Package className="w-8 h-8 text-primary" />
             </div>
           </CardContent>
         </Card>
@@ -461,7 +461,7 @@ export default function AdminProductsPage() {
               onClick={() => setActiveTab('products')}
               className={`flex-1 px-6 py-3 text-sm font-medium border-b-2 transition-colors ${
                 activeTab === 'products'
-                  ? 'border-blue-500 text-blue-600'
+                  ? 'border-primary text-primary font-bold'
                   : 'border-transparent text-gray-500 hover:text-gray-700'
               }`}
             >
@@ -471,7 +471,7 @@ export default function AdminProductsPage() {
               onClick={() => setActiveTab('categories')}
               className={`flex-1 px-6 py-3 text-sm font-medium border-b-2 transition-colors ${
                 activeTab === 'categories'
-                  ? 'border-blue-500 text-blue-600'
+                  ? 'border-primary text-primary font-bold'
                   : 'border-transparent text-gray-500 hover:text-gray-700'
               }`}
             >
@@ -501,7 +501,7 @@ export default function AdminProductsPage() {
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
               >
                 <option value="">All Status</option>
                 {activeTab === 'products' ? (
@@ -523,7 +523,7 @@ export default function AdminProductsPage() {
                 <select
                   value={categoryFilter}
                   onChange={(e) => setCategoryFilter(e.target.value)}
-                  className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                 >
                   <option value="">All Categories</option>
                   {categories.map(category => (
@@ -539,7 +539,7 @@ export default function AdminProductsPage() {
                 <select
                   value={stockFilter}
                   onChange={(e) => setStockFilter(e.target.value)}
-                  className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                 >
                   <option value="">All Stock</option>
                   <option value="in-stock">In Stock</option>
@@ -579,9 +579,9 @@ export default function AdminProductsPage() {
 
           {/* Bulk Actions */}
           {activeTab === 'products' && selectedProducts.size > 0 && (
-            <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+            <div className="mt-4 p-4 bg-primary/5 rounded-xl border border-primary/20">
               <div className="flex items-center justify-between">
-                <p className="text-sm font-medium text-blue-800">
+                <p className="text-sm font-semibold text-primary">
                   {selectedProducts.size} product(s) selected
                 </p>
                 <div className="flex gap-2">
@@ -627,9 +627,9 @@ export default function AdminProductsPage() {
           )}
 
           {activeTab === 'categories' && selectedCategories.size > 0 && (
-            <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+            <div className="mt-4 p-4 bg-primary/5 rounded-xl border border-primary/20">
               <div className="flex items-center justify-between">
-                <p className="text-sm font-medium text-blue-800">
+                <p className="text-sm font-semibold text-primary">
                   {selectedCategories.size} category(s) selected
                 </p>
                 <div className="flex gap-2">
@@ -674,7 +674,7 @@ export default function AdminProductsPage() {
                         className="flex items-center"
                       >
                         {selectedProducts.size === filteredProducts.length ? (
-                          <Check className="w-4 h-4 text-blue-600" />
+                          <Check className="w-4 h-4 text-primary" />
                         ) : (
                           <Square className="w-4 h-4 text-gray-400" />
                         )}
@@ -686,7 +686,7 @@ export default function AdminProductsPage() {
                           setSortBy('name')
                           setSortDir(sortDir === 'asc' ? 'desc' : 'asc')
                         }}
-                        className="flex items-center gap-1 hover:text-blue-600 transition-colors"
+                        className="flex items-center gap-1 hover:text-primary transition-colors"
                       >
                         Name
                         {sortBy === 'name' && (
@@ -701,7 +701,7 @@ export default function AdminProductsPage() {
                           setSortBy('price')
                           setSortDir(sortDir === 'asc' ? 'desc' : 'asc')
                         }}
-                        className="flex items-center gap-1 hover:text-blue-600 transition-colors"
+                        className="flex items-center gap-1 hover:text-primary transition-colors"
                       >
                         Price
                         {sortBy === 'price' && (
@@ -715,7 +715,7 @@ export default function AdminProductsPage() {
                           setSortBy('stock')
                           setSortDir(sortDir === 'asc' ? 'desc' : 'asc')
                         }}
-                        className="flex items-center gap-1 hover:text-blue-600 transition-colors"
+                        className="flex items-center gap-1 hover:text-primary transition-colors"
                       >
                         Stock
                         {sortBy === 'stock' && (
@@ -738,7 +738,7 @@ export default function AdminProductsPage() {
                           className="flex items-center min-h-touch min-w-touch"
                         >
                           {selectedProducts.has(product.id) ? (
-                            <Check className="w-4 h-4 text-blue-600" />
+                            <Check className="w-4 h-4 text-primary" />
                           ) : (
                             <Square className="w-4 h-4 text-gray-400" />
                           )}
@@ -854,7 +854,7 @@ export default function AdminProductsPage() {
                         className="flex items-center"
                       >
                         {selectedCategories.size === filteredCategories.length ? (
-                          <Check className="w-4 h-4 text-blue-600" />
+                          <Check className="w-4 h-4 text-primary" />
                         ) : (
                           <Square className="w-4 h-4 text-gray-400" />
                         )}
@@ -877,7 +877,7 @@ export default function AdminProductsPage() {
                           className="flex items-center min-h-touch min-w-touch"
                         >
                           {selectedCategories.has(category.id) ? (
-                            <Check className="w-4 h-4 text-blue-600" />
+                            <Check className="w-4 h-4 text-primary" />
                           ) : (
                             <Square className="w-4 h-4 text-gray-400" />
                           )}

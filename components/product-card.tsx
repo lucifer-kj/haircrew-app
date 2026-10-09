@@ -214,3 +214,21 @@ export default function ProductCard({
     </motion.div>
   )
 }
+
+export function ProductCardSkeleton() {
+  return (
+    <div className="bg-card border border-border/70 rounded-2xl overflow-hidden flex flex-col h-full animate-pulse shadow-xs">
+      <div className="w-full aspect-square bg-muted/60" />
+      <div className="flex flex-col flex-1 p-4 space-y-3">
+        <div className="h-4 bg-muted/70 rounded-md w-3/4" />
+        <div className="h-3 bg-muted/50 rounded-md w-1/2" />
+        <div className="flex justify-between items-center pt-1">
+          <div className="h-3 bg-muted/40 rounded w-20" />
+          <div className="h-4 bg-muted/50 rounded-full w-16" />
+        </div>
+        <div className="h-6 bg-muted/70 rounded-md w-24" />
+        <div className="h-10 bg-muted/60 rounded-xl w-full mt-auto" />
+      </div>
+    </div>
+  )
+}

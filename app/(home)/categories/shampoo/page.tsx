@@ -41,7 +41,7 @@ function ShampooCategoryPageInner() {
   return (
     <div className="container mx-auto py-12">
       <h1 className="text-3xl font-bold mb-4">Shampoo Category</h1>
-      {type && <div className="mb-4 text-blue-700">Type: <strong>{type}</strong></div>}
+      {type && <div className="mb-4 text-primary font-medium">Type: <strong>{type}</strong></div>}
       {loading ? (
         <div className="py-12 text-center">
           <LoadingSpinner size="lg" className="mx-auto mb-4" />

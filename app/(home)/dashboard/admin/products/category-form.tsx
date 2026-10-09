@@ -220,7 +220,7 @@ export default function CategoryForm({ onClose, onSuccess, initialData }: Catego
             <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
               <ImageIcon className="w-8 h-8 text-gray-400 mx-auto mb-2" />
               <Label htmlFor="image-upload" className="cursor-pointer">
-                <span className="text-blue-600 hover:text-blue-700">Upload an image</span>
+                <span className="text-primary hover:text-primary/80 font-semibold">Upload an image</span>
                 <span className="text-gray-500"> or drag and drop</span>
               </Label>
               <p className="text-xs text-gray-500 mt-1">PNG, JPG up to 5MB</p>

@@ -315,7 +315,7 @@ export default function AdminOrdersClient({
             variant="default"
             onClick={() => updateOrderStatus(order.id, 'PROCESSING')}
             disabled={isUpdating === order.id}
-            className="bg-blue-600 hover:bg-blue-700"
+            className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold"
           >
             {isUpdating === order.id ? (
               <Loader2 className="w-3 h-3 animate-spin" />
@@ -494,7 +494,7 @@ export default function AdminOrdersClient({
                 <p className="text-sm font-medium text-gray-600">Total Orders</p>
                 <p className="text-2xl font-bold">{orders.length}</p>
               </div>
-              <Package className="w-8 h-8 text-blue-500" />
+              <Package className="w-8 h-8 text-primary" />
             </div>
           </CardContent>
         </Card>
@@ -559,7 +559,7 @@ export default function AdminOrdersClient({
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
               >
                 <option value="">All Statuses</option>
                 <option value="AWAITING_VERIFICATION">
@@ -576,7 +576,7 @@ export default function AdminOrdersClient({
               <select
                 value={dateFilter}
                 onChange={(e) => setDateFilter(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
               >
                 <option value="all">All Time</option>
                 <option value="today">Today</option>
@@ -609,9 +609,9 @@ export default function AdminOrdersClient({
 
           {/* Bulk Actions */}
           {selectedOrders.size > 0 && (
-            <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+            <div className="mt-4 p-4 bg-primary/5 rounded-xl border border-primary/20">
               <div className="flex items-center justify-between">
-                <p className="text-sm font-medium text-blue-800">
+                <p className="text-sm font-semibold text-primary">
                   {selectedOrders.size} order(s) selected
                 </p>
                 <div className="flex gap-2">
@@ -671,7 +671,7 @@ export default function AdminOrdersClient({
                       className="flex items-center"
                     >
                       {selectedOrders.size === filteredOrders.length ? (
-                        <Check className="w-4 h-4 text-blue-600" />
+                        <Check className="w-4 h-4 text-primary" />
                       ) : (
                         <Square className="w-4 h-4 text-gray-400" />
                       )}
@@ -683,7 +683,7 @@ export default function AdminOrdersClient({
                         setSortBy('date')
                         setSortDir(sortDir === 'asc' ? 'desc' : 'asc')
                       }}
-                      className="flex items-center gap-1 hover:text-blue-600 transition-colors"
+                      className="flex items-center gap-1 hover:text-primary transition-colors"
                     >
                       Date
                       {sortBy === 'date' && (
@@ -698,7 +698,7 @@ export default function AdminOrdersClient({
                         setSortBy('customer')
                         setSortDir(sortDir === 'asc' ? 'desc' : 'asc')
                       }}
-                      className="flex items-center gap-1 hover:text-blue-600 transition-colors"
+                      className="flex items-center gap-1 hover:text-primary transition-colors"
                     >
                       Customer
                       {sortBy === 'customer' && (
@@ -712,7 +712,7 @@ export default function AdminOrdersClient({
                         setSortBy('total')
                         setSortDir(sortDir === 'asc' ? 'desc' : 'asc')
                       }}
-                      className="flex items-center gap-1 hover:text-blue-600 transition-colors"
+                      className="flex items-center gap-1 hover:text-primary transition-colors"
                     >
                       Total
                       {sortBy === 'total' && (
@@ -726,7 +726,7 @@ export default function AdminOrdersClient({
                         setSortBy('status')
                         setSortDir(sortDir === 'asc' ? 'desc' : 'asc')
                       }}
-                      className="flex items-center gap-1 hover:text-blue-600 transition-colors"
+                      className="flex items-center gap-1 hover:text-primary transition-colors"
                     >
                       Status
                       {sortBy === 'status' && (
@@ -749,7 +749,7 @@ export default function AdminOrdersClient({
                         className="flex items-center"
                       >
                         {selectedOrders.has(order.id) ? (
-                          <Check className="w-4 h-4 text-blue-600" />
+                          <Check className="w-4 h-4 text-primary" />
                         ) : (
                           <Square className="w-4 h-4 text-gray-400" />
                         )}

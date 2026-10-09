@@ -138,20 +138,29 @@ export function Header() {
       sub: ['Anti-Dandruff', 'Volumizing', 'Color Protect'],
     },
     {
-      name: 'Conditioners',
-      slug: 'conditioners',
+      name: 'Conditioner',
+      slug: 'conditioner',
       sub: ['Moisturizing', 'Leave-In', 'Repair'],
     },
     {
-      name: 'Treatments',
-      slug: 'treatments',
-      sub: ['Hair Masks', 'Serums', 'Oils'],
+      name: 'Treatment',
+      slug: 'treatment',
+      sub: ['Damage Repair', 'Scalp Care', 'Keratin'],
     },
-    { name: 'Styling', slug: 'styling', sub: ['Gels', 'Sprays', 'Creams'] },
     {
-      name: 'Accessories',
-      slug: 'accessories',
-      sub: ['Combs', 'Brushes', 'Clips'],
+      name: 'Mask',
+      slug: 'mask-1755942963420',
+      sub: ['Deep Moisture', 'Fiber Restore', 'Nourishing'],
+    },
+    {
+      name: 'Serum',
+      slug: 'serum-1755943467003',
+      sub: ['Frizz Defense', 'Gloss Shine', 'Heat Protect'],
+    },
+    {
+      name: 'Salon SPA',
+      slug: 'spa-1755943477185',
+      sub: ['Scalp Detox', 'Revitalization', 'Nourish'],
     },
   ]
 
@@ -438,8 +447,8 @@ export function Header() {
                             {cat.sub.map(sub => (
                               <Link
                                 key={sub}
-                                href={`/categories/${cat.slug}?type=${encodeURIComponent(sub)}`}
-                                className="block py-1.5 text-gray-600 hover:text-secondary transition-colors"
+                                href={`/products?category=${cat.slug}&search=${encodeURIComponent(sub)}`}
+                                className="block py-1.5 text-muted-foreground hover:text-primary transition-colors text-sm"
                                 onClick={() => setMobileNavOpen(false)}
                               >
                                 {sub}

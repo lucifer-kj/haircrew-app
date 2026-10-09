@@ -88,12 +88,12 @@ export default function AdminAnalyticsPage() {
   // Metrics data
   const metrics = data ? [
     { label: 'Total Revenue', value: formatCurrency(data.metrics.totalRevenue), icon: <DollarSign className="w-6 h-6 text-green-600" /> },
-    { label: 'Total Orders', value: data.metrics.totalOrders.toString(), icon: <ShoppingBag className="w-6 h-6 text-blue-600" /> },
+    { label: 'Total Orders', value: data.metrics.totalOrders.toString(), icon: <ShoppingBag className="w-6 h-6 text-primary" /> },
     { label: 'Total Customers', value: data.metrics.totalCustomers.toString(), icon: <Users className="w-6 h-6 text-purple-600" /> },
     { label: 'Avg. Order Value', value: formatCurrency(data.metrics.avgOrderValue), icon: <TrendingUp className="w-6 h-6 text-orange-600" /> },
   ] : [
     { label: 'Total Revenue', value: '₹0', icon: <DollarSign className="w-6 h-6 text-green-600" /> },
-    { label: 'Total Orders', value: '0', icon: <ShoppingBag className="w-6 h-6 text-blue-600" /> },
+    { label: 'Total Orders', value: '0', icon: <ShoppingBag className="w-6 h-6 text-primary" /> },
     { label: 'Total Customers', value: '0', icon: <Users className="w-6 h-6 text-purple-600" /> },
     { label: 'Avg. Order Value', value: '₹0', icon: <TrendingUp className="w-6 h-6 text-orange-600" /> },
   ]
@@ -139,7 +139,7 @@ export default function AdminAnalyticsPage() {
             <select
               value={dateRange}
               onChange={e => setDateRange(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
             >
               <option value="today">Today</option>
               <option value="last7">Last 7 days</option>
@@ -321,10 +321,10 @@ export default function AdminAnalyticsPage() {
                   <SwipeableCard>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 rounded-full bg-blue-500" />
+                        <div className="w-3 h-3 rounded-full bg-primary" />
                         <span className="text-sm font-medium">Returning Customers</span>
                       </div>
-                      <span className="text-lg font-bold text-blue-600">
+                      <span className="text-lg font-bold text-primary">
                         {data.charts.customerAcquisition.returningCustomers}
                       </span>
                     </div>

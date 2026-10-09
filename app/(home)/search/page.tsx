@@ -94,16 +94,16 @@ function SearchPageInner() {
         )}
       </form>
       {search && (
-        <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg max-w-md mx-auto">
+        <div className="mb-6 p-4 bg-primary/5 border border-primary/20 rounded-xl max-w-md mx-auto">
           <div className="flex items-center justify-between">
-            <span className="text-sm text-blue-800">
+            <span className="text-sm text-foreground">
               Showing results for: <strong>&quot;{search}&quot;</strong>
             </span>
             <Button
               variant="ghost"
               size="sm"
               onClick={clearSearch}
-              className="text-blue-600 hover:text-blue-800"
+              className="text-primary hover:text-primary/80 font-medium"
             >
               Clear search
             </Button>
@@ -113,14 +113,14 @@ function SearchPageInner() {
       {loading ? (
         <div className="py-12 text-center">
           <LoadingSpinner size="lg" className="mx-auto mb-4" />
-          <p className="text-gray-600">Loading products...</p>
+          <p className="text-muted-foreground">Loading products...</p>
         </div>
       ) : error ? (
         <div className="py-12 text-center">
-          <div className="text-red-600 mb-4">{error}</div>
+          <div className="text-destructive mb-4">{error}</div>
           <Button
             onClick={() => window.location.reload()}
-            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+            className="px-5 py-2.5 bg-primary text-primary-foreground rounded-xl hover:bg-primary/90 font-medium"
           >
             Try Again
           </Button>

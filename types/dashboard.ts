@@ -14,11 +14,15 @@ export type PaginationParams = {
 export type PrismaOrder = {
   id: string
   orderNumber: string
-  userId: string
+  userId: string | null
+  guestEmail?: string | null
+  guestName?: string | null
   total: Decimal
   status: string
   paymentStatus: string
-  paymentMethod: string | null // Match Prisma's generated type
+  paymentMethod: string | null
+  paymentReference?: string | null
+  paymentReceiptUrl?: string | null
   createdAt: Date
   updatedAt: Date
   orderItems: PrismaOrderItem[]
@@ -28,7 +32,7 @@ export type PrismaOrder = {
 export type PrismaPaymentOrder = {
   id: string
   orderNumber: string
-  userId: string
+  userId: string | null
   total: Decimal
   status: string
   paymentStatus: string
@@ -72,11 +76,15 @@ export type PrismaReview = {
 export type Order = {
   id: string
   orderNumber: string
-  userId: string
+  userId: string | null
+  guestEmail?: string | null
+  guestName?: string | null
   total: string
   status: string
   paymentStatus: string
-  paymentMethod?: string // Optional string (undefined)
+  paymentMethod?: string
+  paymentReference?: string | null
+  paymentReceiptUrl?: string | null
   createdAt: string
   updatedAt: string
   orderItems: OrderItem[]
@@ -86,7 +94,7 @@ export type Order = {
 export type PaymentOrder = {
   id: string
   orderNumber: string
-  userId: string
+  userId: string | null
   total: string
   status: string
   paymentStatus: string
@@ -130,10 +138,14 @@ export function serializeOrder(order: PrismaOrder): Order {
     id: order.id,
     orderNumber: order.orderNumber,
     userId: order.userId,
+    guestEmail: order.guestEmail,
+    guestName: order.guestName,
     total: order.total.toString(),
     status: order.status,
     paymentStatus: order.paymentStatus,
-    paymentMethod: order.paymentMethod ?? undefined, // Convert null to undefined
+    paymentMethod: order.paymentMethod ?? undefined,
+    paymentReference: order.paymentReference,
+    paymentReceiptUrl: order.paymentReceiptUrl,
     createdAt: order.createdAt.toISOString(),
     updatedAt: order.updatedAt.toISOString(),
     orderItems: order.orderItems.map(serializeOrderItem),
@@ -218,7 +230,9 @@ export type PrismaRecentOrder = {
   user: {
     name: string | null
     email: string
-  }
+  } | null
+  guestName?: string | null
+  guestEmail?: string | null
 }
 
 export type PrismaLowStockProduct = {
@@ -251,7 +265,7 @@ export function serializeRecentOrder(order: PrismaRecentOrder): RecentOrder {
   return {
     id: order.id,
     orderNumber: order.orderNumber,
-    customer: order.user.name || order.user.email || 'Unknown',
+    customer: order.user?.name || order.user?.email || order.guestName || order.guestEmail || 'Guest Customer',
     total: Number(order.total.toString()),
     status: order.status,
     date: format(order.createdAt, 'yyyy-MM-dd'),

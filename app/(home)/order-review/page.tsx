@@ -6,17 +6,19 @@ import { useCartStore } from '@/store/cart-store'
 import { Button } from '@/components/ui/button'
 import QRCode from 'qrcode'
 import Image from 'next/image'
-import { useSession, signIn } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 import { Card } from '@/components/ui/card'
 import { toast } from 'sonner'
-import { AccessibleErrorMessage } from '@/components/ui/accessibility'
-import { z } from 'zod'
+import { UploadButton } from '@uploadthing/react'
+import type { OurFileRouter } from '@/lib/uploadthing'
+import { CheckCircle2, QrCode, Smartphone, ShieldCheck, AlertCircle, UploadCloud } from 'lucide-react'
 
-const UPI_ID = '9718707211@ybl'
-const UPI_NAME = 'Shah Faisal'
+const STORE_UPI_ID = process.env.NEXT_PUBLIC_STORE_UPI_ID || '9718707211@ybl'
+const STORE_UPI_NAME = process.env.NEXT_PUBLIC_STORE_UPI_NAME || 'HairCrew'
 
 interface ShippingInfo {
   name: string
+  email: string
   phone: string
   address: string
   city: string
@@ -27,373 +29,391 @@ interface ShippingInfo {
 
 export default function OrderReviewPage() {
   const router = useRouter()
-  const { data: session, status } = useSession()
-  const { items, getTotal } = useCartStore()
-  const [cartError, setCartError] = useState('')
+  const { data: session } = useSession()
+  const { items, getTotal, clearCart } = useCartStore()
+
   const [shipping, setShipping] = useState<ShippingInfo | null>(null)
-  const [paymentMethod, setPaymentMethod] = useState<'COD' | 'UPI'>('COD')
+  const [paymentMethod, setPaymentMethod] = useState<'UPI' | 'COD'>('UPI')
   const [upiQR, setUpiQR] = useState<string>('')
   const [upiString, setUpiString] = useState<string>('')
+  const [utrNumber, setUtrNumber] = useState<string>('')
+  const [receiptUrl, setReceiptUrl] = useState<string>('')
   const [isPlacing, setIsPlacing] = useState(false)
-  const [step, setStep] = useState<'review' | 'upi' | 'confirmation'>('review')
-  const [, setShowModal] = useState(false)
-  const [, setShowModalOrderId] = useState<string>('')
-  const modalTimeout = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [error, setError] = useState<string>('')
-  const CheckoutSchema = z.object({
-    name: z.string().min(2, 'Name is required.'),
-    phone: z.string().min(10, 'Phone is required.'),
-    address: z.string().min(5, 'Address is required.'),
-    city: z.string().min(2, 'City is required.'),
-    state: z.string().min(2, 'State is required.'),
-    pincode: z.string().min(4, 'Pincode is required.'),
-    country: z.string().min(2, 'Country is required.'),
-    paymentMethod: z.enum(['COD', 'UPI'], { required_error: 'Payment method is required.' }),
-  })
-  const [fieldErrors, setFieldErrors] = useState<{ [key: string]: string }>({})
 
+  const subtotal = getTotal()
+  const shippingFee = subtotal >= 1000 ? 0 : 50
+  const total = subtotal + shippingFee
+
+  // Load shipping details from session storage
   useEffect(() => {
     const data = sessionStorage.getItem('checkout_shipping')
-    if (data) setShipping(JSON.parse(data))
-    else router.replace('/checkout')
+    if (data) {
+      setShipping(JSON.parse(data))
+    } else {
+      router.replace('/checkout')
+    }
   }, [router])
 
+  // Redirect if cart is empty
   useEffect(() => {
-    // Cart validation
     if (!items || items.length === 0) {
-      setCartError('Your cart is empty. Please add items before proceeding.')
-      setTimeout(() => router.replace('/products'), 2000)
-      return
-    }
-    if (items.some(item => item.quantity <= 0)) {
-      setCartError('Cart contains invalid item quantities.')
-      setTimeout(() => router.replace('/products'), 2000)
-      return
+      router.replace('/products')
     }
   }, [items, router])
 
-  // UPI QR Code - Bookmark this part
+  // Generate UPI Intent and QR code with exact order amount
   useEffect(() => {
-    if (paymentMethod === 'UPI') {
-      const upi = `upi://pay?pa=${UPI_ID}&pn=${encodeURIComponent(UPI_NAME)}&am=${getTotal()}&cu=INR`
+    if (total > 0) {
+      const upi = `upi://pay?pa=${STORE_UPI_ID}&pn=${encodeURIComponent(STORE_UPI_NAME)}&am=${total.toFixed(2)}&cu=INR&tn=HairCrewOrder`
       setUpiString(upi)
-      QRCode.toDataURL(upi).then(setUpiQR)
+      QRCode.toDataURL(upi, { width: 256, margin: 2 }).then(setUpiQR)
     }
-  }, [paymentMethod, getTotal])
+  }, [total])
 
-  // COD: Place order immediately
   const handlePlaceOrder = async () => {
-    setIsPlacing(true)
+    if (!shipping) return
     setError('')
-    setFieldErrors({})
-    const shippingData = shipping || {}
-    const result = CheckoutSchema.safeParse({ ...shippingData, paymentMethod })
-    if (!result.success) {
-      const errors: { [key: string]: string } = {}
-      result.error.errors.forEach(err => {
-        if (err.path[0]) errors[err.path[0]] = err.message
-      })
-      setFieldErrors(errors)
-      setIsPlacing(false)
-      return
-    }
-    const orderData = {
-      method: paymentMethod,
-      status: 'pending',
-      items,
-      amount: getTotal(),
-      shipping,
-      createdAt: new Date().toISOString(),
-    }
-    const res = await fetch('/api/order', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(orderData),
-      credentials: 'include',
-    })
-    const data = await res.json()
-    setIsPlacing(false)
-    if (res.ok) {
-      toast.success('Order placed successfully!')
-      setShowModalOrderId(data.id)
-      setShowModal(true)
-      if (modalTimeout.current) clearTimeout(modalTimeout.current)
-      modalTimeout.current = setTimeout(() => {
-        setShowModal(false)
-        router.push(`/order-received/${data.id}`)
-      }, 2500)
-    } else if (res.status === 401) {
-      setError('You must be signed in to place an order. Please sign in and try again.')
-      toast.error('Authentication required. Please sign in to continue.')
-    } else {
-      setError(data.error || 'An error occurred while placing your order. Please try again or contact support.')
-      toast.error(data.error || 'Order placement failed. Please try again.')
-    }
-  }
 
-  // UPI: Only create order after payment confirmation
-  const handleProceedToPayment = () => {
-    setStep('upi')
-  }
+    // Validate UPI requirements
+    if (paymentMethod === 'UPI') {
+      const cleanUtr = utrNumber.trim()
+      if (!cleanUtr) {
+        setError('Please enter the 12-digit UPI Reference Number (UTR) from your payment app.')
+        return
+      }
+      if (cleanUtr.length < 8) {
+        setError('Please enter a valid UPI Transaction / Reference Number (usually 12 digits).')
+        return
+      }
+    }
 
-  const handlePaid = async () => {
     setIsPlacing(true)
-    setError('')
-    // Create order with payment_pending_confirmation
-    const orderData = {
-      method: paymentMethod,
-      status: 'payment_pending_confirmation',
-      items,
-      amount: getTotal(),
-      shipping,
-      createdAt: new Date().toISOString(),
-    }
-    const res = await fetch('/api/order', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(orderData),
-      credentials: 'include',
-    })
-    const data = await res.json()
-    if (res.ok) {
-      // Immediately mark as PAID to trigger admin notification
-      await fetch('/api/order/status', {
+
+    try {
+      const orderData = {
+        method: paymentMethod,
+        items: items.map(item => ({
+          id: item.id,
+          name: item.name,
+          quantity: item.quantity,
+        })),
+        shipping: {
+          name: shipping.name,
+          phone: shipping.phone,
+          address: shipping.address,
+          city: shipping.city,
+          state: shipping.state,
+          pincode: shipping.pincode,
+          country: shipping.country || 'India',
+        },
+        guestEmail: !session?.user ? shipping.email : undefined,
+        guestName: !session?.user ? shipping.name : undefined,
+        guestPhone: !session?.user ? shipping.phone : undefined,
+        paymentReference: paymentMethod === 'UPI' ? utrNumber.trim() : undefined,
+        paymentReceiptUrl: paymentMethod === 'UPI' && receiptUrl ? receiptUrl : undefined,
+      }
+
+      const res = await fetch('/api/order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ orderId: data.id, newStatus: 'PAID' }),
+        body: JSON.stringify(orderData),
         credentials: 'include',
       })
-    }
-    setIsPlacing(false)
-    if (res.ok) {
-      toast.success('Payment confirmed! Order placed successfully!')
-      setShowModalOrderId(data.id)
-      setShowModal(true)
-      if (modalTimeout.current) clearTimeout(modalTimeout.current)
-      modalTimeout.current = setTimeout(() => {
-        setShowModal(false)
+
+      const data = await res.json()
+      setIsPlacing(false)
+
+      if (res.ok) {
+        toast.success('Order placed successfully!')
+        clearCart()
+        sessionStorage.removeItem('checkout_shipping')
         router.push(`/order-received/${data.id}`)
-      }, 2500)
-    } else if (res.status === 401) {
-      setError(
-        'You must be signed in to place an order. Please sign in and try again.'
-      )
-      toast.error('Authentication required')
-    } else {
-      setError(data.error || 'Failed to place order')
-      toast.error(data.error || 'Failed to place order')
+      } else {
+        setError(data.error || 'Failed to place order. Please try again.')
+        toast.error(data.error || 'Order placement failed')
+      }
+    } catch {
+      setIsPlacing(false)
+      setError('Network error. Please verify your connection and try again.')
     }
   }
 
-  // Conditional rendering logic
-  let content = null
-  if (cartError) {
-    content = (
-      <div className="container mx-auto px-4 py-12 max-w-md text-center">
-        <h2 className="text-xl font-bold mb-4">Cart Error</h2>
-        <p className="mb-6 text-red-500">{cartError}</p>
-      </div>
-    )
-  } else if (!shipping || items.length === 0) {
-    content = null
-  } else if (status === 'loading') {
-    content = <div className="text-center py-12">Checking authentication...</div>
-  } else if (!session) {
-    content = (
-      <div className="container mx-auto px-4 py-12 max-w-md text-center">
-        <h2 className="text-xl font-bold mb-4">Sign in required</h2>
-        <p className="mb-6">You must be signed in to place an order.</p>
-        <Button onClick={() => signIn()}>Sign In</Button>
-      </div>
-    )
-  } else {
-    content = (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100 py-12">
-        <Card className="w-full max-w-4xl mx-auto p-0 flex flex-col md:flex-row gap-0 shadow-xl border-0">
-          {/* Left: Shipping & Payment */}
-          <div className="flex-1 p-8 bg-white rounded-l-xl">
-            {/* Stepper */}
-            <div className="flex items-center justify-center mb-8">
-              <div className="flex items-center gap-4">
-                <div className="flex flex-col items-center">
-                  <div className="w-8 h-8 rounded-full bg-orange-500 text-white flex items-center justify-center font-bold">
-                    1
-                  </div>
-                  <span className="text-xs mt-1 font-medium text-orange-600">
-                    Billing Address
-                  </span>
-                </div>
-                <div className="w-8 h-0.5 bg-orange-500" />
-                <div className="flex flex-col items-center">
-                  <div className="w-8 h-8 rounded-full bg-orange-500 text-white flex items-center justify-center font-bold">
-                    2
-                  </div>
-                  <span className="text-xs mt-1 font-medium text-orange-600">
-                    Review & Payment
-                  </span>
-                </div>
-                <div className="w-8 h-0.5 bg-gray-300" />
-                <div className="flex flex-col items-center">
-                  <div className="w-8 h-8 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center font-bold">
-                    3
-                  </div>
-                  <span className="text-xs mt-1 font-medium text-gray-400">
-                    Confirmation
-                  </span>
-                </div>
-              </div>
-            </div>
-            <h1 className="text-2xl font-bold mb-6 text-center">Order Review</h1>
-            {/* Shipping Info */}
-            <div className="mb-6 p-4 bg-gray-50 rounded-lg">
-              <h2 className="font-semibold mb-2">Shipping Information</h2>
-              <div className="text-sm text-gray-700">
-                <div>
-                  <b>Name:</b> {shipping?.name}
-                  {fieldErrors.name && <AccessibleErrorMessage error={fieldErrors.name} id="checkout-name-error" />}
-                </div>
-                <div>
-                  <b>Phone:</b> {shipping?.phone}
-                  {fieldErrors.phone && <AccessibleErrorMessage error={fieldErrors.phone} id="checkout-phone-error" />}
-                </div>
-                <div>
-                  <b>Address:</b> {shipping?.address}, {shipping?.city}, {shipping?.state}, {shipping?.pincode}, {shipping?.country}
-                  {fieldErrors.address && <AccessibleErrorMessage error={fieldErrors.address} id="checkout-address-error" />}
-                  {fieldErrors.city && <AccessibleErrorMessage error={fieldErrors.city} id="checkout-city-error" />}
-                  {fieldErrors.state && <AccessibleErrorMessage error={fieldErrors.state} id="checkout-state-error" />}
-                  {fieldErrors.pincode && <AccessibleErrorMessage error={fieldErrors.pincode} id="checkout-pincode-error" />}
-                  {fieldErrors.country && <AccessibleErrorMessage error={fieldErrors.country} id="checkout-country-error" />}
-                </div>
-              </div>
-            </div>
-            {/* Payment Method */}
-            {step === 'review' && (
-              <form
-                onSubmit={e => {
-                  e.preventDefault()
-                  if (paymentMethod === 'COD') handlePlaceOrder()
-                  else handleProceedToPayment()
-                }}
-                className="space-y-6"
-                aria-live="polite"
-              >
-                <div className="mb-4">
-                  <h2 className="font-semibold mb-2">Payment Method</h2>
-                  <div className="flex gap-4">
-                    <label className="flex items-center gap-2" htmlFor="COD"> 
-                      <input
-                        type="radio"  
-                        name="payment"
-                        value="COD"
-                        checked={paymentMethod === 'COD'}
-                        onChange={() => setPaymentMethod('COD')}
-                        aria-describedby={fieldErrors.paymentMethod ? 'checkout-payment-error' : undefined}
-                      />
-                      Cash on Delivery
-                    </label>
-                    <label className="flex items-center gap-2" htmlFor="UPI"> 
-                      <input
-                        type="radio"
-                        name="payment"
-                        value="UPI"
-                        checked={paymentMethod === 'UPI'}
-                        onChange={() => setPaymentMethod('UPI')}
-                        aria-describedby={fieldErrors.paymentMethod ? 'checkout-payment-error' : undefined}
-                      />
-                      UPI Payment
-                    </label>
-                  </div>
-                  {fieldErrors.paymentMethod && <AccessibleErrorMessage error={fieldErrors.paymentMethod} id="checkout-payment-error" />}
-                </div>
-                {error && (
-                  <AccessibleErrorMessage error={error} id="order-review-error" />
-                )}
-                <Button
-                  type="submit"
-                  className="w-full bg-orange-500 hover:bg-orange-600 text-white text-base font-semibold py-3 rounded-md shadow-md"
-                >
-                  {isPlacing
-                    ? 'Processing...'
-                    : paymentMethod === 'COD'
-                      ? 'Place Order'
-                      : 'Proceed to Payment'}
-                </Button>
-              </form>
-            )}
-            {/* UPI Payment Step */}
-            {step === 'upi' && (
-              <div className="text-center space-y-6" aria-live="polite">
-                <h2 className="text-xl font-bold">Scan to Pay with UPI</h2>
-                {upiQR && (
-                  <Image
-                    src={upiQR}
-                    alt="UPI QR Code"
-                    width={192}
-                    height={192}
-                    className="mx-auto w-48 h-48"
-                  />
-                )}
-                <a
-                  href={upiString}
-                  className="text-[var(--primary)] underline block"
-                >
-                  Open UPI App
-                </a>
-                <Button
-                  onClick={handlePaid}
-                  className="w-full bg-orange-500 hover:bg-orange-600 text-white text-base font-semibold py-3 rounded-md shadow-md"
-                >
-                  {isPlacing ? 'Processing...' : "I've Paid"}
-                </Button>
-                <div className="text-gray-500 text-sm">
-                  After payment, click &quot;I&apos;ve Paid&quot; to notify the
-                  seller.
-                </div>
-              </div>
-            )}
-          </div>
-          {/* Right: Order Summary */}
-          <div className="w-full md:w-96 bg-gray-50 rounded-r-xl p-8 border-l flex flex-col justify-between">
-            <h2 className="text-xl font-bold mb-4">Order Summary</h2>
-            <div className="space-y-4 flex-1">
-              <ul className="divide-y">
-                {items.map(
-                  (item: {
-                    id: string
-                    name: string
-                    price: number
-                    quantity: number
-                  }) => (
-                    <li
-                      key={item.id}
-                      className="py-2 flex justify-between items-center"
-                    >
-                      <span>
-                        {item.name} x {item.quantity}
-                      </span>
-                      <span>₹{(item.price * item.quantity).toFixed(2)}</span>
-                    </li>
-                  )
-                )}
-              </ul>
-              <div className="flex items-center justify-between text-base font-semibold">
-                <span>Subtotal</span>
-                <span>₹{getTotal().toFixed(2)}</span>
-              </div>
-              <div className="flex items-center justify-between text-sm text-gray-500">
-                <span>Shipping</span>
-                <span>Free</span>
-              </div>
-              <div className="flex items-center justify-between text-lg font-bold mt-4">
-                <span>Total</span>
-                <span>₹{getTotal().toFixed(2)}</span>
-              </div>
-            </div>
-          </div>
-        </Card>
+  if (!shipping || items.length === 0) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-gray-500">Loading order summary...</p>
       </div>
     )
   }
 
-  return content
+  return (
+    <div className="min-h-screen bg-gray-50 py-10 px-4">
+      <div className="max-w-4xl mx-auto">
+        <h1 className="text-2xl md:text-3xl font-extrabold text-gray-900 mb-2 text-center">
+          Review & Complete Your Order
+        </h1>
+        <p className="text-gray-500 text-sm text-center mb-8">
+          Verify your details and choose your preferred payment option below.
+        </p>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Left Column: Payment & Verification (2 spans) */}
+          <div className="md:col-span-2 space-y-6">
+            {/* Step 1: Payment Method Selection */}
+            <Card className="p-6 bg-white shadow-sm border border-gray-200">
+              <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                <span className="w-6 h-6 rounded-full bg-purple-700 text-white text-xs flex items-center justify-center">1</span>
+                Choose Payment Method
+              </h2>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* UPI Option */}
+                <div
+                  onClick={() => setPaymentMethod('UPI')}
+                  className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${
+                    paymentMethod === 'UPI'
+                      ? 'border-purple-600 bg-purple-50/50 shadow-sm'
+                      : 'border-gray-200 hover:border-gray-300'
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="font-bold text-gray-900 flex items-center gap-1.5">
+                      <Smartphone className="w-5 h-5 text-purple-700" />
+                      UPI (Zero Extra Fee)
+                    </span>
+                    <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded font-semibold">
+                      Fastest
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-500">
+                    Pay using Google Pay, PhonePe, Paytm, or any UPI app.
+                  </p>
+                </div>
+
+                {/* Cash on Delivery */}
+                <div
+                  onClick={() => setPaymentMethod('COD')}
+                  className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${
+                    paymentMethod === 'COD'
+                      ? 'border-purple-600 bg-purple-50/50 shadow-sm'
+                      : 'border-gray-200 hover:border-gray-300'
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="font-bold text-gray-900">Cash on Delivery</span>
+                    <span className="text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded font-semibold">
+                      COD
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-500">
+                    Pay in cash when your order arrives at your doorstep.
+                  </p>
+                </div>
+              </div>
+            </Card>
+
+            {/* Step 2: UPI Payment Gateway Workflow */}
+            {paymentMethod === 'UPI' && (
+              <Card className="p-6 bg-white shadow-sm border border-purple-200">
+                <h2 className="text-lg font-bold text-gray-900 mb-2 flex items-center gap-2">
+                  <span className="w-6 h-6 rounded-full bg-purple-700 text-white text-xs flex items-center justify-center">2</span>
+                  Scan & Pay via UPI
+                </h2>
+                <p className="text-xs text-gray-500 mb-4">
+                  Pay exactly <strong className="text-gray-900">₹{total.toFixed(2)}</strong> to <strong>{STORE_UPI_ID}</strong> ({STORE_UPI_NAME})
+                </p>
+
+                {/* Mobile Intent Button */}
+                <div className="block sm:hidden mb-5">
+                  <a
+                    href={upiString}
+                    className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-purple-700 to-indigo-700 text-white font-bold py-3 px-4 rounded-xl shadow-md text-sm hover:opacity-95"
+                  >
+                    <Smartphone className="w-4 h-4" />
+                    Open in UPI App (GPay / PhonePe / Paytm)
+                  </a>
+                  <p className="text-center text-[11px] text-gray-400 mt-1">
+                    Or scan QR code below using another device
+                  </p>
+                </div>
+
+                {/* QR Code Section */}
+                <div className="flex flex-col sm:flex-row items-center gap-6 p-4 bg-gray-50 rounded-xl border border-gray-200 mb-6">
+                  {upiQR ? (
+                    <div className="p-2 bg-white rounded-lg shadow-sm border shrink-0">
+                      <Image
+                        src={upiQR}
+                        alt="HairCrew UPI QR Code"
+                        width={180}
+                        height={180}
+                        className="rounded"
+                      />
+                    </div>
+                  ) : (
+                    <div className="w-44 h-44 bg-gray-200 animate-pulse rounded" />
+                  )}
+
+                  <div className="space-y-2 text-sm text-gray-700">
+                    <p className="font-semibold text-gray-900 flex items-center gap-1.5">
+                      <QrCode className="w-4 h-4 text-purple-700" /> How to complete payment:
+                    </p>
+                    <ol className="list-decimal list-inside space-y-1 text-xs text-gray-600">
+                      <li>Open any UPI app (GPay, PhonePe, Paytm, BHIM).</li>
+                      <li>Scan this QR code or tap the button above on mobile.</li>
+                      <li>Verify recipient: <strong>{STORE_UPI_NAME}</strong> ({STORE_UPI_ID}).</li>
+                      <li>Complete payment of <strong>₹{total.toFixed(2)}</strong>.</li>
+                      <li>Copy the <strong>12-digit UTR / Ref Number</strong> from your payment receipt.</li>
+                    </ol>
+                  </div>
+                </div>
+
+                {/* Step 3: Dual Verification Details */}
+                <div className="space-y-4 pt-2 border-t">
+                  <div>
+                    <label className="block text-sm font-bold text-gray-900 mb-1">
+                      Enter UPI Reference / UTR Number <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={utrNumber}
+                      onChange={e => setUtrNumber(e.target.value)}
+                      placeholder="e.g. 429381749201 (12 digits)"
+                      maxLength={24}
+                      className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-purple-600 focus:outline-none"
+                    />
+                    <p className="text-[11px] text-gray-400 mt-1">
+                      Found in your UPI app under &quot;Payment Details&quot; or &quot;UPI Ref ID / UTR&quot;.
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">
+                      Payment Screenshot Proof (Optional for Faster Verification)
+                    </label>
+                    {receiptUrl ? (
+                      <div className="flex items-center gap-3 p-3 bg-green-50 border border-green-200 rounded-lg text-sm text-green-800">
+                        <CheckCircle2 className="w-5 h-5 text-green-600 shrink-0" />
+                        <span className="truncate flex-1">Screenshot attached successfully</span>
+                        <button
+                          type="button"
+                          onClick={() => setReceiptUrl('')}
+                          className="text-xs text-red-600 underline font-medium"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="p-3 border border-dashed rounded-lg bg-gray-50 flex items-center justify-between">
+                        <span className="text-xs text-gray-500 flex items-center gap-1.5">
+                          <UploadCloud className="w-4 h-4 text-gray-400" />
+                          Attach receipt image (.jpg, .png)
+                        </span>
+                        <UploadButton<OurFileRouter, 'imageUploader'>
+                          endpoint="imageUploader"
+                          onClientUploadComplete={res => {
+                            if (res?.[0]?.url) {
+                              setReceiptUrl(res[0].url)
+                              toast.success('Screenshot uploaded!')
+                            }
+                          }}
+                          onUploadError={(err: Error) => {
+                            toast.error(`Upload error: ${err.message}`)
+                          }}
+                        />
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </Card>
+            )}
+
+            {/* Error Display */}
+            {error && (
+              <div className="p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl text-sm flex items-start gap-2">
+                <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
+                <span>{error}</span>
+              </div>
+            )}
+
+            {/* Final Place Order Button */}
+            <Button
+              type="button"
+              disabled={isPlacing}
+              onClick={handlePlaceOrder}
+              className="w-full bg-purple-700 hover:bg-purple-800 text-white font-bold py-4 text-base rounded-xl shadow-lg transition-all"
+            >
+              {isPlacing ? (
+                'Placing Your Order...'
+              ) : paymentMethod === 'UPI' ? (
+                `Confirm & Submit Payment Verification (₹${total.toFixed(2)})`
+              ) : (
+                `Place Cash on Delivery Order (₹${total.toFixed(2)})`
+              )}
+            </Button>
+
+            <div className="flex items-center justify-center gap-2 text-xs text-gray-400">
+              <ShieldCheck className="w-4 h-4 text-green-600" />
+              100% Genuine HairCare Products • Direct Salon Formulations
+            </div>
+          </div>
+
+          {/* Right Column: Order & Shipping Summary */}
+          <div className="space-y-6">
+            {/* Shipping Summary */}
+            <Card className="p-5 bg-white shadow-sm border border-gray-200">
+              <h3 className="font-bold text-gray-900 text-sm mb-3 pb-2 border-b">
+                Delivery Address
+              </h3>
+              <p className="font-semibold text-gray-800 text-sm">{shipping.name}</p>
+              <p className="text-xs text-gray-600 mt-1">{shipping.address}</p>
+              <p className="text-xs text-gray-600">
+                {shipping.city}, {shipping.state} - {shipping.pincode}
+              </p>
+              <p className="text-xs text-gray-600 mt-2">
+                <strong>Phone:</strong> {shipping.phone}
+              </p>
+              <p className="text-xs text-gray-600">
+                <strong>Email:</strong> {shipping.email}
+              </p>
+            </Card>
+
+            {/* Cart Items Summary */}
+            <Card className="p-5 bg-white shadow-sm border border-gray-200">
+              <h3 className="font-bold text-gray-900 text-sm mb-3 pb-2 border-b">
+                Order Items ({items.length})
+              </h3>
+              <div className="space-y-3 max-h-56 overflow-y-auto pr-1">
+                {items.map(item => (
+                  <div key={item.id} className="flex justify-between text-xs">
+                    <span className="text-gray-700 font-medium truncate mr-2">
+                      {item.name} <span className="text-gray-400">× {item.quantity}</span>
+                    </span>
+                    <span className="font-semibold text-gray-900 shrink-0">
+                      ₹{(item.price * item.quantity).toFixed(2)}
+                    </span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="border-t pt-3 mt-4 space-y-1.5 text-xs text-gray-600">
+                <div className="flex justify-between">
+                  <span>Subtotal</span>
+                  <span className="font-medium text-gray-900">₹{subtotal.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Shipping</span>
+                  <span>{shippingFee === 0 ? <strong className="text-green-600">Free</strong> : `₹${shippingFee}`}</span>
+                </div>
+                <div className="flex justify-between text-sm font-bold text-gray-900 pt-2 border-t">
+                  <span>Total Amount</span>
+                  <span className="text-purple-700 font-extrabold text-base">₹{total.toFixed(2)}</span>
+                </div>
+              </div>
+            </Card>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
 }

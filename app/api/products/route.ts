@@ -22,6 +22,9 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Invalid query params', details: parsed.error.errors }, { status: 400 })
     }
     const {
+      category,
+      search,
+      priceRange,
       stockStatus,
       sortBy = 'newest',
       page = '1',
@@ -33,7 +36,46 @@ export async function GET(req: NextRequest) {
     const pageSizeNum = Number(pageSize)
 
     // Initialize where object for filters
-    const where: Record<string, unknown> = {};
+    const where: Record<string, unknown> = {
+      isActive: true,
+      deletedAt: null,
+    }
+
+    // Category filter
+    if (category && category !== 'all') {
+      where.category = {
+        OR: [
+          { slug: category },
+          { id: category },
+        ],
+      }
+    }
+
+    // Search query filter
+    if (search && search.trim()) {
+      where.OR = [
+        { name: { contains: search.trim(), mode: 'insensitive' } },
+        { description: { contains: search.trim(), mode: 'insensitive' } },
+      ]
+    }
+
+    // Price range filter
+    if (priceRange && priceRange !== 'all') {
+      switch (priceRange) {
+        case '0-500':
+          where.price = { gte: 0, lte: 500 }
+          break
+        case '500-1000':
+          where.price = { gt: 500, lte: 1000 }
+          break
+        case '1000-2000':
+          where.price = { gt: 1000, lte: 2000 }
+          break
+        case '2000+':
+          where.price = { gt: 2000 }
+          break
+      }
+    }
 
     // Stock status filter
     if (stockStatus && stockStatus !== 'all') {

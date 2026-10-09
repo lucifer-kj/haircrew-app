@@ -5,6 +5,7 @@ interface LogContext {
   ip?: string
   userAgent?: string
   timestamp?: string
+  [key: string]: unknown
 }
 
 interface LogData {

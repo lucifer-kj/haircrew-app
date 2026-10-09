@@ -125,20 +125,22 @@ export const orderSchema = z.object({
   method: z.enum(['COD', 'UPI', 'CARD'], {
     errorMap: () => ({ message: 'Please select a valid payment method' }),
   }),
-  status: z.enum([
-    'pending',
-    'payment_pending_confirmation',
-    'confirmed',
-    'shipped',
-    'delivered',
-    'cancelled',
-  ]),
+  status: z
+    .enum([
+      'pending',
+      'payment_pending_confirmation',
+      'confirmed',
+      'shipped',
+      'delivered',
+      'cancelled',
+    ])
+    .default('pending'),
   items: z
     .array(
       z.object({
         id: z.string().min(1, 'Product ID is required'),
-        name: z.string().min(1, 'Product name is required'),
-        price: z.number().positive('Price must be positive'),
+        name: z.string().optional(),
+        price: z.number().optional(),
         quantity: z
           .number()
           .int()
@@ -147,6 +149,11 @@ export const orderSchema = z.object({
     )
     .min(1, 'At least one item is required'),
   shipping: shippingSchema,
+  paymentReference: z.string().max(100).optional(),
+  paymentReceiptUrl: z.string().url().optional().or(z.literal('')),
+  guestEmail: z.string().email().optional(),
+  guestName: z.string().min(2).max(100).optional(),
+  guestPhone: z.string().regex(/^[6-9]\d{9}$/).optional(),
 })
 
 // Search and filter validation

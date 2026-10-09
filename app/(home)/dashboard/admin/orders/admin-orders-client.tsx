@@ -56,10 +56,13 @@ interface Order {
     address: string
     city: string
     state: string
-    zip: string
+    zip?: string
+    pincode?: string
   }
   paymentMethod?: string
   paymentStatus?: string
+  paymentReference?: string | null
+  paymentReceiptUrl?: string | null
 }
 
 interface AdminOrdersClientProps {
@@ -258,21 +261,41 @@ export default function AdminOrdersClient({
     
     switch (order.status) {
       case 'PENDING':
+        if (order.paymentStatus === 'AWAITING_VERIFICATION') {
+          actions.push(
+            <Button
+              key="verify-pay"
+              size="sm"
+              onClick={() => updateOrderStatus(order.id, 'PAID')}
+              disabled={isUpdating === order.id}
+              className="bg-emerald-600 hover:bg-emerald-700 text-white"
+            >
+              {isUpdating === order.id ? (
+                <Loader2 className="w-3 h-3 animate-spin" />
+              ) : (
+                'Verify & Confirm'
+              )}
+            </Button>
+          )
+        } else {
+          actions.push(
+            <Button
+              key="confirm"
+              size="sm"
+              variant="default"
+              onClick={() => updateOrderStatus(order.id, 'CONFIRMED')}
+              disabled={isUpdating === order.id}
+              className="bg-green-600 hover:bg-green-700"
+            >
+              {isUpdating === order.id ? (
+                <Loader2 className="w-3 h-3 animate-spin" />
+              ) : (
+                'Confirm'
+              )}
+            </Button>
+          )
+        }
         actions.push(
-          <Button
-            key="confirm"
-            size="sm"
-            variant="default"
-            onClick={() => updateOrderStatus(order.id, 'CONFIRMED')}
-            disabled={isUpdating === order.id}
-            className="bg-green-600 hover:bg-green-700"
-          >
-            {isUpdating === order.id ? (
-              <Loader2 className="w-3 h-3 animate-spin" />
-            ) : (
-              'Confirm'
-            )}
-          </Button>,
           <Button
             key="cancel"
             size="sm"
@@ -376,7 +399,11 @@ export default function AdminOrdersClient({
 
     // Status filter
     if (statusFilter) {
-      filtered = filtered.filter(order => order.status === statusFilter)
+      if (statusFilter === 'AWAITING_VERIFICATION') {
+        filtered = filtered.filter(order => order.paymentStatus === 'AWAITING_VERIFICATION')
+      } else {
+        filtered = filtered.filter(order => order.status === statusFilter)
+      }
     }
 
     // Date filter
@@ -535,6 +562,9 @@ export default function AdminOrdersClient({
                 className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">All Statuses</option>
+                <option value="AWAITING_VERIFICATION">
+                  Awaiting Verification ({orders.filter(o => o.paymentStatus === 'AWAITING_VERIFICATION').length})
+                </option>
                 {statusOptions.map(status => (
                   <option key={status} value={status}>
                     {status} ({orders.filter(o => o.status === status).length})
@@ -847,6 +877,58 @@ export default function AdminOrdersClient({
                   </div>
                 </div>
               </div>
+
+              {/* UPI Payment Verification Card */}
+              {selectedOrder.paymentMethod === 'UPI' && (
+                <div className="p-4 bg-purple-50 rounded-lg border border-purple-200 space-y-3">
+                  <div className="flex justify-between items-center">
+                    <h4 className="font-bold text-purple-900 text-sm">UPI Payment Verification</h4>
+                    <span className="text-xs px-2 py-0.5 rounded font-semibold bg-purple-200 text-purple-800">
+                      {selectedOrder.paymentStatus || 'AWAITING_VERIFICATION'}
+                    </span>
+                  </div>
+                  <div className="text-sm">
+                    <span className="text-gray-500">Submitted UTR / Ref No:</span>{' '}
+                    <strong className="font-mono text-gray-900">{selectedOrder.paymentReference || 'None provided'}</strong>
+                  </div>
+                  {selectedOrder.paymentReceiptUrl ? (
+                    <div>
+                      <p className="text-xs text-gray-500 mb-1">Receipt Screenshot:</p>
+                      <a href={selectedOrder.paymentReceiptUrl} target="_blank" rel="noreferrer" className="inline-block border rounded overflow-hidden shadow-sm hover:opacity-90">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={selectedOrder.paymentReceiptUrl} alt="Payment Receipt" className="max-h-48 rounded object-contain" />
+                      </a>
+                    </div>
+                  ) : (
+                    <p className="text-xs text-gray-400 italic">No screenshot attached</p>
+                  )}
+                  {selectedOrder.paymentStatus === 'AWAITING_VERIFICATION' && (
+                    <div className="flex gap-2 pt-2 border-t">
+                      <Button
+                        size="sm"
+                        className="bg-emerald-600 hover:bg-emerald-700 text-white"
+                        onClick={() => {
+                          updateOrderStatus(selectedOrder.id, 'PAID')
+                          setIsModalOpen(false)
+                        }}
+                      >
+                        Verify & Confirm Payment
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="text-red-600 border-red-300 hover:bg-red-50"
+                        onClick={() => {
+                          updateOrderStatus(selectedOrder.id, 'PAYMENT_FAILED')
+                          setIsModalOpen(false)
+                        }}
+                      >
+                        Reject (Invalid UTR)
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* Order Items */}
               <div>

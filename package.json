@@ -7,9 +7,9 @@
   },
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "npm run prisma:generate && next build",
+    "build": "pnpm run prisma:generate && next build",
     "build:skip-prisma": "next build",
-    "build:windows": "npm run prisma:generate:windows && next build",
+    "build:windows": "pnpm run prisma:generate:windows && next build",
     "build:troubleshoot": "node scripts/build-troubleshoot.js",
     "prisma:generate": "prisma generate || echo 'Prisma generate failed, continuing with build...'",
     "prisma:generate:force": "rm -rf node_modules/.prisma && prisma generate",
@@ -17,13 +17,13 @@
     "start": "next start",
     "lint": "next lint",
     "seed": "tsx prisma/seed.ts",
-    "analyze": "ANALYZE=true npm run build",
-    "clean": "rm -rf .next/ node_modules/.cache/ && npm install",
+    "analyze": "ANALYZE=true pnpm run build",
+    "clean": "rm -rf .next/ node_modules/.cache/ && pnpm install",
     "type-check": "tsc --noEmit",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "deps:check": "npx depcheck",
-    "deps:update": "npx npm-check-updates -u"
+    "deps:check": "pnpm dlx depcheck",
+    "deps:update": "pnpm dlx npm-check-updates -u"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.10.0",

@@ -1,7 +1,14 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/auth'
 
 export async function GET() {
+  const session = await getServerSession(authOptions)
+  if (!session?.user || session.user.role !== 'ADMIN') {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
   try {
     // Aggregate top products by total quantity sold and revenue
     const topProducts = await prisma.orderItem.groupBy({
@@ -22,7 +29,7 @@ export async function GET() {
     })
 
     // Fetch product details for each top product
-    const productIds = topProducts.map(item => item.productId)
+    const productIds = topProducts.map((item: { productId: string }) => item.productId)
     const products = await prisma.product.findMany({
       where: { id: { in: productIds } },
       select: {
@@ -36,8 +43,8 @@ export async function GET() {
     })
 
     // Merge aggregated data with product details
-    const result = topProducts.map(item => {
-      const product = products.find(p => p.id === item.productId)
+    const result = topProducts.map((item: { productId: string; _sum: { quantity: number | null; price: unknown } }) => {
+      const product = products.find((p: { id: string }) => p.id === item.productId)
       return {
         id: product?.id,
         name: product?.name,

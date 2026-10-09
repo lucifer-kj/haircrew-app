@@ -109,8 +109,9 @@ model Product {
   isFeatured   Boolean  @default(false)
   slug         String   @unique
   categoryId   String
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  deletedAt    DateTime?
 
   // Relations
   category   Category    @relation(fields: [categoryId], references: [id])
@@ -125,34 +126,39 @@ model Product {
 }
 
 model Order {
-  id          String      @id @default(cuid())
-  orderNumber String      @unique
-  userId      String
-  status      OrderStatus @default(PENDING)
-  total       Decimal     @db.Decimal(10, 2)
-  subtotal    Decimal     @db.Decimal(10, 2)
-  tax         Decimal     @default(0) @db.Decimal(10, 2)
-  shipping    Decimal     @default(0) @db.Decimal(10, 2)
-  discount    Decimal     @default(0) @db.Decimal(10, 2)
-  currency    String      @default("USD")
+  id                String        @id @default(cuid())
+  orderNumber       String        @unique
+  userId            String?
+  guestEmail        String?
+  guestName         String?
+  guestPhone        String?
+  status            OrderStatus   @default(PENDING)
+  total             Decimal       @db.Decimal(10, 2)
+  subtotal          Decimal       @db.Decimal(10, 2)
+  tax               Decimal       @default(0) @db.Decimal(10, 2)
+  shipping          Decimal       @default(0) @db.Decimal(10, 2)
+  discount          Decimal       @default(0) @db.Decimal(10, 2)
+  currency          String        @default("INR")
   
   // Shipping info
-  shippingAddress Json?
-  billingAddress  Json?
+  shippingAddress   Json?
+  billingAddress    Json?
   
   // Payment info
-  paymentMethod   String?
-  paymentStatus   PaymentStatus @default(PENDING)
-  stripePaymentId String?
+  paymentMethod     String?
+  paymentStatus     PaymentStatus @default(PENDING)
+  paymentReference  String?       // 12-digit UPI UTR / Transaction No
+  paymentReceiptUrl String?       // UploadThing receipt screenshot URL
+  stripePaymentId   String?
   
   // Timestamps
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  paidAt    DateTime?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+  paidAt            DateTime?
 
   // Relations
-  user       User        @relation(fields: [userId], references: [id])
-  orderItems OrderItem[]
+  user              User?         @relation(fields: [userId], references: [id])
+  orderItems        OrderItem[]
 
   @@map("orders")
   @@index([userId])
@@ -339,6 +345,7 @@ enum OrderStatus {
 
 enum PaymentStatus {
   PENDING
+  AWAITING_VERIFICATION
   PAID
   FAILED
   REFUNDED

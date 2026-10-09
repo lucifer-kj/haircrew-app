@@ -10,39 +10,21 @@ import { getPusherServer } from '@/lib/pusher-server'
 import { sendOrderConfirmationEmail } from '@/lib/email'
 import { getShippingFee } from '@/lib/shipping'
 
-// These interfaces are now defined in the validation schema
-
 function generateOrderNumber() {
-  return `ORD-${Date.now()}-${Math.floor(Math.random() * 10000)}`
+  return `ORD-${Date.now()}-${Math.floor(1000 + Math.random() * 9000)}`
 }
 
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions)
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
-  const userId = session.user.id
+  const userId = session?.user?.id || null
 
   try {
-    // Defensive check: ensure user exists
-    const user = await prisma.user.findUnique({ where: { id: userId } })
-    if (!user) {
-      Logger.warn('Order creation attempted with invalid user', {
-        userId,
-        ip: req.headers.get('x-forwarded-for') || 'unknown',
-      })
-      return NextResponse.json(
-        { error: 'User not found. Please sign in again.' },
-        { status: 401 }
-      )
-    }
-
     const body = await req.json()
 
     // Validate input using schema
     const validation = validateInput(orderSchema, body)
     if (!validation.success) {
-      Logger.validation('order_creation', body, userId, {
+      Logger.validation('order_creation', body, userId || 'guest', {
         ip: req.headers.get('x-forwarded-for') || 'unknown',
       })
       return NextResponse.json(
@@ -54,40 +36,108 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    const { method, status, items, shipping } = validation.data
-    // 1. Verify stock availability
+    const {
+      method,
+      items,
+      shipping,
+      paymentReference,
+      paymentReceiptUrl,
+      guestEmail,
+      guestName,
+      guestPhone,
+    } = validation.data
+
+    // If no logged in user, require guest email
+    const orderEmail = session?.user?.email || guestEmail
+    const orderName = session?.user?.name || guestName || shipping.name
+    const orderPhone = guestPhone || shipping.phone
+
+    if (!userId && !orderEmail) {
+      return NextResponse.json(
+        { error: 'An email address is required for order confirmation.' },
+        { status: 400 }
+      )
+    }
+
+    // 1. Fetch products from database to get AUTHENTIC prices & verify stock
     const productIds = items.map((item: { id: string }) => item.id)
-    const products = await prisma.product.findMany({
-      where: { id: { in: productIds } },
-      select: { id: true, stock: true, name: true },
+    const dbProducts = await prisma.product.findMany({
+      where: {
+        id: { in: productIds },
+        isActive: true,
+        deletedAt: null,
+      },
+      select: {
+        id: true,
+        stock: true,
+        name: true,
+        price: true,
+      },
     })
+
+    if (dbProducts.length !== productIds.length) {
+      const missingIds = productIds.filter(id => !dbProducts.some(p => p.id === id))
+      return NextResponse.json(
+        { error: `One or more products are unavailable: ${missingIds.join(', ')}` },
+        { status: 400 }
+      )
+    }
+
+    // Check stock for all items
     for (const item of items) {
-      const product = products.find(p => p.id === item.id)
-      if (!product) {
-        console.error(`Product not found: ${item.id}`)
+      const dbProduct = dbProducts.find(p => p.id === item.id)
+      if (!dbProduct) {
         return NextResponse.json({ error: `Product not found: ${item.id}` }, { status: 400 })
       }
-      if (product.stock < item.quantity) {
-        console.error(`Insufficient stock for product: ${product.name}`)
-        return NextResponse.json({ error: `Insufficient stock for product: ${product.name}` }, { status: 400 })
+      if (dbProduct.stock < item.quantity) {
+        return NextResponse.json(
+          { error: `Insufficient stock for "${dbProduct.name}". Only ${dbProduct.stock} remaining.` },
+          { status: 400 }
+        )
       }
     }
 
-    // 2. Process order in transaction
+    // 2. Compute authentic subtotal using DATABASE prices (preventing client price tampering)
+    const verifiedItems = items.map(item => {
+      const dbProduct = dbProducts.find(p => p.id === item.id)!
+      const unitPrice = Number(dbProduct.price)
+      return {
+        id: item.id,
+        quantity: item.quantity,
+        price: unitPrice,
+        name: dbProduct.name,
+      }
+    })
+
+    const subtotal = verifiedItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
+    const shippingFee = getShippingFee(verifiedItems)
+    const total = subtotal + shippingFee
+
+    // 3. Determine payment & order status
+    let paymentStatus: PaymentStatus = PaymentStatus.PENDING
+    if (method === 'UPI') {
+      paymentStatus = PaymentStatus.AWAITING_VERIFICATION
+    }
+
+    // 4. Atomic transaction: create order and decrement stock
     const result = await prisma.$transaction(async (tx) => {
-      // a. Create order
       const order = await tx.order.create({
         data: {
           orderNumber: generateOrderNumber(),
           userId: userId,
-          status: status === 'pending' ? OrderStatus.PENDING : OrderStatus.PROCESSING,
-          paymentStatus: status === 'pending' ? PaymentStatus.PENDING : PaymentStatus.PENDING,
+          guestEmail: !userId ? orderEmail : null,
+          guestName: !userId ? orderName : null,
+          guestPhone: !userId ? orderPhone : null,
+          status: OrderStatus.PENDING,
+          paymentStatus: paymentStatus,
           paymentMethod: method,
-          total: items.reduce((sum: number, item: { price: number; quantity: number }) => sum + item.price * item.quantity, 0),
-          subtotal: items.reduce((sum: number, item: { price: number; quantity: number }) => sum + item.price * item.quantity, 0),
-          shipping: getShippingFee(items),
+          paymentReference: paymentReference?.trim() || null,
+          paymentReceiptUrl: paymentReceiptUrl?.trim() || null,
+          total: total,
+          subtotal: subtotal,
+          shipping: shippingFee,
           currency: 'INR',
-          shippingAddress: JSON.parse(JSON.stringify({
+          shippingAddress: {
             name: sanitizeInput(shipping.name),
             phone: shipping.phone,
             address: sanitizeInput(shipping.address),
@@ -95,10 +145,9 @@ export async function POST(req: NextRequest) {
             state: sanitizeInput(shipping.state),
             pincode: shipping.pincode,
             country: sanitizeInput(shipping.country || 'India'),
-          })),
-          createdAt: new Date(),
+          },
           orderItems: {
-            create: items.map((item: { id: string; quantity: number; price: number }) => ({
+            create: verifiedItems.map(item => ({
               product: { connect: { id: item.id } },
               quantity: item.quantity,
               price: item.price,
@@ -107,35 +156,67 @@ export async function POST(req: NextRequest) {
         },
         include: { orderItems: true },
       })
-      // b. Reduce stock
-      await Promise.all(items.map((item: { id: string; quantity: number }) =>
-        tx.product.update({
-          where: { id: item.id },
-          data: { stock: { decrement: item.quantity } },
-        })
-      ))
+
+      // Decrement stock atomically
+      await Promise.all(
+        verifiedItems.map(item =>
+          tx.product.update({
+            where: { id: item.id },
+            data: { stock: { decrement: item.quantity } },
+          })
+        )
+      )
+
       return order
     })
 
-    Logger.order('created', result.id, userId, {
+    Logger.order('created', result.id, userId || 'guest', {
       ip: req.headers.get('x-forwarded-for') || 'unknown',
     })
-    await getPusherServer().trigger('orders', 'new-order', {
-      orderId: result.id,
-      user: { id: user.id, name: user.name, email: user.email },
-      total: result.total,
-      createdAt: result.createdAt,
-    })
-    await sendOrderConfirmationEmail(user.email, user.name ?? '', result.id)
-    return NextResponse.json({ id: result.id }, { status: 201 })
+
+    // 5. Non-blocking side effects (Pusher and Email)
+    try {
+      const pusher = getPusherServer()
+      if (pusher) {
+        await pusher.trigger('orders', 'new-order', {
+          orderId: result.id,
+          orderNumber: result.orderNumber,
+          user: { id: userId, name: orderName, email: orderEmail },
+          total: result.total,
+          paymentStatus: result.paymentStatus,
+          paymentMethod: result.paymentMethod,
+          createdAt: result.createdAt,
+        })
+      }
+    } catch (pusherErr: any) {
+      Logger.warn('Pusher notification skipped', { error: pusherErr?.message })
+    }
+
+    if (orderEmail) {
+      try {
+        await sendOrderConfirmationEmail(orderEmail, orderName ?? '', result.id)
+      } catch (emailErr: any) {
+        Logger.warn('Order confirmation email skipped', { error: emailErr?.message })
+      }
+    }
+
+    return NextResponse.json(
+      {
+        id: result.id,
+        orderNumber: result.orderNumber,
+        total: result.total,
+        paymentStatus: result.paymentStatus,
+      },
+      { status: 201 }
+    )
   } catch (error) {
     console.error('Order processing failed:', error)
     Logger.error('Order creation failed', error as Error, {
-      userId,
+      userId: userId || 'guest',
       ip: req.headers.get('x-forwarded-for') || 'unknown',
     })
     return NextResponse.json(
-      { error: 'Order processing failed' },
+      { error: 'Order processing failed. Please try again.' },
       { status: 500 }
     )
   }
@@ -144,32 +225,55 @@ export async function POST(req: NextRequest) {
 export async function GET(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-    const userId = session.user.id
+    const userId = session?.user?.id
     const { searchParams } = new URL(req.url)
     const id = searchParams.get('id')
+    const email = searchParams.get('email')
+
     if (!id) {
       return NextResponse.json({ error: 'Order ID required' }, { status: 400 })
     }
+
     const order = await prisma.order.findUnique({
       where: { id },
-      include: { orderItems: true },
+      include: {
+        orderItems: {
+          include: {
+            product: { select: { name: true, images: true, slug: true } },
+          },
+        },
+      },
     })
-    if (!order || order.userId !== userId) {
+
+    if (!order) {
       return NextResponse.json({ error: 'Order not found' }, { status: 404 })
     }
+
+    // Permission check: owner user, admin, or matching guest email
+    const isOwner = userId && order.userId === userId
+    const isAdmin = session?.user?.role === 'ADMIN'
+    const isGuestOwner = email && order.guestEmail?.toLowerCase() === email.toLowerCase()
+
+    if (!isOwner && !isAdmin && !isGuestOwner) {
+      return NextResponse.json({ error: 'Unauthorized to view this order' }, { status: 403 })
+    }
+
     return NextResponse.json({
       id: order.id,
       orderNumber: order.orderNumber,
       total: order.total,
+      subtotal: order.subtotal,
+      shipping: order.shipping,
       createdAt: order.createdAt,
       status: order.status,
       paymentStatus: order.paymentStatus,
       paymentMethod: order.paymentMethod,
+      paymentReference: order.paymentReference,
+      paymentReceiptUrl: order.paymentReceiptUrl,
       orderItems: order.orderItems,
       shippingAddress: order.shippingAddress,
+      guestEmail: order.guestEmail,
+      guestName: order.guestName,
     })
   } catch (e) {
     console.error(e)
@@ -186,6 +290,7 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
   const userId = session.user.id
+  const isAdmin = session.user.role === 'ADMIN'
 
   try {
     const body = await req.json()
@@ -193,22 +298,32 @@ export async function PATCH(req: NextRequest) {
     if (!orderId || !newStatus) {
       return NextResponse.json({ error: 'Order ID and newStatus are required' }, { status: 400 })
     }
-    // Fetch order and items
+
     const order = await prisma.order.findUnique({
       where: { id: orderId },
       include: { orderItems: true },
     })
+
     if (!order) {
       return NextResponse.json({ error: 'Order not found' }, { status: 404 })
     }
-    // Only allow restock if not shipped/delivered
-    if (
-      newStatus === 'CANCELLED' &&
-      order.status !== 'SHIPPED' &&
-      order.status !== 'DELIVERED'
-    ) {
+
+    // Authorization check: non-admin can ONLY cancel their own order
+    if (!isAdmin) {
+      if (order.userId !== userId) {
+        return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+      }
+      if (newStatus !== 'CANCELLED') {
+        return NextResponse.json({ error: 'Customers can only cancel pending orders.' }, { status: 403 })
+      }
+      if (order.status !== 'PENDING') {
+        return NextResponse.json({ error: 'Only pending orders can be cancelled.' }, { status: 400 })
+      }
+    }
+
+    // Cancel and Restock
+    if (newStatus === 'CANCELLED' && order.status !== 'SHIPPED' && order.status !== 'DELIVERED') {
       await prisma.$transaction(async (tx) => {
-        // Restock each product
         await Promise.all(
           order.orderItems.map(item =>
             tx.product.update({
@@ -217,27 +332,32 @@ export async function PATCH(req: NextRequest) {
             })
           )
         )
-        // Update order status
         await tx.order.update({
           where: { id: orderId },
-          data: { status: 'CANCELLED' },
+          data: { status: OrderStatus.CANCELLED },
         })
       })
+
       Logger.order('restocked_on_cancel', orderId, userId, {
         ip: req.headers.get('x-forwarded-for') || 'unknown',
       })
-      return NextResponse.json({ success: true, message: 'Order cancelled and products restocked.' })
-    } else {
-      // Just update status
-      await prisma.order.update({
-        where: { id: orderId },
-        data: { status: newStatus },
-      })
-      Logger.order('status_updated', orderId, userId, {
-        ip: req.headers.get('x-forwarded-for') || 'unknown',
-      })
-      return NextResponse.json({ success: true, message: 'Order status updated.' })
+      return NextResponse.json({ success: true, message: 'Order cancelled and inventory restocked.' })
     }
+
+    // Admin status update
+    if (!isAdmin) {
+      return NextResponse.json({ error: 'Unauthorized status transition' }, { status: 403 })
+    }
+
+    const updated = await prisma.order.update({
+      where: { id: orderId },
+      data: { status: newStatus as OrderStatus },
+    })
+
+    Logger.order('status_updated', orderId, userId, {
+      ip: req.headers.get('x-forwarded-for') || 'unknown',
+    })
+    return NextResponse.json({ success: true, order: updated })
   } catch (error) {
     console.error('Order status update failed:', error)
     Logger.error('Order status update failed', error as Error, {

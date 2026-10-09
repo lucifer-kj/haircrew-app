@@ -27,8 +27,8 @@ export default async function AdminOrdersPage() {
   const serializedOrders = orders.map(order => ({
     ...serializeOrder(order),
     user: {
-      name: order.user.name || '',
-      email: order.user.email || '',
+      name: order.user?.name || order.guestName || 'Guest Customer',
+      email: order.user?.email || order.guestEmail || '',
     },
   }))
   

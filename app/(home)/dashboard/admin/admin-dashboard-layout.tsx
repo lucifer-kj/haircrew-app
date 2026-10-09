@@ -321,7 +321,8 @@ export default function AdminDashboardLayout({
                   tick={{ fontSize: 12, fill: '#64748b' }}
                 />
                 <Tooltip
-                  formatter={formatCurrency}
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  formatter={(value: any) => formatCurrency(Number(value) || 0)}
                   labelStyle={{ color: '#334155' }}
                   contentStyle={{
                     background: '#fff',

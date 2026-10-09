@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import {
   Facebook,
   Twitter,
@@ -16,8 +17,14 @@ import { useReducedMotion } from '@/lib/useReducedMotion'
 import { Logo } from '@/components/ui/logo'
 
 export function Footer() {
+  const pathname = usePathname()
   const reduced = useReducedMotion()
   const [ref, inView] = useScrollReveal()
+
+  // Do not render consumer store footer on admin routes
+  if (pathname?.startsWith('/dashboard/admin') || pathname?.startsWith('/admin')) {
+    return null
+  }
   return (
     <motion.footer
       ref={ref}

@@ -77,7 +77,7 @@ export default function OrdersClient({ orders }: OrdersClientProps) {
               <PackageSearch className="h-6 w-6" />
             </div>
             <div>
-              <h1 className="text-2xl md:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary">
+              <h1 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white">
                 Your Orders
               </h1>
               <p className="text-slate-600 mt-1">

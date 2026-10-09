@@ -69,55 +69,111 @@ export async function generateMetadata(
   }
 }
 
+import { prisma } from '@/lib/prisma'
+
 // Server-side data fetchers
 async function getProduct(slug: string): Promise<Product | null> {
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/products/${slug}`, {
-      cache: 'no-store', // or 'force-cache' for static generation
-    });
+    const product = await prisma.product.findUnique({
+      where: { slug },
+      include: {
+        category: {
+          select: {
+            name: true,
+            slug: true,
+          },
+        },
+      },
+    })
     
-    if (!response.ok) {
-      return null;
+    if (!product) {
+      return null
     }
     
-    return await response.json();
+    return {
+      id: product.id,
+      name: product.name,
+      description: product.description || '',
+      price: Number(product.price),
+      comparePrice: product.comparePrice ? Number(product.comparePrice) : undefined,
+      images: product.images,
+      slug: product.slug,
+      stock: product.stock,
+      categoryId: product.categoryId,
+      category: product.category,
+    }
   } catch (error) {
-    console.error('Failed to fetch product:', error);
-    return null;
+    console.error('Failed to fetch product:', error)
+    return null
   }
 }
 
 async function getReviews(slug: string): Promise<Review[]> {
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/products/${slug}/reviews`, {
-      cache: 'no-store',
-    });
-    
-    if (!response.ok) {
-      return [];
-    }
-    
-    return await response.json();
+    const product = await prisma.product.findUnique({
+      where: { slug },
+      select: { id: true },
+    })
+    if (!product) return []
+
+    const reviews = await prisma.review.findMany({
+      where: { productId: product.id },
+      include: {
+        user: { select: { name: true } },
+      },
+      orderBy: { createdAt: 'desc' },
+    })
+
+    return reviews.map(r => ({
+      id: r.id,
+      rating: r.rating,
+      title: r.title || '',
+      comment: r.comment || '',
+      createdAt: r.createdAt.toISOString(),
+      user: {
+        name: r.user.name || 'Anonymous',
+      },
+    }))
   } catch (error) {
-    console.error('Failed to fetch reviews:', error);
-    return [];
+    console.error('Failed to fetch reviews:', error)
+    return []
   }
 }
 
 async function getRelatedProducts(slug: string): Promise<RelatedProduct[]> {
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/products/${slug}/related`, {
-      cache: 'no-store',
-    });
-    
-    if (!response.ok) {
-      return [];
-    }
-    
-    return await response.json();
+    const currentProduct = await prisma.product.findUnique({
+      where: { slug },
+      select: { id: true, categoryId: true },
+    })
+    if (!currentProduct) return []
+
+    const related = await prisma.product.findMany({
+      where: {
+        categoryId: currentProduct.categoryId,
+        id: { not: currentProduct.id },
+        isActive: true,
+      },
+      take: 4,
+      select: {
+        id: true,
+        name: true,
+        price: true,
+        images: true,
+        slug: true,
+      },
+    })
+
+    return related.map(p => ({
+      id: p.id,
+      name: p.name,
+      price: Number(p.price),
+      images: p.images,
+      slug: p.slug,
+    }))
   } catch (error) {
-    console.error('Failed to fetch related products:', error);
-    return [];
+    console.error('Failed to fetch related products:', error)
+    return []
   }
 }
 

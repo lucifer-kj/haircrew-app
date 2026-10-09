@@ -84,14 +84,38 @@ export async function GET(request: NextRequest) {
       }),
     ])
 
-    // Fetch top products from API (internal call)
-    const protocol = process.env.NODE_ENV === 'production' ? 'https' : 'http'
-    const host = request.headers.get('host')
-    const baseUrl = `${protocol}://${host}`
-    const topProductsRes = await fetch(`${baseUrl}/api/admin/top-products`, {
-      cache: 'no-store',
+    // Top products directly from database
+    const topProductsRaw = await prisma.orderItem.groupBy({
+      by: ['productId'],
+      _sum: { quantity: true, price: true },
+      orderBy: { _sum: { quantity: 'desc' } },
+      take: 5,
     })
-    const { topProducts } = topProductsRes.ok ? await topProductsRes.json() : { topProducts: [] }
+    const topProductIds = topProductsRaw.map(item => item.productId)
+    const topProductsMeta = await prisma.product.findMany({
+      where: { id: { in: topProductIds } },
+      select: {
+        id: true,
+        name: true,
+        images: true,
+        price: true,
+        stock: true,
+        category: { select: { name: true } },
+      },
+    })
+    const topProducts = topProductsRaw.map(item => {
+      const meta = topProductsMeta.find(p => p.id === item.productId)
+      return {
+        id: meta?.id || item.productId,
+        name: meta?.name || 'Product',
+        image: meta?.images || [],
+        price: Number(meta?.price || 0),
+        stock: meta?.stock || 0,
+        category: meta?.category?.name || 'General',
+        totalSold: item._sum.quantity || 0,
+        totalRevenue: (item._sum.quantity || 0) * Number(meta?.price || 0),
+      }
+    })
 
     // Revenue chart data
     const revenueMap = new Map<string, number>()

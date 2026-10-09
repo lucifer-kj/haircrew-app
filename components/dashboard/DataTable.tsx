@@ -29,8 +29,8 @@ function DataTable<T>({
     <div className="bg-white dark:bg-slate-800/80 rounded-xl shadow p-6 overflow-x-auto" style={{ maxWidth: '100vw' }}>
       {/* Header with filters */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4 gap-4">
-        <h2 className="text-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-          Data Table
+        <h2 className="text-xl font-bold text-slate-900 dark:text-white">
+          Recent Orders
         </h2>
         {filters && (
           <div className="flex gap-2 items-center">

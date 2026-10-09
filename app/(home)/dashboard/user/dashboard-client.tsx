@@ -149,7 +149,7 @@ export default function DashboardClient({
         >
           <div className="px-6 py-8 text-center md:text-left md:flex md:justify-between md:items-center">
             <div>
-              <h1 className="text-2xl md:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary">
+              <h1 className="text-2xl md:text-3xl font-bold text-white tracking-tight">
                 Hello, {user?.name || 'User'}
               </h1>
               <p className="mt-1 text-white/80">Welcome to your dashboard</p>

@@ -67,7 +67,7 @@ export default function ProfileClient({ user, stats }: ProfileClientProps) {
 
             {/* User Info */}
             <div className="flex-1 text-center md:text-left">
-              <h1 className="text-2xl md:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary">
+              <h1 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white">
                 {user.name || 'User'}
               </h1>
 
@@ -86,7 +86,7 @@ export default function ProfileClient({ user, stats }: ProfileClientProps) {
 
             {/* Edit Profile Button */}
             <div className="md:self-start">
-              <GlassButton className="px-6 py-2.5 bg-gradient-to-r from-primary to-secondary text-white">
+              <GlassButton className="px-6 py-2.5 bg-primary hover:bg-primary/90 text-white font-medium">
                 Edit Profile
               </GlassButton>
             </div>

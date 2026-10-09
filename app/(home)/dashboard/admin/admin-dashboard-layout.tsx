@@ -247,10 +247,10 @@ export default function AdminDashboardLayout({
       {/* Welcome Section - Only show when no children */}
       {!children && (
         <div className="mb-8">
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent mb-2">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-2">
             Welcome, Admin!
           </h1>
-          <p className="text-lg text-slate-600 dark:text-slate-300">
+          <p className="text-base sm:text-lg text-slate-600 dark:text-slate-300">
             This is your dashboard overview. Use the sidebar to navigate.
           </p>
         </div>
@@ -289,7 +289,7 @@ export default function AdminDashboardLayout({
           {/* Sales Analytics: Revenue Chart */}
           <div className="bg-white dark:bg-slate-800/80 rounded-xl shadow p-6 mb-8 w-full max-w-full overflow-x-auto" style={{ maxWidth: '100vw' }}>
             <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4 gap-4">
-              <h2 className="text-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+              <h2 className="text-xl font-bold text-slate-900 dark:text-white">
                 Revenue Chart
               </h2>
               <div className="flex gap-2">
@@ -349,7 +349,7 @@ export default function AdminDashboardLayout({
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8 w-full max-w-full" style={{ maxWidth: '100vw' }}>
               {/* Order Volume Bar Chart */}
               <div className="bg-white dark:bg-slate-800/80 rounded-xl shadow p-6 flex flex-col">
-                <h3 className="text-lg font-bold mb-4 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                <h3 className="text-lg font-bold mb-4 text-slate-900 dark:text-white">
                   Order Volume
                 </h3>
                 <ResponsiveContainer width="100%" height={220}>
@@ -377,7 +377,7 @@ export default function AdminDashboardLayout({
               </div>
               {/* Order Status Pie Chart */}
               <div className="bg-white dark:bg-slate-800/80 rounded-xl shadow p-6 flex flex-col">
-                <h3 className="text-lg font-bold mb-4 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                <h3 className="text-lg font-bold mb-4 text-slate-900 dark:text-white">
                   Order Status Distribution
                 </h3>
                 <ResponsiveContainer width="100%" height={220}>
@@ -404,7 +404,7 @@ export default function AdminDashboardLayout({
               </div>
               {/* Peak Ordering Times Bar Chart */}
               <div className="bg-white dark:bg-slate-800/80 rounded-xl shadow p-6 flex flex-col">
-                <h3 className="text-lg font-bold mb-4 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                <h3 className="text-lg font-bold mb-4 text-slate-900 dark:text-white">
                   Peak Ordering Times
                 </h3>
                 <ResponsiveContainer width="100%" height={220}>
@@ -464,7 +464,7 @@ export default function AdminDashboardLayout({
 
           {/* Low Stock Alerts */}
           <div className="bg-white dark:bg-slate-800/80 rounded-xl shadow p-6 mb-8 w-full max-w-full overflow-x-auto" style={{ maxWidth: '100vw' }}>
-            <h2 className="text-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent mb-4">
+            <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-4">
               Low Stock Alerts
             </h2>
             {lowStockProducts.length === 0 ? (
@@ -534,7 +534,7 @@ export default function AdminDashboardLayout({
 
           {/* Top Products Section */}
           <div className="bg-white dark:bg-slate-800/80 rounded-xl shadow p-6 mb-8 w-full max-w-full overflow-x-auto" style={{ maxWidth: '100vw' }}>
-            <h2 className="text-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent mb-4">
+            <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-4">
               Top Products
             </h2>
             {topProducts.length === 0 ? (
@@ -593,7 +593,7 @@ export default function AdminDashboardLayout({
 
           {/* Export & Reports Section */}
           <div className="bg-white dark:bg-slate-800/80 rounded-xl shadow p-6 mb-8 w-full max-w-full overflow-x-auto" style={{ maxWidth: '100vw' }}>
-            <h2 className="text-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent mb-4">
+            <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-4">
               Export & Reports
             </h2>
             <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-4">

@@ -100,6 +100,7 @@ function MobileTabBar() {
 }
 
 export function Header() {
+  const pathname = usePathname()
   const [scrolled, setScrolled] = useState(false)
   const [mounted, setMounted] = useState(false)
   const { items, removeItem, updateQuantity, getTotal, getCount } =
@@ -117,7 +118,17 @@ export function Header() {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
-  const displayCartCount = mounted ? cartCount : 0
+  // Lock body scroll when mobile nav is open
+  useEffect(() => {
+    if (mobileNavOpen) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [mobileNavOpen])
 
   // Category nav structure
   const categories = [
@@ -144,17 +155,12 @@ export function Header() {
     },
   ]
 
-  // Lock body scroll when mobile nav is open
-  useEffect(() => {
-    if (mobileNavOpen) {
-      document.body.style.overflow = 'hidden'
-    } else {
-      document.body.style.overflow = ''
-    }
-    return () => {
-      document.body.style.overflow = ''
-    }
-  }, [mobileNavOpen])
+  // Do not render consumer store header on admin routes
+  if (pathname?.startsWith('/dashboard/admin') || pathname?.startsWith('/admin')) {
+    return null
+  }
+
+  const displayCartCount = mounted ? cartCount : 0
 
   return (
     <>

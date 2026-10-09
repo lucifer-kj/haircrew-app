@@ -50,7 +50,7 @@ const MetricCard = React.memo(({
           {title}
         </span>
       </div>
-      <span className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+      <span className="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">
         {formatValue(value, format)}
       </span>
       {trend && (

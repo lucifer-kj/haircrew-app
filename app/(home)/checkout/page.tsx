@@ -37,7 +37,6 @@ export default function CheckoutPage() {
       country: string
     }[]
   >([])
-  const [addressLoading, setAddressLoading] = useState(false)
   const [selectedAddress, setSelectedAddress] = useState('')
 
   const { getTotal, items } = useCartStore()
@@ -54,7 +53,6 @@ export default function CheckoutPage() {
         email: prev.email || session.user?.email || '',
       }))
 
-      setAddressLoading(true)
       fetch('/api/user/addresses', { credentials: 'include' })
         .then(res => (res.ok ? res.json() : []))
         .then(data => {
@@ -63,7 +61,6 @@ export default function CheckoutPage() {
         .catch(() => {
           setAddresses([])
         })
-        .finally(() => setAddressLoading(false))
     }
   }, [session])
 

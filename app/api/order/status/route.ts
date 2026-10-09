@@ -64,8 +64,9 @@ export async function POST(req: NextRequest) {
             reference: updated.paymentReference,
           })
         }
-      } catch (err: any) {
-        Logger.warn('Pusher payment-submitted error', { error: err?.message })
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err)
+        Logger.warn('Pusher payment-submitted error', { error: msg })
       }
 
       return NextResponse.json({
@@ -149,8 +150,9 @@ export async function POST(req: NextRequest) {
           },
         })
       }
-    } catch (err: any) {
-      Logger.warn('Pusher status update skipped', { error: err?.message })
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err)
+      Logger.warn('Pusher status update skipped', { error: msg })
     }
 
     // Non-blocking email notifications
@@ -161,13 +163,14 @@ export async function POST(req: NextRequest) {
         } else if (newStatus === 'SHIPPED' || newStatus === 'DELIVERED') {
           await sendShippingUpdateEmail(customerEmail, customerName, orderId, newStatus)
         }
-      } catch (err: any) {
-        Logger.warn('Email notification skipped', { error: err?.message })
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err)
+        Logger.warn('Email notification skipped', { error: msg })
       }
     }
 
     return NextResponse.json({ success: true, order: updated })
-  } catch (e: any) {
+  } catch (e) {
     console.error('Order status update error:', e)
     return NextResponse.json(
       { error: 'Failed to update order status' },

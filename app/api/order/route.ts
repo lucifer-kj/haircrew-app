@@ -188,15 +188,17 @@ export async function POST(req: NextRequest) {
           createdAt: result.createdAt,
         })
       }
-    } catch (pusherErr: any) {
-      Logger.warn('Pusher notification skipped', { error: pusherErr?.message })
+    } catch (pusherErr) {
+      const msg = pusherErr instanceof Error ? pusherErr.message : String(pusherErr)
+      Logger.warn('Pusher notification skipped', { error: msg })
     }
 
     if (orderEmail) {
       try {
         await sendOrderConfirmationEmail(orderEmail, orderName ?? '', result.id)
-      } catch (emailErr: any) {
-        Logger.warn('Order confirmation email skipped', { error: emailErr?.message })
+      } catch (emailErr) {
+        const msg = emailErr instanceof Error ? emailErr.message : String(emailErr)
+        Logger.warn('Order confirmation email skipped', { error: msg })
       }
     }
 

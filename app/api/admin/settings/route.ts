@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/auth'
 import { z } from 'zod'
+import { hash } from 'bcryptjs'
 import Logger from '@/lib/logger'
 import type { Session } from 'next-auth'
 
@@ -104,13 +105,16 @@ export async function PATCH(req: NextRequest) {
     const { profile, store, payment, notifications } = validation.data
     // Update profile
     if (profile) {
+      const updateData: { name: string; email: string; password?: string } = {
+        name: profile.name,
+        email: profile.email,
+      }
+      if (profile.password) {
+        updateData.password = await hash(profile.password, 12)
+      }
       await prisma.user.update({
         where: { id: session.user.id },
-        data: {
-          name: profile.name,
-          email: profile.email,
-          ...(profile.password ? { password: profile.password } : {}),
-        },
+        data: updateData,
       })
     }
     // Update settings

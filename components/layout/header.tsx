@@ -57,7 +57,7 @@ function MobileTabBar() {
     },
   ]
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t flex justify-around items-center h-16 lg:hidden">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-t border-border/80 flex justify-around items-center h-16 lg:hidden shadow-[0_-4px_16px_rgba(0,0,0,0.06)]">
       {tabs.map(tab => {
         const active =
           pathname === tab.href ||
@@ -173,8 +173,12 @@ export function Header() {
 
   return (
     <>
-      {/* Top promo bar */}
-      <div className="bg-gradient-to-r from-primary-dark via-primary to-purple-800 text-white font-medium text-xs sm:text-sm py-2 shadow-xs">
+      {/* Top promo bar - visible on mobile only on home page; hidden on mobile for other pages */}
+      <div
+        className={`bg-gradient-to-r from-primary-dark via-primary to-purple-800 text-white font-medium text-xs sm:text-sm py-2 shadow-xs ${
+          pathname === '/' || pathname === '/home' ? 'block' : 'hidden md:block'
+        }`}
+      >
         <div className="container mx-auto px-4 flex items-center justify-center">
           <p className="text-center tracking-wide">
             ✨ Free express shipping on all orders over ₹250! <Link href="/products" className="underline font-semibold ml-1 hover:text-white/80 transition-colors">Shop Now</Link>
@@ -542,9 +546,9 @@ export function Header() {
             </motion.div>
           )}
         </AnimatePresence>
-        {/* Mobile Bottom Tab Bar */}
-        <MobileTabBar />
       </motion.header>
+      {/* Mobile Bottom Tab Bar (rendered outside motion.header to prevent containing block trap) */}
+      <MobileTabBar />
     </>
   )
 }

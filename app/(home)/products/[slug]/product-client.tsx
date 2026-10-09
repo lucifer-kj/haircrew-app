@@ -2,18 +2,10 @@
 
 import React, { useState, useMemo } from 'react'
 import Image from 'next/image'
-import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Star, ShoppingCart, Heart, Share2 } from 'lucide-react'
 import StarRating from '@/components/star-rating'
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselPrevious,
-  CarouselNext,
-} from '@/components/ui/carousel'
 import { useCartStore } from '@/store/cart-store'
 import { useSession } from 'next-auth/react'
 import { toast } from 'sonner'
@@ -57,7 +49,7 @@ interface RelatedProduct {
 interface ProductClientProps {
   product: Product
   reviews: Review[]
-  relatedProducts: RelatedProduct[]
+  relatedProducts?: RelatedProduct[]
   showReviewsOnly?: boolean
 }
 
@@ -166,7 +158,6 @@ function ReviewFormClient() {
 export default function ProductClient({ 
   product, 
   reviews, 
-  relatedProducts, 
   showReviewsOnly = false 
 }: ProductClientProps) {
   const [selectedImage, setSelectedImage] = useState(0)
@@ -177,15 +168,6 @@ export default function ProductClient({
   
   const addToCart = useCartStore((state) => state.addItem)
   const { data: session } = useSession()
-
-  // Format price
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('en-IN', {
-      style: 'currency',
-      currency: 'INR',
-      minimumFractionDigits: 2,
-    }).format(price)
-  }
 
 
   const ratingDistribution = useMemo(() => {
@@ -492,50 +474,6 @@ export default function ProductClient({
           </Button>
         </div>
       </div>
-
-      {/* Related Products Carousel */}
-      {relatedProducts.length > 0 && (
-        <div className="mt-16">
-          <h3 className="text-xl font-bold mb-6">You might also like</h3>
-          <Carousel className="w-full">
-            <CarouselContent>
-              {relatedProducts.map((relatedProduct) => (
-                <CarouselItem key={relatedProduct.id} className="basis-80 max-w-xs">
-                  <Card className="hover:shadow-lg transition-shadow">
-                    <CardContent className="flex flex-col items-center p-4">
-                      <Link href={`/products/${relatedProduct.slug}`}>
-                        <div className="relative aspect-square w-full bg-gray-100 rounded-lg overflow-hidden mb-4">
-                          <Image
-                            src={relatedProduct.images[0] || '/Images/p1.jpg'}
-                            alt={relatedProduct.name}
-                            fill
-                            className="object-cover hover:scale-105 transition-transform"
-                            sizes="300px"
-                          />
-                        </div>
-                      </Link>
-                      <CardTitle className="text-lg font-semibold mb-2 text-center line-clamp-2">
-                        {relatedProduct.name}
-                      </CardTitle>
-                      <div className="text-primary font-bold text-xl mb-3">
-                        {formatPrice(relatedProduct.price)}
-                      </div>
-                      <Link
-                        href={`/products/${relatedProduct.slug}`}
-                        className="bg-primary text-primary-foreground px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors text-sm font-medium"
-                      >
-                        View Product
-                      </Link>
-                    </CardContent>
-                  </Card>
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-            <CarouselPrevious className="left-2 top-1/2 -translate-y-1/2" />
-            <CarouselNext className="right-2 top-1/2 -translate-y-1/2" />
-          </Carousel>
-        </div>
-      )}
     </>
   )
 }

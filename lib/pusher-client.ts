@@ -4,13 +4,14 @@ import { env } from './env';
 let pusherClient: Pusher | null = null;
 
 export function getPusherClient(): Pusher | null {
-  if (!env.NEXT_PUBLIC_PUSHER_APP_KEY) {
+  const key = env.NEXT_PUBLIC_PUSHER_APP_KEY || process.env.NEXT_PUBLIC_PUSHER_APP_KEY || process.env.PUSHER_KEY;
+  if (!key) {
     return null;
   }
   if (!pusherClient) {
     try {
-      pusherClient = new Pusher(env.NEXT_PUBLIC_PUSHER_APP_KEY, {
-        cluster: env.NEXT_PUBLIC_PUSHER_CLUSTER || 'us2',
+      pusherClient = new Pusher(key, {
+        cluster: env.NEXT_PUBLIC_PUSHER_CLUSTER || process.env.NEXT_PUBLIC_PUSHER_CLUSTER || 'ap2',
         channelAuthorization: {
           endpoint: '/api/pusher/auth',
           transport: 'ajax',

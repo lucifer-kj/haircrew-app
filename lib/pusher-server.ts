@@ -3,18 +3,28 @@ import { env } from './env';
 
 let pusherServer: Pusher | null = null;
 
-export function getPusherServer() {
+export function getPusherServer(): Pusher | null {
   if (!pusherServer) {
-    if (!env.PUSHER_APP_ID || !env.PUSHER_KEY || !env.PUSHER_SECRET) {
-      throw new Error('Pusher configuration is missing');
+    const appId = env.PUSHER_APP_ID || process.env.PUSHER_APP_ID;
+    const key = env.PUSHER_KEY || process.env.PUSHER_KEY;
+    const secret = env.PUSHER_SECRET || process.env.PUSHER_SECRET;
+    const cluster = env.PUSHER_CLUSTER || process.env.PUSHER_CLUSTER || 'ap2';
+
+    if (!appId || !key || !secret) {
+      return null;
     }
-    pusherServer = new Pusher({
-      appId: env.PUSHER_APP_ID,
-      key: env.PUSHER_KEY,
-      secret: env.PUSHER_SECRET,
-      cluster: env.PUSHER_CLUSTER || 'us2',
-      useTLS: true,
-    });
+    try {
+      pusherServer = new Pusher({
+        appId,
+        key,
+        secret,
+        cluster,
+        useTLS: true,
+      });
+    } catch (err) {
+      console.warn('Failed to initialize Pusher server:', err);
+      return null;
+    }
   }
   return pusherServer;
 } 

@@ -1,47 +1,78 @@
-import { Ratelimit } from '@upstash/ratelimit'
-import { Redis } from '@upstash/redis'
+interface RateLimitResult {
+  success: boolean
+  limit: number
+  remaining: number
+  reset: number
+  pending: Promise<void>
+}
 
-type Duration = `${number} ${'ms' | 's' | 'm' | 'h' | 'd'}` | `${number}${'ms' | 's' | 'm' | 'h' | 'd'}`
+class MemoryRateLimiter {
+  private tokens: number
+  private windowMs: number
+  private hits: Map<string, number[]> = new Map()
 
-export const createRateLimiter = (tokens: number, window: Duration) => {
-  // Check if Redis environment variables are available
-  if (!process.env.UPSTASH_REDIS_REST_URL || !process.env.UPSTASH_REDIS_REST_TOKEN) {
-    console.warn('Upstash Redis not configured. Rate limiting disabled.');
-    // Return a mock rate limiter that always allows requests
-    return {
-      limit: async (): Promise<{
-        success: boolean;
-        limit: number;
-        remaining: number;
-        reset: number;
-        pending: Promise<void>;
-      }> => ({
-        success: true,
-        limit: tokens,
-        remaining: tokens - 1,
-        reset: Date.now() + 30000,
-        pending: Promise.resolve()
-      }),
-      getRemaining: async (): Promise<{
-        remaining: number;
-        reset: number;
-      }> => ({
-        remaining: tokens,
-        reset: Date.now() + 30000
-      }),
-      resetTokens: async (): Promise<void> => {}
-    };
+  constructor(tokens: number, windowMs: number) {
+    this.tokens = tokens
+    this.windowMs = windowMs
   }
 
-  return new Ratelimit({
-    redis: Redis.fromEnv(),
-    limiter: Ratelimit.slidingWindow(tokens, window), // 15 requests per 30 seconds
-    analytics: true,
-    prefix: 'ratelimit:dashboard',
-  })
+  async limit(identifier = 'global'): Promise<RateLimitResult> {
+    const now = Date.now()
+    const windowStart = now - this.windowMs
+    const timestamps = (this.hits.get(identifier) || []).filter(t => t > windowStart)
+
+    if (timestamps.length >= this.tokens) {
+      return {
+        success: false,
+        limit: this.tokens,
+        remaining: 0,
+        reset: timestamps[0] + this.windowMs,
+        pending: Promise.resolve(),
+      }
+    }
+
+    timestamps.push(now)
+    this.hits.set(identifier, timestamps)
+
+    return {
+      success: true,
+      limit: this.tokens,
+      remaining: this.tokens - timestamps.length,
+      reset: now + this.windowMs,
+      pending: Promise.resolve(),
+    }
+  }
+
+  async getRemaining(identifier = 'global') {
+    const now = Date.now()
+    const windowStart = now - this.windowMs
+    const timestamps = (this.hits.get(identifier) || []).filter(t => t > windowStart)
+    return {
+      remaining: Math.max(0, this.tokens - timestamps.length),
+      reset: now + this.windowMs,
+    }
+  }
+
+  async resetTokens(identifier = 'global') {
+    this.hits.delete(identifier)
+  }
+}
+
+export const createRateLimiter = (tokens: number, windowStr: string) => {
+  let ms = 30000
+  const match = windowStr.match(/^(\d+)\s*(ms|s|m|h)?$/)
+  if (match) {
+    const num = parseInt(match[1])
+    const unit = match[2] || 's'
+    if (unit === 's') ms = num * 1000
+    else if (unit === 'm') ms = num * 60 * 1000
+    else if (unit === 'h') ms = num * 3600 * 1000
+    else ms = num
+  }
+  return new MemoryRateLimiter(tokens, ms)
 }
 
 export const dashboardLimiters = {
-  metrics: createRateLimiter(15, '30 s'), // More generous for metrics
-  sensitive: createRateLimiter(5, '1 m'), // Stricter for sensitive operations
-} 
+  metrics: createRateLimiter(30, '30s'),
+  sensitive: createRateLimiter(10, '60s'),
+}

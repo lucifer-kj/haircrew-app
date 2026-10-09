@@ -12,13 +12,20 @@ export async function POST(req: NextRequest) {
   });
 
   // Broadcast to admin channel
-  await getPusherServer().trigger('presence-admin-dashboard', 'admin-notification', {
-    id: notification.id,
-    type,
-    message,
-    data,
-    createdAt: notification.createdAt,
-  });
+  const pusher = getPusherServer()
+  if (pusher) {
+    try {
+      await pusher.trigger('presence-admin-dashboard', 'admin-notification', {
+        id: notification.id,
+        type,
+        message,
+        data,
+        createdAt: notification.createdAt,
+      });
+    } catch (err) {
+      console.warn('Pusher notification failed:', err);
+    }
+  }
 
   return NextResponse.json({ success: true });
 } 

@@ -64,12 +64,19 @@ export async function PATCH(
       data: { stock },
     })
     // Pusher: Notify clients of stock update
-    await getPusherServer().trigger('products', 'stock-updated', {
-      id: product.id,
-      name: product.name,
-      stock: product.stock,
-      slug: product.slug,
-    })
+    const pusher = getPusherServer()
+    if (pusher) {
+      try {
+        await pusher.trigger('products', 'stock-updated', {
+          id: product.id,
+          name: product.name,
+          stock: product.stock,
+          slug: product.slug,
+        })
+      } catch (err) {
+        console.warn('Pusher product stock trigger failed:', err)
+      }
+    }
     return NextResponse.json(product)
   } catch (e) {
     console.error(e)

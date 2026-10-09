@@ -64,7 +64,17 @@ export default function LoginForm() {
         toast.error(errorMsg)
       } else {
         toast.success('Signed in successfully!')
-        router.push(redirectTo)
+        try {
+          const sessionRes = await fetch('/api/auth/session')
+          const sessionData = await sessionRes.json()
+          if (sessionData?.user?.role === 'ADMIN' && (redirectTo === '/' || !redirectTo)) {
+            router.push('/dashboard/admin')
+          } else {
+            router.push(redirectTo)
+          }
+        } catch {
+          router.push(redirectTo)
+        }
         router.refresh()
       }
     } catch {

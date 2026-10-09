@@ -17,8 +17,8 @@ export default function AuthGuard({ children, requiredRole = 'ADMIN' }: {
   useEffect(() => {
     if (status === 'loading') return
     if (!session || (requiredRole && session.user.role !== requiredRole)) {
-      // Redirect to signin with expiry reason and deep link
-      router.replace(`/auth/signin?reason=expired&redirect=${encodeURIComponent(pathname)}`)
+      const redirectTarget = requiredRole === 'ADMIN' ? '/admin/login' : '/auth/signin'
+      router.replace(`${redirectTarget}?callbackUrl=${encodeURIComponent(pathname)}`)
     }
   }, [session, status, router, requiredRole, pathname])
 

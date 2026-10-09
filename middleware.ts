@@ -42,8 +42,25 @@ export async function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname
   const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET })
 
-  const isAdminPath = path.startsWith('/dashboard/admin') || path.startsWith('/api/admin')
+  const isAdminLogin = path === '/admin/login'
+  const isAdminPath = path.startsWith('/dashboard/admin') || path.startsWith('/api/admin') || path === '/admin' || (path.startsWith('/admin/') && !path.startsWith('/admin/login'))
   const isUserDashboard = path.startsWith('/dashboard/user')
+
+  // If already authenticated as admin and visiting /admin/login, redirect straight to dashboard
+  if (isAdminLogin) {
+    if (token?.role === 'ADMIN') {
+      const response = NextResponse.redirect(new URL('/dashboard/admin', request.url))
+      Object.entries(securityHeaders).forEach(([key, value]) => {
+        response.headers.set(key, value)
+      })
+      return response
+    }
+    const response = NextResponse.next()
+    Object.entries(securityHeaders).forEach(([key, value]) => {
+      response.headers.set(key, value)
+    })
+    return response
+  }
 
   // API Admin routes protection
   if (path.startsWith('/api/admin')) {
@@ -52,19 +69,32 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // Page protection
-  if (!token && (isAdminPath || isUserDashboard)) {
+  // Admin Page protection - redirect to dedicated /admin/login
+  if (isAdminPath) {
+    if (!token) {
+      const signInUrl = new URL('/admin/login', request.url)
+      signInUrl.searchParams.set('callbackUrl', path)
+      const response = NextResponse.redirect(signInUrl)
+      Object.entries(securityHeaders).forEach(([key, value]) => {
+        response.headers.set(key, value)
+      })
+      return response
+    }
+
+    if (token.role !== 'ADMIN') {
+      const response = NextResponse.redirect(new URL('/admin/login?error=AccessDenied', request.url))
+      Object.entries(securityHeaders).forEach(([key, value]) => {
+        response.headers.set(key, value)
+      })
+      return response
+    }
+  }
+
+  // User Dashboard protection - redirect to consumer /auth/signin
+  if (!token && isUserDashboard) {
     const signInUrl = new URL('/auth/signin', request.url)
     signInUrl.searchParams.set('callbackUrl', path)
     const response = NextResponse.redirect(signInUrl)
-    Object.entries(securityHeaders).forEach(([key, value]) => {
-      response.headers.set(key, value)
-    })
-    return response
-  }
-
-  if (isAdminPath && token?.role !== 'ADMIN') {
-    const response = NextResponse.redirect(new URL('/', request.url))
     Object.entries(securityHeaders).forEach(([key, value]) => {
       response.headers.set(key, value)
     })
@@ -81,6 +111,8 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
+    '/admin',
+    '/admin/:path*',
     '/dashboard/admin/:path*',
     '/dashboard/user/:path*',
     '/api/admin/:path*',

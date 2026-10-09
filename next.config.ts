@@ -81,7 +81,7 @@ const nextConfig: NextConfig = {
     maxInactiveAge: 25 * 1000,
     pagesBufferLength: 4,
   },
-  output: 'standalone',
+  output: process.env.DOCKER_BUILD === 'true' ? 'standalone' : undefined,
 }
 
 export default nextConfig

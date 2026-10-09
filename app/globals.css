@@ -48,33 +48,53 @@
 
 @layer base {
   :root {
-    /* Brand Colors from design.json */
-    --primary: #9929ea;
-    --primary-dark: #7e20c6;
-    --secondary: #891997;
-    --background: #eae4d5;
-    --accent: #b6b09f;
+    /* Brand Colors */
+    --primary: #8b15e8;
+    --primary-dark: #700bc5;
+    --primary-foreground: #ffffff;
+    --secondary: #f4ecfb;
+    --secondary-foreground: #700bc5;
+    --background: #fbfaf8;
+    --foreground: #1c1917;
+    --accent: #eee8dc;
+    --accent-foreground: #1c1917;
 
-    /* Neutral Colors */
+    /* Surfaces & Cards */
+    --card: #ffffff;
+    --card-foreground: #1c1917;
+    --popover: #ffffff;
+    --popover-foreground: #1c1917;
+
+    /* Neutrals & Muted */
     --white: #ffffff;
     --light-gray: #f8f9fa;
     --medium-gray: #e9ecef;
     --dark-gray: #6c757d;
     --charcoal: #484e53;
     --black: #000000;
+    --muted: #f5f2eb;
+    --muted-foreground: #78716c;
+
+    /* Borders & Inputs */
+    --border: #e7e2d7;
+    --input: #e7e2d7;
+    --ring: #8b15e8;
+    --radius: 0.75rem;
 
     /* Semantic Colors */
-    --success: #28a745;
-    --warning: #ffc107;
-    --error: #dc3545;
-    --info: #17a2b8;
+    --success: #16a34a;
+    --warning: #f59e0b;
+    --error: #dc2626;
+    --destructive: #dc2626;
+    --destructive-foreground: #ffffff;
+    --info: #0284c7;
 
     /* Gradients */
-    --hero-gradient: linear-gradient(135deg, #ffe5f0 0%, #f0f8ff 100%);
+    --hero-gradient: linear-gradient(135deg, #fdf4ff 0%, #faf5ff 50%, #fbfaf8 100%);
     --card-overlay: linear-gradient(
       180deg,
       rgba(0, 0, 0, 0) 0%,
-      rgba(0, 0, 0, 0.3) 100%
+      rgba(0, 0, 0, 0.4) 100%
     );
 
     /* Typography */
@@ -117,31 +137,12 @@
     --breakpoint-desktop: 1024px;
     --breakpoint-large: 1200px;
 
-    --radius: 0.75rem;
-
-    /* Theme colors */
-    --foreground: #020817;
-    --card: #ffffff;
-    --card-foreground: #020817;
-    --popover: #ffffff;
-    --popover-foreground: #020817;
-    --primary-foreground: #ffffff;
-    --secondary-foreground: #020817;
-    --muted: #f4f4f5;
-    --muted-foreground: #71717a;
-    --accent-foreground: #18181b;
-    --destructive: #ef4444;
-    --destructive-foreground: #ffffff;
-    --border: #e4e4e7;
-    --input: #e4e4e7;
-    --ring: #9929ea;
-
     /* Glass UI effect variables */
-    --glass-bg: rgba(255, 255, 255, 0.7);
-    --glass-border: rgba(255, 255, 255, 0.2);
-    --glass-shadow: rgba(31, 38, 135, 0.05);
-    --glass-highlight: rgba(255, 255, 255, 0.7);
-    --glass-blur: 8px;
+    --glass-bg: rgba(255, 255, 255, 0.85);
+    --glass-border: rgba(231, 226, 215, 0.6);
+    --glass-shadow: rgba(139, 21, 232, 0.04);
+    --glass-highlight: rgba(255, 255, 255, 0.9);
+    --glass-blur: 12px;
   }
 
   .dark {

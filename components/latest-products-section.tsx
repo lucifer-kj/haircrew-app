@@ -22,13 +22,16 @@ export default function LatestProductsSection({
   const canLoadMore = products.length > visibleCount
   const visibleProducts = products.slice(0, visibleCount)
   return (
-    <section className="py-16 bg-[#EAE4D5]">
-      <div className="max-w-7xl mx-auto px-4">
+    <section className="py-16 sm:py-20 bg-background border-t border-border/40">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold text-[#000] mb-4">
+          <span className="text-xs uppercase tracking-widest font-bold text-primary mb-2 block">
+            Curated Formulations
+          </span>
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-foreground tracking-tight mb-3">
             Latest Products
           </h2>
-          <p className="text-[#9929EA] font-bold max-w-2xl mx-auto">
+          <p className="text-muted-foreground font-medium text-sm sm:text-base max-w-2xl mx-auto">
             Check out our newest arrivals and best sellers.
           </p>
         </div>
@@ -82,17 +85,17 @@ export default function LatestProductsSection({
           </div>
           {/* Load More Button */}
           {!loading && canLoadMore && (
-            <div className="flex justify-center mt-8 gap-4">
+            <div className="flex justify-center mt-10 gap-3">
               <button
                 onClick={() => setVisibleCount(c => Math.min(c + 4, products.length))}
-                className="px-6 py-2 bg-[#9929EA] hover:bg-[#9929EA]/90 text-white rounded-full font-semibold shadow transition"
+                className="px-6 py-2.5 bg-primary hover:bg-primary/90 text-primary-foreground rounded-full font-semibold shadow-xs transition text-sm cursor-pointer"
               >
                 Load More
               </button>
               {onViewAll && (
                 <button
                   onClick={onViewAll}
-                  className="px-6 py-2 bg-[#000] hover:bg-[#333] text-white rounded-full font-semibold shadow transition"
+                  className="px-6 py-2.5 bg-secondary hover:bg-secondary/80 text-secondary-foreground rounded-full font-semibold shadow-xs transition text-sm cursor-pointer"
                 >
                   View All
                 </button>
@@ -107,24 +110,22 @@ export default function LatestProductsSection({
 
 function ProductSkeleton() {
   return (
-    <div className="bg-white rounded-xl shadow-md flex flex-col animate-pulse overflow-hidden">
-      <div className="aspect-[4/3] bg-[#EAE4D5] w-full relative">
-        {/* Add shimmer effect overlay */}
+    <div className="bg-card border border-border/80 rounded-2xl shadow-xs flex flex-col animate-pulse overflow-hidden">
+      <div className="aspect-square bg-muted/40 w-full relative">
         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent shimmer-animation"></div>
       </div>
       <div className="p-4 flex-1 flex flex-col justify-between">
-        <div className="h-5 bg-[#B6B09F] rounded w-3/4 mb-2" />
-        <div className="h-4 bg-[#B6B09F] rounded w-1/2 mb-4" />
-        <div className="flex items-center mb-2">
-          {/* Rating skeleton */}
+        <div className="h-4 bg-muted rounded w-3/4 mb-2" />
+        <div className="h-4 bg-muted rounded w-1/2 mb-4" />
+        <div className="flex items-center mb-4">
           <div className="flex space-x-1">
             {[1, 2, 3, 4, 5].map(i => (
-              <div key={i} className="w-4 h-4 rounded-full bg-[#B6B09F]"></div>
+              <div key={i} className="w-3.5 h-3.5 rounded-full bg-muted"></div>
             ))}
           </div>
-          <div className="h-3 bg-[#B6B09F] rounded w-16 ml-auto"></div>
+          <div className="h-3 bg-muted rounded w-12 ml-auto"></div>
         </div>
-        <div className="h-10 bg-[#9929EA] rounded w-full" />
+        <div className="h-10 bg-primary/20 rounded-lg w-full" />
       </div>
     </div>
   )

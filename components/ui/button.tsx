@@ -1,69 +1,67 @@
-import { forwardRef } from 'react'
-import { cn } from '@/lib/utils'
+import * as React from 'react'
 import { Slot } from '@radix-ui/react-slot'
+import { cva, type VariantProps } from 'class-variance-authority'
+import { cn } from '@/lib/utils'
 
-interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?:
-    | 'default'
-    | 'destructive'
-    | 'outline'
-    | 'secondary'
-    | 'ghost'
-    | 'link'
-  size?: 'default' | 'sm' | 'lg' | 'icon'
+export const buttonVariants = cva(
+  'inline-flex items-center justify-center whitespace-nowrap rounded-lg text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 select-none cursor-pointer active:scale-[0.98]',
+  {
+    variants: {
+      variant: {
+        default:
+          'bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 hover:shadow-md',
+        destructive:
+          'bg-destructive text-destructive-foreground shadow-xs hover:bg-destructive/90',
+        outline:
+          'border border-input bg-background/80 backdrop-blur-xs shadow-xs hover:bg-secondary hover:text-secondary-foreground hover:border-primary/30',
+        secondary:
+          'bg-secondary text-secondary-foreground shadow-xs hover:bg-secondary/80',
+        ghost:
+          'hover:bg-secondary/70 hover:text-secondary-foreground',
+        link:
+          'text-primary underline-offset-4 hover:underline',
+      },
+      size: {
+        default: 'h-10 px-4 py-2',
+        sm: 'h-8 rounded-md px-3 text-xs',
+        lg: 'h-11 rounded-md px-6 text-base',
+        icon: 'h-10 w-10',
+      },
+    },
+    defaultVariants: {
+      variant: 'default',
+      size: 'default',
+    },
+  }
+)
+
+export interface ButtonProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
+    VariantProps<typeof buttonVariants> {
   asChild?: boolean
 }
 
-export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  function Button(
-    {
-      className,
-      variant = 'default',
-      size = 'default',
-      asChild = false,
-      ...props
-    },
-    ref
-  ) {
+export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+  ({ className, variant, size, asChild = false, ...props }, ref) => {
     const Comp = asChild ? Slot : 'button'
     return (
       <Comp
+        className={cn(buttonVariants({ variant, size, className }))}
         ref={ref}
         {...props}
-        className={cn(
-          'min-h-[44px] rounded-full font-semibold focus:outline-none focus:ring-2 focus:ring-secondary transition-all',
-          'text-base sm:text-lg',
-
-          // Handle variants
-          variant === 'default' &&
-            'bg-[var(--primary)] text-white hover:bg-[var(--primary-dark)]',
-          variant === 'destructive' && 'bg-red-500 text-white hover:bg-red-600',
-          variant === 'outline' &&
-            'border border-gray-300 bg-transparent hover:bg-gray-100',
-          variant === 'secondary' &&
-            'bg-gray-200 text-gray-800 hover:bg-gray-300',
-          variant === 'ghost' && 'bg-transparent hover:bg-gray-100',
-          variant === 'link' &&
-            'bg-transparent text-[var(--primary)] underline-offset-4 hover:underline',
-
-          // Handle sizes
-          size === 'default' && 'px-4 py-2',
-          size === 'sm' && 'px-3 py-1.5 text-sm',
-          size === 'lg' && 'px-6 py-3',
-          size === 'icon' && 'p-2 min-w-[44px] aspect-square',
-
-          className
-        )}
       />
     )
   }
 )
+Button.displayName = 'Button'
 
-// Global Loader Spinner
-export function Loader({ className = 'w-8 h-8' }: { className?: string }) {
+export function Loader({ className = 'w-5 h-5' }: { className?: string }) {
   return (
     <div
-      className={`inline-block animate-spin rounded-full border-4 border-solid border-secondary border-t-transparent ${className}`}
+      className={cn(
+        'inline-block animate-spin rounded-full border-2 border-solid border-primary border-t-transparent',
+        className
+      )}
       role="status"
       aria-label="Loading"
     />

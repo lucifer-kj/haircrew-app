@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import {
   X,
+  Menu,
   ShoppingCart,
   Trash2,
   Home,
@@ -294,55 +295,77 @@ export function Header() {
           </div>
 
           {/* Right side actions */}
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-3 sm:space-x-4">
             {/* User/Account Dropdown */}
             {session ? (
               <Popover>
                 <PopoverTrigger asChild>
                   <motion.button
-                    className="p-2 rounded-full border border-gray-200 hover:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary"
+                    className="p-2 rounded-full border border-border bg-card hover:bg-secondary text-foreground transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                     whileHover={reduced ? undefined : { scale: 1.05 }}
                     whileTap={reduced ? undefined : { scale: 0.95 }}
+                    aria-label="User account"
                   >
-                    <UserIcon className="w-6 h-6 text-gray-700" />
+                    <UserIcon className="w-5 h-5" />
                   </motion.button>
                 </PopoverTrigger>
-                <PopoverContent align="end" className="w-48 p-0">
-                  <ul className="py-2">
+                <PopoverContent align="end" className="w-52 p-1.5 shadow-lg border border-border/80 rounded-xl">
+                  <div className="px-3 py-2 border-b border-border/60 mb-1">
+                    <p className="text-xs text-muted-foreground">Signed in as</p>
+                    <p className="text-sm font-semibold truncate text-foreground">{session.user?.name || session.user?.email}</p>
+                  </div>
+                  <ul className="space-y-0.5">
                     <li>
                       <Link
-                        href="/dashboard/profile"
-                        className="block px-4 py-2 text-gray-700 hover:bg-secondary/10 hover:text-secondary rounded transition-colors"
+                        href="/dashboard/user/profile"
+                        className="block px-3 py-1.5 text-sm text-foreground/80 hover:bg-secondary hover:text-primary rounded-lg transition-colors font-medium"
                       >
-                        Profile
+                        My Profile
+                      </Link>
+                    </li>
+                    <li>
+                      <Link
+                        href="/dashboard/user/orders"
+                        className="block px-3 py-1.5 text-sm text-foreground/80 hover:bg-secondary hover:text-primary rounded-lg transition-colors font-medium"
+                      >
+                        My Orders
                       </Link>
                     </li>
                     {session?.user?.role === 'ADMIN' && (
                       <li>
                         <Link
                           href="/dashboard/admin"
-                          className="block px-4 py-2 text-gray-700 hover:bg-secondary/10 hover:text-secondary rounded transition-colors"
+                          className="block px-3 py-1.5 text-sm text-primary font-semibold hover:bg-secondary rounded-lg transition-colors"
                         >
-                          Dashboard
+                          🛡️ Admin Dashboard
                         </Link>
                       </li>
                     )}
-                    <li>
+                    <li className="pt-1 border-t border-border/60">
                       <button
                         onClick={() => signOut({ callbackUrl: '/' })}
-                        className="w-full text-left px-4 py-2 text-red-600 hover:bg-red-50 rounded transition-colors"
+                        className="w-full text-left px-3 py-1.5 text-sm text-destructive hover:bg-destructive/10 rounded-lg transition-colors font-medium"
                       >
-                        Logout
+                        Sign Out
                       </button>
                     </li>
                   </ul>
                 </PopoverContent>
               </Popover>
             ) : (
-              <Button onClick={() => router.push('/auth/signin')}>
+              <Button size="sm" onClick={() => router.push('/auth/signin')}>
                 Sign In
               </Button>
             )}
+
+            {/* Mobile Hamburger Toggle */}
+            <button
+              onClick={() => setMobileNavOpen(true)}
+              className="lg:hidden p-2 rounded-lg text-foreground hover:text-primary hover:bg-secondary transition-colors"
+              aria-label="Open mobile navigation"
+            >
+              <Menu className="w-6 h-6" />
+            </button>
           </div>
         </div>
 
@@ -454,22 +477,44 @@ export function Header() {
                   </div>
 
                   {/* Mobile User Actions */}
-                  <div className="p-4 border-t mt-auto">
-                    <div className="space-y-2">
-                      <Link
-                        href={session?.user?.role === 'ADMIN' ? '/dashboard/admin' : '/dashboard/user/profile'}
-                        className="block w-full text-center py-3 rounded bg-secondary text-white font-bold hover:bg-secondary/90 transition"
-                        onClick={() => setMobileNavOpen(false)}
-                      >
-                        {session?.user?.role === 'ADMIN' ? 'Admin Dashboard' : 'My Account'}
-                      </Link>
-                      <button
-                        className="block w-full text-center py-3 rounded bg-gray-100 text-gray-800 font-bold hover:bg-gray-200 transition"
-                        onClick={() => setMobileNavOpen(false)}
-                      >
-                        Sign Out
-                      </button>
-                    </div>
+                  <div className="p-4 border-t border-border mt-auto">
+                    {session ? (
+                      <div className="space-y-2">
+                        <Link
+                          href={session?.user?.role === 'ADMIN' ? '/dashboard/admin' : '/dashboard/user/profile'}
+                          className="block w-full text-center py-2.5 rounded-xl bg-primary text-primary-foreground font-semibold shadow hover:bg-primary/90 transition text-sm"
+                          onClick={() => setMobileNavOpen(false)}
+                        >
+                          {session?.user?.role === 'ADMIN' ? '🛡️ Admin Dashboard' : 'My Account'}
+                        </Link>
+                        <button
+                          onClick={() => {
+                            setMobileNavOpen(false)
+                            signOut({ callbackUrl: '/' })
+                          }}
+                          className="block w-full text-center py-2.5 rounded-xl border border-destructive/20 text-destructive font-medium hover:bg-destructive/10 transition text-sm"
+                        >
+                          Sign Out
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        <Link
+                          href="/auth/signin"
+                          className="block w-full text-center py-2.5 rounded-xl bg-primary text-primary-foreground font-semibold shadow hover:bg-primary/90 transition text-sm"
+                          onClick={() => setMobileNavOpen(false)}
+                        >
+                          Sign In
+                        </Link>
+                        <Link
+                          href="/auth/signup"
+                          className="block w-full text-center py-2.5 rounded-xl border border-border text-foreground font-medium hover:bg-secondary transition text-sm"
+                          onClick={() => setMobileNavOpen(false)}
+                        >
+                          Create Account
+                        </Link>
+                      </div>
+                    )}
                   </div>
                 </div>
               </FocusTrap>

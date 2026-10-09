@@ -118,7 +118,7 @@ export default function ProductCard({
       transition={{ type: 'spring', stiffness: 300, damping: 22 }}
       className="h-full"
     >
-      <Card className="group bg-white rounded-xl shadow-md transition-all duration-300 relative overflow-hidden flex flex-col h-full">
+      <Card className="group bg-card border border-border/80 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 relative overflow-hidden flex flex-col h-full">
         {/* Wishlist Button */}
         {showWishlist && (
           <Button
@@ -127,7 +127,7 @@ export default function ProductCard({
             aria-label={
               isInWishlist ? 'Remove from wishlist' : 'Add to wishlist'
             }
-            className="absolute top-3 right-3 z-10 bg-white/80 backdrop-blur-sm hover:bg-white focus:ring-2 focus:ring-secondary"
+            className="absolute top-3 right-3 z-10 bg-background/80 backdrop-blur-md hover:bg-background border border-border/60 shadow-xs focus:ring-2 focus:ring-primary rounded-full h-8 w-8"
             onClick={handleWishlistToggle}
             disabled={wishlistLoading}
             tabIndex={0}
@@ -136,7 +136,7 @@ export default function ProductCard({
               <LoadingSpinner size="sm" />
             ) : (
               <Heart
-                className={`w-5 h-5 ${isInWishlist ? 'fill-red-500 text-red-500' : 'text-gray-600'}`}
+                className={`w-4 h-4 ${isInWishlist ? 'fill-red-500 text-red-500' : 'text-muted-foreground'}`}
               />
             )}
           </Button>
@@ -145,18 +145,17 @@ export default function ProductCard({
         {/* Clickable Image and Title */}
         <Link
           href={`/products/${product.slug}`}
-          className="block focus:outline-none focus:ring-2 focus:ring-secondary rounded-t-xl"
+          className="block focus:outline-none focus:ring-2 focus:ring-primary rounded-t-2xl"
         >
-          <div className="relative w-full aspect-[4/3] bg-[#EAE4D5] overflow-hidden flex items-center justify-center">
+          <div className="relative w-full aspect-square bg-muted/30 overflow-hidden flex items-center justify-center">
             <Image
               src={product.images[0] || '/Images/p1.jpg'}
               alt={imageAlt}
               fill
-              sizes="(max-width: 768px) 100vw, 300px"
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 300px"
               className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-300"
               priority={false}
               loading="lazy"
-              fetchPriority="auto"
             />
           </div>
         </Link>
@@ -166,25 +165,25 @@ export default function ProductCard({
           <Link
             href={`/products/${product.slug}`}
             tabIndex={0}
-            className="block focus:outline-none focus:ring-2 focus:ring-secondary rounded"
+            className="block focus:outline-none focus:ring-2 focus:ring-primary rounded"
           >
-            <CardTitle className="text-base sm:text-lg font-bold mb-1 text-gray-900 group-hover:text-secondary transition-colors line-clamp-2 text-left">
+            <CardTitle className="text-sm sm:text-base font-semibold mb-1 text-foreground group-hover:text-primary transition-colors line-clamp-2 text-left">
               <span title={product.name}>{product.name}</span>
             </CardTitle>
           </Link>
 
           {/* Rating and Stock */}
-          <div className="flex items-center justify-between mb-1">
+          <div className="flex items-center justify-between mb-2">
             {renderStars(product.rating)}
             <span
-              className={`text-xs font-semibold ml-2 ${inStock ? 'text-green-600' : 'text-red-500'}`}
+              className={`text-xs font-semibold px-2 py-0.5 rounded-full ${inStock ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-red-50 text-red-700 border border-red-200'}`}
             >
               {inStock ? 'In Stock' : 'Out of Stock'}
             </span>
           </div>
 
           {/* Price */}
-          <div className="text-secondary font-bold text-lg mb-2 text-left">
+          <div className="text-primary font-bold text-lg mb-3 text-left">
             {formatPrice(product.price)}
           </div>
 
@@ -192,7 +191,7 @@ export default function ProductCard({
           <div className="w-full mt-auto">
             <Button
               onClick={handleAddToCart}
-              className="w-full bg-secondary hover:bg-secondary/90 text-white font-semibold py-2 transition-all duration-200 flex items-center justify-center"
+              className="w-full font-semibold shadow-xs"
               disabled={!inStock || cartLoading}
               aria-disabled={!inStock || cartLoading}
               aria-label={inStock ? 'Add to cart' : 'Out of stock'}

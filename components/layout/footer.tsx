@@ -23,38 +23,38 @@ export function Footer() {
       initial="hidden"
       animate={inView ? 'show' : 'hidden'}
       variants={reduced ? undefined : fadeIn}
-      className="hidden bg-[#f7f6f3] text-black pt-8 lg:block"
+      className="bg-card text-foreground border-t border-border/80 pt-10 pb-24 lg:pb-10"
     >
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4">
         {/* Condensed footer with minimal content */}
-        <div className="flex flex-col md:flex-row justify-between items-center">
+        <div className="flex flex-col md:flex-row justify-between items-center gap-6">
           {/* Logo and socials */}
-          <div className="flex flex-col items-center md:items-start mb-6 md:mb-0">
-            <span className="text-2xl font-bold bg-gradient-to-r from-black via-secondary to-secondary bg-clip-text text-transparent mb-4">
+          <div className="flex flex-col items-center md:items-start">
+            <span className="text-2xl font-bold bg-gradient-to-r from-foreground via-primary to-primary bg-clip-text text-transparent mb-3">
               HairCrew
             </span>
             <div className="flex space-x-4">
               <Link
                 href="#"
-                className="text-gray-700 hover:text-secondary transition-colors"
+                className="text-muted-foreground hover:text-primary transition-colors p-1"
               >
                 <Facebook className="w-5 h-5" />
               </Link>
               <Link
                 href="#"
-                className="text-gray-700 hover:text-secondary transition-colors"
+                className="text-muted-foreground hover:text-primary transition-colors p-1"
               >
                 <Twitter className="w-5 h-5" />
               </Link>
               <Link
                 href="#"
-                className="text-gray-700 hover:text-secondary transition-colors"
+                className="text-muted-foreground hover:text-primary transition-colors p-1"
               >
                 <Instagram className="w-5 h-5" />
               </Link>
               <Link
                 href="#"
-                className="text-gray-700 hover:text-secondary transition-colors"
+                className="text-muted-foreground hover:text-primary transition-colors p-1"
               >
                 <Youtube className="w-5 h-5" />
               </Link>
@@ -62,38 +62,38 @@ export function Footer() {
           </div>
 
           {/* Contact */}
-          <div className="hidden md:flex flex-col items-end">
-            <div className="flex items-center space-x-3 mb-2">
-              <Mail className="w-4 h-4 text-secondary" />
-              <span className="text-secondary text-sm">
+          <div className="flex flex-col items-center md:items-end">
+            <div className="flex items-center space-x-2.5 mb-1.5 text-muted-foreground hover:text-foreground transition-colors">
+              <Mail className="w-4 h-4 text-primary" />
+              <a href="mailto:shahf3724@gmail.com" className="text-sm">
                 shahf3724@gmail.com
-              </span>
+              </a>
             </div>
-            <div className="flex items-center space-x-3">
-              <Phone className="w-4 h-4 text-secondary" />
-              <span className="text-secondary text-sm">+91 97187 07211</span>
+            <div className="flex items-center space-x-2.5 text-muted-foreground hover:text-foreground transition-colors">
+              <Phone className="w-4 h-4 text-primary" />
+              <a href="tel:+919718707211" className="text-sm">+91 97187 07211</a>
             </div>
           </div>
         </div>
 
-        {/* Bottom bar - even more condensed */}
-        <div className="border-t border-gray-300 mt-6 pt-6 text-center md:text-left">
-          <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-            <p className="text-gray-700 text-sm">
-              © 2024 HairCrew. All rights reserved.
+        {/* Bottom bar */}
+        <div className="border-t border-border/60 mt-8 pt-6 text-center md:text-left">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+            <p className="text-muted-foreground text-xs sm:text-sm">
+              © {new Date().getFullYear()} HairCrew. All rights reserved.
             </p>
-            <div className="flex flex-wrap justify-center md:justify-end gap-4">
+            <div className="flex flex-wrap justify-center md:justify-end gap-6 text-xs sm:text-sm">
               <Link
                 href="/privacy"
-                className="text-gray-700 hover:text-secondary transition-colors text-sm"
+                className="text-muted-foreground hover:text-primary transition-colors"
               >
                 Privacy Policy
               </Link>
               <Link
                 href="/terms"
-                className="text-gray-700 hover:text-secondary transition-colors text-sm"
+                className="text-muted-foreground hover:text-primary transition-colors"
               >
-                Terms
+                Terms of Service
               </Link>
             </div>
           </div>
